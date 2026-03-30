@@ -1,0 +1,3162 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="theme-color" content="#2b6050">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ValutApp — Valutazione Funzionale e Comportamentale</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600&display=swap');
+
+/* ── LIGHT ── */
+:root {
+  --bg:#ffffff; --bg2:#f2efe6; --card:#fff; --border:#e2ddd3; --border2:#cdc8ba;
+  --text:#1b1916; --text2:#6a6258; --text3:#9c9488;
+  --accent:#2b6050; --accent2:#3d8068; --accent3:#55a88a;
+  --al:#ddf0e8; --al2:#bfe4d4;
+  --danger:#b53030; --dl:#fce8e8;
+  --warn:#ad5f1a; --wl:#fdecd8;
+  --gold:#9e761e; --gl:#fdf0d8;
+  --r:14px; --rs:8px;
+  --sh:0 1px 3px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.06);
+  --shm:0 4px 20px rgba(0,0,0,.10);
+  --shl:0 12px 48px rgba(0,0,0,.14);
+  --fd:'Playfair Display',Georgia,serif;
+  --fb:'Inter',system-ui,sans-serif;
+  --t:.18s ease;
+}
+/* ── DARK — alta leggibilità ── */
+[data-theme="dark"] {
+  --bg:#16140f; --bg2:#1e1b16; --card:#252118; --border:#38342c; --border2:#4a453a;
+  --text:#f0ebe2; --text2:#c0b8aa; --text3:#8a8278;
+  --accent:#55c896; --accent2:#70d8ac; --accent3:#88e8c0;
+  --al:#183224; --al2:#1e3e2c;
+  --danger:#e07878; --dl:#2e1010;
+  --warn:#e09858; --wl:#2e1a08;
+  --gold:#d4a850; --gl:#2a1e04;
+  --sh:0 1px 4px rgba(0,0,0,.35),0 4px 16px rgba(0,0,0,.30);
+  --shm:0 4px 20px rgba(0,0,0,.45);
+  --shl:0 12px 48px rgba(0,0,0,.55);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--bg);color:var(--text);min-height:100vh;transition:background var(--t),color var(--t);font-size:14.5px;line-height:1.65;-webkit-font-smoothing:antialiased}
+[data-theme="light"] body, body:not([data-theme="dark"]){
+  background:
+    linear-gradient(135deg,
+      rgba(248,220,80,.35) 0%,
+      rgba(255,255,255,.0) 35%,
+      rgba(100,170,240,.32) 60%,
+      rgba(80,195,140,.38) 100%
+    ),
+    #ffffff;
+  background-attachment:fixed;
+}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+
+/* ── TOPBAR ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:64px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:var(--sh);gap:10px}
+.tlogo{display:flex;align-items:center;gap:10px;white-space:nowrap}
+.tlogo-mark{width:34px;height:34px;background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;flex-shrink:0;box-shadow:0 3px 10px rgba(43,96,80,.35)}
+.tlogo-text{display:flex;flex-direction:column;line-height:1.1}
+.tlogo-name{font-family:var(--fd);font-size:1.1rem;color:var(--accent);font-weight:700;letter-spacing:-.01em}
+.tlogo-sub{font-size:0.6rem;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-top:1px}
+.tbar-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+/* navigation buttons in topbar */
+.btn-nav{background:var(--bg2);color:var(--text);border:1.5px solid var(--border2);font-size:.82rem;font-weight:600;padding:8px 16px;border-radius:10px;gap:7px}
+.btn-nav:hover{background:var(--accent);color:#fff;border-color:var(--accent);transform:translateY(-1px);box-shadow:0 4px 12px rgba(43,96,80,.28)}
+.btn-nav .nav-icon{font-size:1rem}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 15px;border-radius:var(--rs);font-family:var(--fb);font-size:.83rem;font-weight:500;cursor:pointer;border:none;transition:all var(--t);letter-spacing:.01em}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(43,96,80,.22)}
+.btn-primary:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 4px 14px rgba(43,96,80,.32)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--bg2);color:var(--text);border-color:var(--border2)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-danger:hover{opacity:.85}
+.btn-gold{background:var(--gold);color:#fff;box-shadow:0 2px 8px rgba(158,118,30,.22)}
+.btn-gold:hover{opacity:.88;transform:translateY(-1px)}
+.btn-sm{padding:5px 11px;font-size:.77rem;border-radius:6px}
+.btn-lg{padding:12px 26px;font-size:.94rem;border-radius:var(--r)}
+.btn:disabled{opacity:.4;pointer-events:none}
+
+/* ── LAYOUT ── */
+.content{flex:1;padding:28px 24px;max-width:900px;margin:0 auto;width:100%}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px;box-shadow:var(--sh);margin-bottom:18px}
+.card h2{font-family:var(--fd);font-size:1.3rem;color:var(--accent);margin-bottom:12px;font-weight:700}
+.card h3{font-family:var(--fd);font-size:1rem;margin-bottom:8px;font-weight:700}
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.68rem;font-weight:600;letter-spacing:.03em;background:var(--al);color:var(--accent2)}
+
+/* ── INPUTS ── */
+input[type="text"],input[type="number"],textarea,select{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--rs);background:var(--bg);color:var(--text);font-family:var(--fb);font-size:.89rem;transition:border-color var(--t),box-shadow var(--t);outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(43,96,80,.12)}
+[data-theme="dark"] input:focus,[data-theme="dark"] textarea:focus{box-shadow:0 0 0 3px rgba(85,200,150,.16)}
+.form-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.form-group label{display:block;font-size:.7rem;font-weight:600;color:var(--text3);margin-bottom:5px;letter-spacing:.07em;text-transform:uppercase}
+
+/* ── HERO ── */
+.hero{position:relative;overflow:hidden;background:linear-gradient(155deg,var(--al) 0%,var(--bg) 55%);padding:52px 24px 40px;text-align:center}
+.hero::before{content:'';position:absolute;top:-60px;right:-60px;width:300px;height:300px;background:radial-gradient(circle,var(--al2) 0%,transparent 70%);pointer-events:none;opacity:.5}
+.hero-brand{display:inline-flex;align-items:center;gap:14px;margin-bottom:10px}
+.hero-brand-mark{width:54px;height:54px;background:var(--accent);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:#fff;box-shadow:0 6px 24px rgba(43,96,80,.32);flex-shrink:0}
+.hero-brand-text{text-align:left}
+.hero-brand h1{font-family:var(--fd);font-size:clamp(2rem,5.5vw,3rem);color:var(--accent);line-height:1.05;font-weight:700;letter-spacing:-.025em}
+.hero-brand h1 em{font-style:italic;color:var(--accent2)}
+.hero-brand .hb-sub{font-size:.65rem;font-family:var(--fb);font-weight:600;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-top:6px;display:block}
+.hero-desc{color:var(--text2);font-size:.9rem;max-width:440px;margin:0 auto 30px;line-height:1.65}
+
+/* ── BANNER UTENTE ATTIVO ── */
+.user-banner{background:linear-gradient(130deg,var(--accent) 0%,var(--accent2) 100%);color:#fff;padding:13px 18px;border-radius:var(--r);margin:0 auto 24px;max-width:680px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;box-shadow:0 4px 20px rgba(43,96,80,.28)}
+.ub-dot{width:7px;height:7px;background:rgba(255,255,255,.75);border-radius:50%;display:inline-block;margin-right:6px;animation:pulse 2.2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes aipulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+
+/* ── AREA CARDS ── */
+.home-areas{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:680px;margin:0 auto 32px}
+
+/* section labels */
+.home-section-label{max-width:680px;margin:0 auto 10px;font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3)}
+
+/* section 1: setup row */
+.home-setup-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;max-width:780px;margin:0 auto 0}
+
+/* visual divider between sections */
+.home-section-divider{max-width:680px;margin:28px auto 24px;border:none;border-top:2px dashed var(--border2)}
+
+/* section 2: daily row — active user (slim) + big compile */
+.home-daily-cards{display:grid;grid-template-columns:1fr;gap:14px;max-width:680px;margin:0 auto 32px}
+
+.area-card{border-radius:var(--r);padding:22px 18px;text-align:center;cursor:pointer;transition:all .22s;position:relative;overflow:hidden}
+.area-card.users-card{background:linear-gradient(140deg,#5a4a8a 0%,#7860b0 100%);border:2px solid #5a4a8a;color:#fff;box-shadow:0 5px 20px rgba(90,74,138,.32)}
+.area-card.active-user-card{background:linear-gradient(140deg,#1a5a3a 0%,#2a7a54 100%);border:2px solid #1a5a3a;color:#fff;box-shadow:0 5px 20px rgba(26,90,58,.32);padding:16px 22px;cursor:default}
+.area-card.design-card{background:linear-gradient(140deg,#c45a00 0%,#e07020 100%);border:2px solid #c45a00;color:#fff;box-shadow:0 5px 20px rgba(196,90,0,.35)}
+.area-card.compile-card{background:linear-gradient(140deg,#1a4a7a 0%,#2460a0 100%);border:2px solid #1a4a7a;color:#fff;box-shadow:0 5px 20px rgba(26,74,122,.35)}
+.area-card.work-compile-card{background:linear-gradient(140deg,#0a5a6a 0%,#0e8a9a 100%);border:2px solid #0a5a6a;color:#fff;box-shadow:0 5px 20px rgba(10,90,106,.38)}
+.area-card.work-results-card{background:linear-gradient(140deg,#5a1a4a 0%,#8a2a6a 100%);border:2px solid #5a1a4a;color:#fff;box-shadow:0 5px 20px rgba(90,26,74,.38)}
+.area-card.lab-card{background:linear-gradient(140deg,#1a5a7a 0%,#1a8a6a 100%);border:2px solid #1a5a7a;color:#fff;box-shadow:0 5px 20px rgba(26,90,122,.35)}
+.area-card.compile-card-big{padding:30px 28px;background:linear-gradient(140deg,#1a4a7a 0%,#1e6ab8 100%);box-shadow:0 8px 30px rgba(26,74,122,.42)}
+.area-card:hover{transform:translateY(-3px);filter:brightness(1.07);box-shadow:0 10px 32px rgba(0,0,0,.22)}
+.area-card.active-user-card:hover{transform:none;filter:none}
+.area-card .ac-icon{width:46px;height:46px;margin:0 auto 11px;background:rgba(255,255,255,.18);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;transition:transform .2s}
+.area-card .ac-icon-big{width:62px;height:62px;font-size:1.9rem;margin-bottom:13px}
+.area-card:hover .ac-icon{transform:scale(1.08);background:rgba(255,255,255,.28)}
+.area-card h3{font-family:var(--fd);font-size:1rem;color:#fff;margin-bottom:4px;font-weight:700}
+.compile-card-big h3{font-size:1.25rem;margin-bottom:7px}
+.area-card p{font-size:.78rem;color:rgba(255,255,255,.82)}
+.compile-badge{margin-top:9px;font-size:.77rem;color:rgba(255,255,255,.75);min-height:14px}
+/* active-user card dropdown */
+.auc-select{width:100%;margin-top:4px;padding:7px 10px;border-radius:8px;border:1.5px solid rgba(255,255,255,.35);background:rgba(0,0,0,.2);color:#fff;font-family:var(--fb);font-size:.83rem;font-weight:600;cursor:pointer;outline:none}
+.auc-select option{background:#1a5a3a;color:#fff}
+.auc-select:focus{border-color:rgba(255,255,255,.7)}
+
+/* ── PROFILES ── */
+.profiles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:11px;margin-bottom:22px}
+.profile-card{background:linear-gradient(150deg,#eef7f2 0%,#f8f6f0 100%);border:1.5px solid #c8ddd4;border-left:4px solid var(--accent2);border-radius:var(--r);padding:16px 15px;cursor:pointer;transition:all .2s;position:relative;box-shadow:0 2px 10px rgba(43,96,80,.10)}
+[data-theme="dark"] .profile-card{background:linear-gradient(150deg,#1c2e24 0%,#1e1b14 100%);border-color:#304a3a;border-left-color:var(--accent2)}
+.profile-card:hover{border-color:var(--accent);border-left-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 22px rgba(43,96,80,.22)}
+.profile-card.active-profile{border-color:var(--accent);border-left-color:var(--accent);border-left-width:5px;background:linear-gradient(135deg,#d4eedd 0%,#eef7f2 100%);box-shadow:0 4px 18px rgba(43,96,80,.20)}
+[data-theme="dark"] .profile-card.active-profile{background:linear-gradient(135deg,#1e3828 0%,#1c2a20 100%)}
+.pc-avatar{width:36px;height:36px;border-radius:9px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:.95rem;margin-bottom:9px;font-family:var(--fd);font-weight:700;color:#fff}
+.pc-name{font-family:var(--fd);font-size:.96rem;color:#1a4a36;margin-bottom:3px;font-weight:700;padding-right:42px;line-height:1.2}
+[data-theme="dark"] .pc-name{color:var(--accent2)}
+.pc-meta{font-size:.73rem;color:#4a6a58;line-height:1.5}
+[data-theme="dark"] .pc-meta{color:var(--text2)}
+.pc-badge{position:absolute;top:10px;right:10px;background:var(--accent);color:#fff;font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:.04em;text-transform:uppercase}
+.pc-actions{display:flex;gap:5px;margin-top:11px}
+.profile-new{border-style:dashed;border-color:var(--border2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:115px;color:var(--text3);font-size:.83rem;transition:all .2s;background:transparent}
+.profile-new:hover{color:var(--accent);border-color:var(--accent);background:var(--al)}
+.profile-new .pn-icon{font-size:1.5rem}
+
+/* ── INSTRUCTIONS ── */
+.instr-card{max-width:680px;margin:0 auto}
+[data-theme="dark"] .instr-card{background:linear-gradient(150deg,#182818 0%,#1a1a10 100%) !important;border-color:#2a4030 !important}
+[data-theme="dark"] .instr-toggle strong{color:var(--accent2) !important}
+[data-theme="dark"] .instr-toggle span:last-child{color:var(--text3) !important}
+.instr-toggle{cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600;font-size:.86rem}
+.instr-body{display:none;margin-top:14px}
+.instr-body.open{display:block}
+.instr-step{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(43,96,80,.15)}
+.instr-step:last-child{border-bottom:none}
+.instr-num{background:var(--accent);color:#fff;width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;margin-top:3px}
+
+/* ── SECTION HEADER ── */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.section-header h2{font-family:var(--fd);font-size:1.45rem;font-weight:700}
+
+/* ── MACRO AREAS ── */
+.macro-area{margin-bottom:12px;border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden}
+.macro-header{display:flex;align-items:center;justify-content:space-between;padding:11px 15px;background:var(--bg2);cursor:pointer;border-bottom:1px solid var(--border);gap:8px}
+.macro-header h3{font-size:.86rem;font-weight:600;display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:0}
+.macro-count{font-size:.69rem;color:var(--text3);background:var(--border);padding:2px 8px;border-radius:20px;white-space:nowrap}
+.chevron{transition:transform .2s;font-size:.78rem;color:var(--text3);flex-shrink:0}
+.macro-header.open .chevron{transform:rotate(180deg)}
+.macro-body{display:none;padding:13px 15px}
+.macro-body.open{display:block}
+.micro-group{margin-bottom:12px}
+.micro-label{font-size:.68rem;font-weight:700;color:var(--accent2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:7px;padding-bottom:5px;border-bottom:1.5px solid var(--al)}
+.question-item{display:flex;align-items:flex-start;gap:9px;padding:5px 0}
+.question-item input[type="checkbox"]{width:14px;height:14px;margin-top:4px;flex-shrink:0;accent-color:var(--accent);cursor:pointer}
+.question-item label{font-size:.84rem;color:var(--text);cursor:pointer;line-height:1.45}
+.question-item label small{display:none}
+/* tooltip with hover delay — only on q-text, never on buttons */
+.question-item{position:relative}
+.q-item{padding:13px 0;border-bottom:1px solid var(--border);position:relative}
+.q-text{font-size:.86rem;margin-bottom:9px;font-weight:500;position:relative;display:inline-block;width:100%;cursor:default}
+.q-note-tooltip{
+  visibility:hidden;
+  opacity:0;
+  position:absolute;left:0;top:calc(100% + 4px);z-index:200;
+  background:#1a2e24;color:#e8f5ee;
+  border-radius:9px;padding:9px 13px;
+  font-size:.76rem;line-height:1.6;
+  box-shadow:0 6px 22px rgba(0,0,0,.22);max-width:360px;white-space:normal;
+  pointer-events:none;
+  transition:opacity .18s ease, visibility 0s linear 1.4s;
+}
+/* trigger ONLY on q-text (in both design and compile views), NOT on the scale buttons */
+.question-item:hover .q-note-tooltip,
+.q-text:hover .q-note-tooltip{
+  visibility:visible;
+  opacity:1;
+  transition:opacity .18s ease 1.4s, visibility 0s linear 1.4s;
+}
+/* prevent tooltip from showing when hovering the ttap-scale area */
+.ttap-scale:hover ~ * .q-note-tooltip,
+.q-item:has(.ttap-scale:hover) .q-note-tooltip{
+  visibility:hidden !important;
+  opacity:0 !important;
+  transition:none !important;
+}
+[data-theme="dark"] .q-note-tooltip{background:#0d1f15;color:#c8e8d8;box-shadow:0 6px 22px rgba(0,0,0,.5)}
+.select-all-row{display:flex;gap:7px;margin-bottom:11px}
+
+/* ── USER INFO BAR ── */
+.user-info-bar{background:linear-gradient(130deg,var(--al) 0%,var(--card) 100%);border:1.5px solid var(--al2);border-radius:var(--r);padding:12px 18px;margin-bottom:18px;display:flex;gap:24px;flex-wrap:wrap;box-shadow:var(--sh)}
+.user-info-bar .info-item label{font-size:.65rem;font-weight:700;color:var(--accent2);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:2px}
+.user-info-bar .info-item span{font-size:.9rem;font-weight:600}
+
+/* ── CALENDAR ── */
+.cal-wrap{margin-bottom:24px;max-width:520px;margin-left:auto;margin-right:auto}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-nav h3{font-family:var(--fd);font-size:1.1rem;font-weight:700}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--border)}
+.cal-hdr{text-align:center;font-size:.62rem;font-weight:700;color:var(--text3);padding:6px 2px;letter-spacing:.07em;text-transform:uppercase;background:var(--bg2)}
+.cal-day{display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .14s;font-size:.82rem;font-weight:500;position:relative;color:var(--text);background:var(--card);padding:6px 2px;min-height:40px;gap:3px}
+.cal-day:hover{background:var(--al);color:var(--accent)}
+.cal-day.empty{cursor:default;background:var(--bg2)}
+.cal-day.empty:hover{background:var(--bg2);color:var(--text)}
+.cal-day.today{background:var(--accent);color:#fff;font-weight:700}
+.cal-day.today:hover{background:var(--accent2)}
+.cal-day .cal-dots{display:flex;gap:3px;justify-content:center;height:8px;align-items:center}
+.cal-dot-green{width:7px;height:7px;border-radius:50%;background:#22a060;box-shadow:0 0 0 1.5px rgba(34,160,96,.3)}
+.cal-dot-red{width:7px;height:7px;border-radius:50%;background:#d03030;box-shadow:0 0 0 1.5px rgba(208,48,48,.3)}
+.cal-day.today .cal-dot-green{background:#fff;box-shadow:0 0 0 1.5px rgba(255,255,255,.5)}
+.cal-day.today .cal-dot-red{background:#ffaaaa;box-shadow:0 0 0 1.5px rgba(255,255,255,.4)}
+
+/* ── TTAP ── */
+.q-item:last-child{border-bottom:none}
+.q-text{font-size:.86rem;margin-bottom:9px;font-weight:500}
+.q-text small{display:block;font-size:.7rem;color:var(--text3);font-weight:400;margin-top:2px}
+.ttap-scale{display:flex;gap:6px;flex-wrap:wrap}
+.ttap-btn{padding:7px 14px;border-radius:var(--rs);border:2px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:var(--fb);font-size:.82rem;font-weight:600;transition:all .13s;min-width:42px;text-align:center}
+.ttap-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--al);transform:translateY(-1px)}
+.ttap-btn.selected-0{background:#d0d0d0;border-color:#888;color:#333;box-shadow:0 2px 8px rgba(0,0,0,.18);transform:scale(1.06)}
+.ttap-btn.selected-1{background:#f0a0a0;border-color:#c03030;color:#7a0000;box-shadow:0 2px 8px rgba(192,48,48,.35);transform:scale(1.06)}
+.ttap-btn.selected-2{background:#f5c080;border-color:#b05000;color:#6a2a00;box-shadow:0 2px 8px rgba(176,80,0,.30);transform:scale(1.06)}
+.ttap-btn.selected-3{background:#f0e070;border-color:#888000;color:#4a4400;box-shadow:0 2px 8px rgba(136,128,0,.28);transform:scale(1.06)}
+.ttap-btn.selected-4{background:#90d8b0;border-color:#1a8050;color:#0a4020;box-shadow:0 2px 8px rgba(26,128,80,.30);transform:scale(1.06)}
+.ttap-btn.selected-5{background:#40c080;border-color:#0a6030;color:#fff;font-weight:700;box-shadow:0 3px 12px rgba(10,96,48,.40);transform:scale(1.08)}
+[data-theme="dark"] .ttap-btn.selected-1{background:#8b2020;color:#ffcccc}
+[data-theme="dark"] .ttap-btn.selected-2{background:#7a3800;color:#ffd4a0}
+[data-theme="dark"] .ttap-btn.selected-3{background:#5a5000;color:#ffffa0}
+[data-theme="dark"] .ttap-btn.selected-4{background:#1a5a38;color:#b0ffcc}
+[data-theme="dark"] .ttap-btn.selected-5{background:#0d7040;color:#e0fff0}
+.ttap-legend{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:13px;font-size:.7rem}
+.ttap-legend span{padding:3px 8px;border-radius:20px;font-weight:500}
+.tl0{background:var(--bg2);color:var(--text2)} .tl1{background:var(--dl);color:var(--danger)}
+.tl2{background:var(--wl);color:var(--warn)}   .tl3{background:var(--gl);color:var(--gold)}
+.tl4{background:var(--al);color:var(--accent2)} .tl5{background:var(--al2);color:var(--accent)}
+
+.save-bar{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--border);padding:13px 26px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 -4px 18px rgba(0,0,0,.06)}
+.save-status{font-size:.8rem;color:var(--text3)}
+.save-status.saved{color:var(--accent2);font-weight:500}
+/* section visibility toggle */
+.section-vis-btn{font-size:.72rem;font-weight:600;padding:3px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;transition:all .14s;flex-shrink:0}
+.section-vis-btn.hidden-section{background:var(--dl);border-color:var(--danger);color:var(--danger)}
+.section-vis-btn:hover{background:var(--al);border-color:var(--accent);color:var(--accent)}
+.section-body-hidden{display:none !important}
+
+/* ── RESULTS ── */
+.results-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.stat-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--sh)}
+.stat-card h4{font-size:.68rem;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px}
+.stat-val{font-family:var(--fd);font-size:2.1rem;color:var(--accent);font-weight:700;line-height:1}
+.stat-sub{font-size:.75rem;color:var(--text3);margin-top:4px}
+.chart-wrap{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:18px;box-shadow:var(--sh)}
+.chart-wrap h4{font-family:var(--fd);font-size:.96rem;margin-bottom:14px;font-weight:700}
+.insight-list{list-style:none}
+.insight-list li{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:.84rem;align-items:flex-start}
+.insight-list li:last-child{border-bottom:none}
+.insight-icon{font-size:.92rem;flex-shrink:0;margin-top:1px}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:.7rem;font-weight:600}
+.badge-green{background:var(--al);color:var(--accent2)}
+.badge-red{background:var(--dl);color:var(--danger)}
+.badge-orange{background:var(--wl);color:var(--warn)}
+
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:52px 24px;color:var(--text2)}
+.empty-state .empty-icon{font-size:2.8rem;margin-bottom:12px;display:block}
+.empty-state h3{font-family:var(--fd);font-size:1.15rem;color:var(--text2);margin-bottom:7px}
+
+/* ── NOTIFICATION ── */
+.notif{position:fixed;bottom:22px;right:22px;z-index:9999;background:var(--accent);color:#fff;padding:11px 17px;border-radius:var(--r);font-size:.83rem;font-weight:500;box-shadow:var(--shl);transform:translateY(80px);opacity:0;transition:all .28s ease;max-width:290px;line-height:1.4}
+.notif.show{transform:translateY(0);opacity:1}
+
+/* ── MODALS ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;align-items:flex-start;justify-content:center;backdrop-filter:blur(3px);overflow-y:auto;padding:16px 0}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card);border-radius:18px;padding:26px;width:100%;max-width:440px;margin:auto 16px;box-shadow:var(--shl);border:1px solid var(--border);max-height:calc(100vh - 32px);overflow-y:auto}
+.modal h3{font-family:var(--fd);font-size:1.25rem;margin-bottom:16px;font-weight:700}
+.modal-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:18px}
+
+/* ── BACKUP ── */
+.backup-modal{max-width:510px}
+.backup-option{display:flex;align-items:flex-start;gap:13px;padding:14px;border:1.5px solid var(--border);border-radius:var(--r);margin-bottom:10px;cursor:pointer;transition:all .14s}
+.backup-option:hover{border-color:var(--accent);background:var(--al)}
+.bo-icon{font-size:1.4rem;flex-shrink:0;margin-top:2px}
+.bo-title{font-weight:600;font-size:.88rem;margin-bottom:3px}
+.bo-desc{font-size:.77rem;color:var(--text2);line-height:1.45}
+.drop-zone{border:2px dashed var(--border2);border-radius:var(--r);padding:26px;text-align:center;cursor:pointer;transition:all .18s;color:var(--text2)}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent);background:var(--al);color:var(--accent)}
+.dz-icon{font-size:1.8rem;margin-bottom:8px;display:block}
+.drop-zone p{font-size:.84rem;margin-bottom:3px}
+.drop-zone small{font-size:.72rem;opacity:.65}
+.import-result{margin-top:11px;padding:11px 13px;border-radius:8px;font-size:.82rem;display:none;line-height:1.5}
+.import-result.ok{background:var(--al);color:var(--accent);border:1px solid var(--al2);display:block}
+.import-result.err{background:var(--dl);color:var(--danger);border:1px solid var(--danger);display:block}
+.backup-tabs{display:flex;margin-bottom:16px;border:1.5px solid var(--border);border-radius:9px;overflow:hidden}
+.backup-tab{flex:1;padding:9px;text-align:center;cursor:pointer;font-size:.82rem;font-weight:600;background:var(--bg2);color:var(--text2);border:none;font-family:var(--fb);transition:all .14s}
+.backup-tab.active{background:var(--accent);color:#fff}
+.backup-panel{display:none}
+.backup-panel.active{display:block}
+
+/* ── CUSTOM QUESTIONS ── */
+.custom-q-area{margin-top:14px;border-top:1.5px dashed var(--border2);padding-top:12px}
+.custom-q-label{font-size:.68rem;font-weight:700;color:var(--accent2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.custom-q-item{display:flex;align-items:flex-start;gap:8px;padding:5px 0}
+.custom-q-item input[type="checkbox"]{width:15px;height:15px;margin-top:3px;flex-shrink:0;accent-color:var(--accent);cursor:pointer}
+.custom-q-item .cq-text{flex:1;font-size:.85rem;color:var(--text);line-height:1.4}
+.custom-q-item .cq-del{background:none;border:none;cursor:pointer;color:var(--text3);font-size:.85rem;padding:2px 5px;border-radius:4px;flex-shrink:0;transition:color var(--t);margin-top:1px;line-height:1}
+.custom-q-item .cq-del:hover{color:var(--danger)}
+.custom-q-add{display:flex;gap:7px;align-items:center;margin-top:8px}
+.custom-q-add input[type="text"]{flex:1;font-size:.84rem;padding:7px 11px}
+.custom-q-add button{flex-shrink:0;white-space:nowrap}
+
+/* ── AI TABS ── */
+.ai-tabs{display:flex;gap:0;margin-bottom:14px;border:1.5px solid var(--border);border-radius:9px;overflow:hidden}
+.ai-tab{flex:1;padding:8px 12px;text-align:center;cursor:pointer;font-size:.82rem;font-weight:600;background:var(--bg2);color:var(--text2);border:none;font-family:var(--fb);transition:all .14s}
+.ai-tab.active{background:var(--accent);color:#fff}
+.ai-tab-panel{display:none}.ai-tab-panel.active{display:block}
+
+
+/* ── HOME IN TOPBAR ── */
+.tlogo-home{display:inline-flex;align-items:center;gap:5px;margin-left:10px;padding:4px 10px;border-radius:8px;background:var(--bg2);border:1.5px solid var(--border2);font-size:.78rem;font-weight:600;color:var(--text2);cursor:pointer;transition:all var(--t);text-decoration:none;font-family:var(--fb)}
+.tlogo-home:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+
+/* ── HISTORY NAV ── */
+.tlogo-nav{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;background:var(--bg2);border:1.5px solid var(--border2);font-size:.9rem;color:var(--text2);cursor:pointer;transition:all var(--t);font-family:var(--fb);flex-shrink:0;line-height:1}
+.tlogo-nav:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tlogo-nav:disabled{opacity:.25;pointer-events:none}
+
+
+/* ── USER SIDEBAR ── */
+.screen-with-sidebar{display:block !important;position:relative;min-height:100vh}
+.screen-with-sidebar>.topbar{margin-left:220px;border-left:none;box-shadow:none;border-bottom:1px solid var(--border)}
+.user-sidebar{
+  position:fixed;
+  top:0;
+  left:0;
+  width:220px;
+  bottom:0;
+  background:var(--card);
+  border-right:1px solid var(--border);
+  border-bottom:none;
+  padding:72px 10px 24px 10px;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  overflow-y:auto;
+  z-index:99;
+  box-shadow:var(--sh);
+}
+.user-sidebar-title{
+  font-size:.65rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--text3);padding:0 6px 6px;margin-bottom:2px;
+  border-bottom:1px solid var(--border);
+}
+.sidebar-user-btn.disabled{cursor:default;background:transparent;border-color:transparent;pointer-events:none}
+.sidebar-user-btn{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:9px;border:none;background:transparent;cursor:pointer;font-family:var(--fb);font-size:.82rem;font-weight:500;color:var(--text2);text-align:left;transition:all .15s;width:100%}
+.sidebar-user-btn:hover{background:var(--al);color:var(--accent)}
+.sidebar-user-btn.active{background:var(--accent);color:#fff;font-weight:700}
+.sidebar-user-avatar{width:30px;height:30px;border-radius:8px;background:var(--accent2);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#fff;flex-shrink:0}
+.sidebar-user-btn.active .sidebar-user-avatar{background:rgba(255,255,255,.25)}
+.sidebar-main{margin-left:220px;min-height:calc(100vh - 64px)}
+@media(max-width:700px){
+  .user-sidebar{width:100%;height:auto;position:static;flex-direction:row;flex-wrap:wrap;border-right:none;border-bottom:1px solid var(--border);padding:8px;box-shadow:none;bottom:auto;top:auto}
+  .user-sidebar-title{display:none}
+  .sidebar-user-btn{padding:6px 10px;flex:0 0 auto;width:auto}
+  .sidebar-main{margin-left:0}
+}
+
+/* ── SETTINGS TABS ── */
+.settings-tab{flex:1;padding:8px 10px;text-align:center;cursor:pointer;font-size:.82rem;font-weight:600;background:var(--bg2);color:var(--text2);border:none;font-family:var(--fb);transition:all .14s}
+.settings-tab.active{background:var(--accent);color:#fff}
+.settings-tab-panel{display:none}
+.settings-tab-panel.active{display:block}
+
+/* ── SETTINGS MODAL ── */
+.settings-modal{max-width:480px}
+.settings-category{margin-bottom:0;padding:18px 0;border-bottom:1.5px solid var(--border)}
+.settings-category:last-of-type{border-bottom:none}
+.settings-category-title{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.settings-section{margin-bottom:20px}
+.settings-section-title{font-size:.68rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.api-key-input-wrap{display:flex;gap:8px;align-items:center}
+.api-key-input-wrap input{font-family:monospace;font-size:.84rem;letter-spacing:.04em}
+.usage-bar-wrap{margin-top:10px}
+.usage-bar-bg{height:8px;background:var(--border);border-radius:6px;overflow:hidden;margin:6px 0}
+.usage-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:6px;transition:width .4s ease}
+.usage-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
+.usage-stat{background:var(--bg2);border-radius:9px;padding:10px 12px;text-align:center}
+.usage-stat-val{font-size:1.05rem;font-weight:700;color:var(--accent);display:block;margin-bottom:2px}
+.usage-stat-label{font-size:.66rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em}
+/* AI output areas */
+.ai-val-output{background:linear-gradient(135deg,var(--al) 0%,var(--card) 100%);border:1.5px solid var(--accent2);border-radius:10px;padding:16px 18px;font-size:.87rem;line-height:1.8;color:var(--text);white-space:pre-wrap;min-height:60px}
+.ai-val-output.loading{color:var(--text3);font-style:italic}
+.ai-val-output.error{color:var(--danger);background:var(--dl);border-color:var(--danger)}
+.ai-notes-output{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-size:.86rem;line-height:1.75;color:var(--text);white-space:pre-wrap;min-height:60px}
+.ai-notes-output.loading{color:var(--text3);font-style:italic}
+.ai-notes-output.error{color:var(--danger);background:var(--dl)}
+.q-note-toggle{display:flex;align-items:center;gap:6px;margin-top:7px;cursor:pointer;width:fit-content}
+.q-note-toggle input[type="checkbox"]{width:13px;height:13px;accent-color:var(--gold);cursor:pointer;flex-shrink:0}
+.q-note-toggle-label{font-size:.72rem;font-weight:600;color:var(--gold);user-select:none}
+.q-note-area{display:none;margin-top:7px}
+.q-note-area.open{display:block}
+.q-note-area textarea{width:100%;padding:8px 11px;font-size:.82rem;border:1.5px solid var(--gold);border-radius:8px;background:var(--gl);color:var(--text);font-family:var(--fb);resize:vertical;min-height:56px;outline:none;transition:border-color var(--t)}
+.q-note-area textarea:focus{border-color:var(--warn);box-shadow:0 0 0 3px rgba(158,118,30,.12)}
+/* results notes section */
+.notes-entry{padding:10px 0;border-bottom:1px solid var(--border)}
+.notes-entry:last-child{border-bottom:none}
+.notes-date{font-size:.68rem;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px}
+.notes-q-row{display:flex;gap:10px;align-items:flex-start;padding:4px 0}
+.notes-q-label{font-size:.78rem;font-weight:600;color:var(--text2);min-width:0;flex:1}
+.notes-q-text{font-size:.81rem;color:var(--text);line-height:1.5;flex:2;background:var(--gl);border-radius:6px;padding:5px 9px}
+.abc-toggle-row{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--wl);border:1.5px solid var(--warn);border-radius:var(--rs);margin-top:14px;cursor:pointer}
+.abc-toggle-row input[type="checkbox"]{width:16px;height:16px;accent-color:var(--warn);cursor:pointer;flex-shrink:0}
+.abc-toggle-row label{font-size:.85rem;font-weight:600;color:var(--warn);cursor:pointer;display:flex;align-items:center;gap:8px;flex:1}
+.abc-toggle-row select{padding:5px 9px;font-size:.82rem;border:1.5px solid var(--warn);border-radius:6px;background:var(--bg);color:var(--warn);font-weight:600;cursor:pointer;outline:none}
+.abc-block{background:var(--card);border:1.5px solid var(--warn);border-radius:var(--r);padding:18px;margin-bottom:14px;box-shadow:var(--sh)}
+.abc-block-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.abc-block-title{font-family:var(--fd);font-size:1rem;font-weight:700;color:var(--warn);display:flex;align-items:center;gap:8px}
+.abc-row{display:grid;grid-template-columns:1fr;gap:10px}
+.abc-field label{display:block;font-size:.68rem;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:5px}
+.abc-field textarea{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--rs);background:var(--bg);color:var(--text);font-family:var(--fb);font-size:.84rem;resize:vertical;min-height:64px;transition:border-color var(--t);outline:none}
+.abc-field textarea:focus{border-color:var(--warn);box-shadow:0 0 0 3px rgba(173,95,26,.12)}
+.abc-field-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+/* Read ABC modal */
+.abc-read-entry{border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px}
+.abc-read-date{font-size:.72rem;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px}
+.abc-read-schema{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px}
+.abc-read-col{background:var(--bg2);border-radius:7px;padding:9px 11px}
+.abc-read-col-label{font-size:.66rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px}
+.abc-read-col-label.ant{color:#7060b0}.abc-read-col-label.beh{color:var(--warn)}.abc-read-col-label.con{color:var(--accent2)}
+.abc-read-col-val{font-size:.83rem;color:var(--text);line-height:1.45}
+.abc-read-note{font-size:.78rem;color:var(--text2);margin-top:6px;font-style:italic}
+/* print ABC */
+.print-abc-section{page-break-before:always}
+@media(max-width:600px){.abc-field-row{grid-template-columns:1fr}.abc-read-schema{grid-template-columns:1fr}}
+.last-backup-info{font-size:.73rem;color:var(--text3);margin-top:7px;text-align:center}
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  .home-areas{grid-template-columns:1fr}
+  .home-setup-cards{grid-template-columns:1fr}
+  .home-three-cards{grid-template-columns:1fr}
+  .home-three-cards .area-card:last-child{grid-column:auto}
+  .form-row{grid-template-columns:1fr}
+  .form-row-2{grid-template-columns:1fr}
+  .results-grid{grid-template-columns:1fr}
+  .content{padding:18px 14px}
+  .topbar{padding:0 14px}
+  .profiles-grid{grid-template-columns:1fr 1fr}
+  .hero{padding:36px 16px 28px}
+}
+
+/* ── PRINT ── */
+@media print{
+  *{visibility:hidden}
+  #screen-results{visibility:visible;display:block !important;position:absolute;top:0;left:0;width:100%}
+  #screen-results *{visibility:visible}
+  .topbar,.save-bar,.no-print,.section-vis-btn{display:none !important}
+  .section-body-hidden,.res-block-body.section-body-hidden{display:none !important}
+  body{background:#fff !important;margin:0;padding:0}
+  #results-content{padding:16px 24px}
+  .card,.chart-wrap,.stat-card,.abc-read-entry{break-inside:avoid;page-break-inside:avoid}
+  .results-grid{display:grid !important;grid-template-columns:1fr 1fr}
+  .abc-read-schema{display:grid !important;grid-template-columns:1fr 1fr 1fr}
+  canvas{max-width:100% !important}
+  :root{--bg:#fff;--bg2:#f5f5f5;--card:#fff;--border:#ddd;--text:#111;--text2:#555;--text3:#888;--accent:#2b6050;--accent2:#3d8068;--al:#e0f0e8;--al2:#c8e8d8;--danger:#b53030;--dl:#fce8e8;--warn:#ad5f1a;--wl:#fdecd8;--gold:#9e761e}
+}
+
+/* ── PASSWORD DIALOG ── */
+#pwd-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+#pwd-overlay.open{display:flex}
+#pwd-box{background:var(--card);border-radius:16px;padding:24px;width:320px;box-shadow:var(--shl);border:1px solid var(--border)}
+#pwd-box h4{font-family:var(--fd);font-size:1rem;margin-bottom:6px;font-weight:700}
+#pwd-box p{font-size:.8rem;color:var(--text2);margin-bottom:14px}
+#pwd-input{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-family:var(--fb);font-size:.95rem;letter-spacing:0;outline:none;margin-bottom:14px;-webkit-text-security:disc}
+#pwd-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(43,96,80,.12)}
+#pwd-actions{display:flex;gap:9px;justify-content:flex-end}
+</style>
+</head>
+<body data-theme="light">
+
+<!-- ══════ HOME ══════ -->
+<div id="screen-home" class="screen active">
+  <div class="topbar">
+    <div class="tlogo">
+      <div class="tlogo-mark" style="background:none;box-shadow:none;padding:0;width:38px;height:38px;border-radius:9px;overflow:hidden"><img src="./logo.png" style="width:38px;height:38px;object-fit:cover;display:block"></div>
+      <div class="tlogo-text">
+        <span class="tlogo-name">ValutApp</span>
+        <span class="tlogo-sub">Valutazione Funzionale</span>
+      </div>
+    </div>
+    <div class="tbar-actions">
+      <div id="ai-topbar-badge" style="display:none;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:.03em;background:linear-gradient(90deg,var(--al),var(--al2));border:1px solid var(--accent2);color:var(--accent2);white-space:nowrap"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent2);display:inline-block;animation:aipulse 2s infinite"></span>AI attiva</div>
+      <button class="btn btn-ghost btn-sm" onclick="openSettingsModal()" title="Impostazioni">⚙️</button>
+      <button class="btn btn-ghost btn-sm" onclick="toggleTheme()">🌙</button>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-brand">
+      <div class="hero-brand-mark" style="background:none;box-shadow:none;padding:0;width:80px;height:80px;border-radius:18px;overflow:hidden;flex-shrink:0"><img src="./logo.png" style="width:80px;height:80px;object-fit:cover;display:block"></div>
+      <div class="hero-brand-text">
+        <h1>Valut<em>App</em></h1>
+        <span class="hb-sub">App di valutazione funzionale e comportamentale</span>
+      </div>
+    </div>
+    <p class="hero-desc">Strumento digitale per operatori socio-occupazionali. Progetta schede personalizzate, compila osservazioni giornaliere e monitora i progressi .</p>
+
+    <!-- HOME LAYOUT: Lavoro quotidiano prima, Configurazione dopo -->
+
+    <!-- SEZIONE 1: Lavoro quotidiano (utente attivo + compilazione) -->
+    <div class="home-section-label">📋 Lavoro quotidiano</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:680px;margin:0 auto 32px">
+      <div class="area-card work-compile-card" onclick="goTo('screen-compile')" style="padding:22px 16px">
+        <div class="ac-icon">📋</div>
+        <h3>Area Compilazione Utente</h3>
+        <p>Compila le schede giornaliere dell'utente attivo</p>
+        <div class="compile-badge" id="home-user-badge"></div>
+      </div>
+      <div class="area-card work-results-card" onclick="goTo('screen-results')" style="padding:22px 16px">
+        <div class="ac-icon">📊</div>
+        <h3>Area Risultati Utente</h3>
+        <p>Visualizza analisi e grafici per l'utente attivo</p>
+        <div class="compile-badge" id="home-results-badge"></div>
+      </div>
+    </div>
+
+    <!-- separatore visivo -->
+    <div class="home-section-divider"></div>
+
+    <!-- SEZIONE 2: Configurazione -->
+    <div class="home-section-label">⚙️ Configurazione</div>
+    <div class="home-setup-cards">
+      <div class="area-card users-card" onclick="goTo('screen-users')">
+        <div class="ac-icon">👥</div>
+        <h3>Area Utenti</h3>
+        <p>Crea e modifica i profili</p>
+      </div>
+      <div class="area-card design-card" onclick="goTo('screen-design-select')">
+        <div class="ac-icon">📐</div>
+        <h3>Area Progettazione Utente</h3>
+        <p>Configura le domande per ogni utente</p>
+        <div class="compile-badge" id="home-design-badge"></div>
+      </div>
+      <div class="area-card lab-card" onclick="goTo('screen-lab')">
+        <div class="ac-icon">🔬</div>
+        <h3>Area Progettazione Laboratorio</h3>
+        <p>Adatta il laboratorio alle esigenze dell'utenza</p>
+      </div>
+    </div>
+
+    <div class="home-section-divider"></div>
+
+    <div class="card instr-card" style="background:linear-gradient(150deg,#eef5f0 0%,#f2f0e8 100%);border:1.5px solid #b8d4c4">
+      <div class="instr-toggle" onclick="this.nextElementSibling.classList.toggle('open')">
+        <span>📖</span><strong style="color:#1a4a36">Come si usa ValutApp</strong>
+        <span style="margin-left:auto;color:#5a7a6a;font-size:.78rem">▾ espandi</span>
+      </div>
+      <div class="instr-body">
+        <div class="instr-step"><div class="instr-num">1</div><div><strong>Crea gli utenti</strong> — Nella sezione <em>Configurazione</em>, clicca <em>Area Utenti</em>. Premi <strong>＋ Nuovo utente</strong>, inserisci nome, età e servizio/gruppo. Da qui puoi anche modificare o eliminare i profili esistenti.</div></div>
+        <div class="instr-step"><div class="instr-num">2</div><div><strong>Configura le domande per ogni utente</strong> — Clicca <em>Area Progettazione Utente</em>. Appare la lista di tutti gli utenti divisi in <em>Da progettare</em> e <em>Già progettati</em>. Clicca su un utente per accedere alla sua configurazione: spunta le domande tra le 8 macro aree funzionali, aggiungi domande personalizzate se necessario. Tieni il cursore su una domanda per 1–2 secondi per vedere un esempio pratico. Salva con <strong>💾 Salva Configurazione</strong>. I dati anagrafici si modificano solo dall'Area Utenti.</div></div>
+        <div class="instr-step"><div class="instr-num">3</div><div><strong>Attiva gli schemi ABC (opzionale)</strong> — In Area Progettazione Utente, nell'area D <em>Regolazione Emotiva</em>, spunta <strong>Aggiungi schemi ABC</strong> e scegli quanti schemi per giorno (1–5). Gli schemi ABC documentano episodi con Antecedente, Comportamento e Conseguenza, inclusi nel PDF finale.</div></div>
+        <div class="instr-step"><div class="instr-num">4</div><div><strong>Compila ogni giorno</strong> — Clicca <em>Area Compilazione Utente</em>. Sulla sinistra appare la barra con tutti gli utenti: quelli senza domande configurate sono grigi. Seleziona un utente e clicca un giorno nel calendario (🟢 = compilato, 🔴 = con ABC). Sopra il calendario appare una card con la data selezionata e il pulsante <strong>✏️ Compila questa scheda</strong>: cliccalo per aprire le domande. Assegna punteggi 0–5, aggiungi note con <strong>📝 Note</strong>, compila gli ABC se attivi. Quando apri una scheda, la barra laterale mostra una ✓ verde accanto agli utenti già compilati in quel giorno. Salva con il pulsante in basso.</div></div>
+        <div class="instr-step"><div class="instr-num">5</div><div><strong>Leggi i risultati</strong> — Clicca <em>Area Risultati Utente</em>. La barra laterale mostra tutti gli utenti: quelli senza compilazioni sono grigi. Clicca un utente per vederne i risultati: riepilogo statistico, grafico di andamento, medie per macro area, punti di forza (≥4), aree critiche (&lt;2.5), dettaglio per domanda, note qualitative. Usa <strong>🚫 Nascondi</strong> per escludere sezioni dalla stampa, poi esporta con <strong>🖨️ Salva PDF</strong>. La barra laterale non viene inclusa nel PDF.</div></div>
+        <div class="instr-step"><div class="instr-num">6</div><div><strong>Analisi del laboratorio</strong> — Clicca <em>Area Progettazione Laboratorio</em>. Non richiede utente attivo: aggrega le domande configurate per tutti gli utenti. Mostra grafico per area funzionale, top 10 domande con utenti interessati (passa il cursore su "x/x utenti" per vedere i nomi), dettaglio per area con badge Alta/Media/Bassa priorità. Se le funzioni AI sono attive, è disponibile la sezione <em>Consigli AI</em>.</div></div>
+        <div class="instr-step"><div class="instr-num">7</div><div><strong>Funzioni AI (opzionali)</strong> — Apri <strong>⚙️ Impostazioni</strong> (richiede password) e spunta <em>Implementa funzioni AI</em>. Nei Risultati appaiono <em>Valutazione Qualitativa AI</em> e <em>Sintesi Note AI</em>; nel Laboratorio compare <em>Consigli AI</em>. Scegli <strong>Genera con AI</strong> (chiave API Anthropic, ~$0.01–0.03 a generazione) oppure <strong>Genera Prompt</strong> per usare claude.ai gratuitamente.</div></div>
+        <div class="instr-step"><div class="instr-num">8</div><div><strong>Impostazioni e backup</strong> — Il pulsante <strong>⚙️</strong> in alto (protetto da password) raccoglie: attivazione AI, chiave API e contatori, backup e ripristino, verifica aggiornamenti. Il backup esporta profili, compilazioni e preferenze in un file <em>.json</em> — puoi scegliere se includere anche le impostazioni. Per ripristinare su un altro dispositivo, importa lo stesso file dalla sezione <em>Backup & Ripristino</em>.</div></div>
+      </div>
+    </div>
+
+    <div class="card instr-card" style="background:linear-gradient(150deg,#f0f4f8 0%,#f8f6f0 100%);border:1.5px solid #b8c8d4;margin-top:14px">
+      <div class="instr-toggle" onclick="this.nextElementSibling.classList.toggle('open')">
+        <span>🔬</span><strong style="color:#1a3a4a">Note Metodologiche</strong>
+        <span style="margin-left:auto;color:#5a7a6a;font-size:.78rem">▾ espandi</span>
+      </div>
+      <div class="instr-body">
+        <div style="padding:8px 0;font-size:.84rem;color:var(--text);line-height:1.82">
+
+          <p style="margin-bottom:12px"><strong>Fonti di ispirazione e approccio originale.</strong> ValutApp non è una trasposizione di alcuno strumento standardizzato esistente, ma è stato progettato traendo ispirazione critica da due cornici teoriche complementari: la <em>Classificazione Internazionale del Funzionamento, della Disabilità e della Salute</em> (ICF, OMS 2001) e il <em>TTAP — Transition to Adult Life for Persons with Autism</em> (Mesibov, Thomas &amp; Schopler). Dall'ICF è stata mutuata la logica della <em>valutazione per domini funzionali</em>: l'idea che la disabilità non sia un attributo della persona ma il risultato dell'interazione tra le sue caratteristiche e il contesto ambientale. Questo ha orientato la scelta di osservare non solo cosa la persona sa fare, ma <em>quanto supporto necessita per farlo</em>. Dal TTAP è stata ripresa la struttura dell'osservazione situata nel contesto reale di vita e lavoro: attività ecologicamente valide, sequenze operative concrete, attenzione alla generalizzazione e alla transizione verso l'autonomia. Le due cornici, tuttavia, perseguono finalità diverse e si rivolgono a popolazioni e contesti differenti: adottarle integralmente avrebbe prodotto uno strumento eccessivamente rigido o poco adatto alla realtà quotidiana di un centro socio-occupazionale. Per questo si è scelto di rielaborarle, estraendone i principi più utili e costruendo qualcosa di funzionalmente autonomo.</p>
+
+          <p style="margin-bottom:12px"><strong>Criteri di selezione e rielaborazione delle domande.</strong> Le 8 aree di osservazione — comprensione delle istruzioni, modalità di lavoro, abilità manuali e prassiche, regolazione emotiva e comportamentale, gestione delle pause, comunicazione e interazione sociale, autonomia personale, apprendimento e adattamento — sono state identificate sulla base della loro <em>rilevanza ecologica</em> nel contesto socio-occupazionale: si osserva ciò che ha ricaduta concreta sulla partecipazione quotidiana, non costrutti astratti. Ogni item è stato formulato in termini operativi e comportamentali — descrive un'azione osservabile, non uno stato interno — per garantire uniformità di giudizio tra operatori diversi e ridurre la variabilità inter-rater. I codici ICF originali e le schede TTAP sono stati consultati come riferimento concettuale, ma le domande risultanti sono state riformulate per adattarsi a una scala di valutazione unitaria e a sessioni di osservazione diretta brevi, caratteristiche tipiche del lavoro operativo quotidiano. Gli esempi contestuali nei tooltip sono stati elaborati specificamente per il contesto laboratoriale italiano, con situazioni concrete e riconoscibili.</p>
+
+          <p style="margin-bottom:12px"><strong>La scala di valutazione (0–5).</strong> Né l'ICF né il TTAP prevedono una scala numerica a 6 livelli direttamente sovrapponibile a quella adottata qui. L'ICF utilizza qualificatori percentuali di compromissione (0–4: nessuna, lieve, media, grave, completa); il TTAP prevede categorie qualitative di emergenza dell'abilità. ValutApp ha operato una sintesi originale, costruendo una scala che misura il <em>livello di supporto necessario</em> perché un comportamento si manifesti: da 0 (non valutabile) a 5 (completamente autonomo), passando attraverso gradi crescenti di indipendenza dal supporto fisico, verbale e gestuale. Questa progressione riflette la logica del <em>prompting gerarchico</em>, ampiamente consolidata nella pratica educativa e abilitativa con persone con disabilità complessa, e consente di applicare un unico strumento a profili molto diversi senza perdere sensibilità diagnostica.</p>
+
+          <p style="margin-bottom:12px"><strong>Logica di scoring e lettura dei risultati.</strong> Per ogni domanda si calcola la media dei punteggi validi del periodo, escludendo gli zeri (non valutabilità, non assenza dell'abilità). Le medie per area costruiscono un <em>profilo funzionale</em> che evidenzia competenze consolidate e domini prioritari. I <strong>punti di forza</strong> (media ≥ 4) indicano abilità su cui costruire percorsi di generalizzazione e autonomia; le <strong>aree critiche</strong> (media &lt; 2.5) segnalano dove intervenire con maggiore struttura o adattamento ambientale. L'andamento nel tempo permette di rilevare progressi, regressioni o variabilità, offrendo una base empirica per la programmazione individuale.</p>
+
+          <p style="margin-bottom:12px"><strong>Funzioni AI: supporto all'operatore, non sostituzione.</strong> ValutApp integra funzioni opzionali di intelligenza artificiale per la generazione di testi valutativi. È essenziale chiarire la loro natura e i loro limiti: l'AI non osserva, non conosce l'utente e non ha accesso a informazioni che non siano stati esplicitamente inseriti nello strumento. Ciò che produce — una relazione narrativa o una sintesi delle note qualitative — è un testo generato a partire dai dati numerici e testuali forniti dall'operatore, con l'obiettivo di ridurre il carico redazionale e offrire un punto di partenza per la documentazione clinica. Il giudizio professionale, il contesto relazionale e la conoscenza diretta della persona rimangono prerogativa esclusiva dell'operatore e non possono essere delegati a nessun sistema automatico. Le funzioni AI devono pertanto essere intese come uno strumento di <em>assistenza alla scrittura</em>, non come fonte autonoma di valutazione. Per questa ragione sono disattivate per impostazione predefinita e attivabili selettivamente dal pannello ⚙️ Impostazioni: ogni équipe può decidere liberamente se e in quale misura avvalersene, in base alla propria metodologia di lavoro e alle proprie preferenze documentali.</p>
+
+          <p style="font-size:.8rem;color:var(--text2);padding-top:10px;border-top:1px solid var(--border);margin-top:2px">⚠️ <strong>Limiti dello strumento.</strong> ValutApp è uno strumento di osservazione strutturata a uso interno: i punteggi hanno valore clinico-descrittivo, non sono standardizzati né validati psicometricamente, e non sostituiscono valutazioni formali. Il riferimento a ICF e TTAP è di natura teorica e non implica conformità certificata a tali sistemi. L'attendibilità dipende dall'accordo sui criteri di scoring tra tutti gli operatori: si raccomanda una condivisione preliminare in équipe prima dell'uso sistematico.</p>
+
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.1.3</div>
+  </div>
+</div>
+<div id="screen-lab" class="screen">
+  <div class="topbar">
+    <div class="tlogo">
+      <div class="tlogo-mark">🔬</div>
+      <div class="tlogo-text"><span class="tlogo-name">Progettazione Laboratorio</span></div>
+      <button class="tlogo-home" onclick="goTo('screen-home')">🏠 Home</button><button class="tlogo-nav" id="nav-back" onclick="historyBack()" title="Indietro">‹</button><button class="tlogo-nav" id="nav-fwd" onclick="historyForward()" title="Avanti">›</button>
+    </div>
+    <div class="tbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="toggleTheme()">🌙</button>
+    </div>
+  </div>
+  <div class="content" id="lab-content">
+    <div class="empty-state">
+      <span class="empty-icon">🔬</span>
+      <h3>Caricamento...</h3>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ USERS ══════ -->
+<div id="screen-users" class="screen">
+  <div class="topbar">
+    <div class="tlogo">
+      <div class="tlogo-mark">👥</div>
+      <div class="tlogo-text"><span class="tlogo-name">Area Utenti</span></div><button class="tlogo-home" onclick="goTo('screen-home')">🏠 Home</button><button class="tlogo-nav" id="nav-back" onclick="historyBack()" title="Indietro">‹</button><button class="tlogo-nav" id="nav-fwd" onclick="historyForward()" title="Avanti">›</button>
+    </div>
+    <div class="tbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="toggleTheme()">🌙</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <h2 style="margin:0">👥 Gestione Utenti</h2>
+        <button class="btn btn-primary" onclick="openNewProfileModal()">＋ Nuovo utente</button>
+      </div>
+      <p style="font-size:.84rem;color:var(--text2);margin-bottom:18px">Clicca su un profilo per attivarlo. L'utente attivo è quello su cui lavorerai in Progettazione e Compilazione.</p>
+      <div class="profiles-grid" id="profiles-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ DESIGN SELECT ══════ -->
+<div id="screen-design-select" class="screen">
+  <div class="topbar">
+    <div class="tlogo">
+      <div class="tlogo-mark">📐</div>
+      <div class="tlogo-text"><span class="tlogo-name">Progettazione Utente</span></div><button class="tlogo-home" onclick="goTo('screen-home')">🏠 Home</button><button class="tlogo-nav" id="nav-back" onclick="historyBack()" title="Indietro">‹</button><button class="tlogo-nav" id="nav-fwd" onclick="historyForward()" title="Avanti">›</button>
+    </div>
+    <div class="tbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="toggleTheme()">🌙</button>
+    </div>
+  </div>
+  <div class="content" id="design-select-content"></div>
+</div>
+
+<!-- ══════ DESIGN ══════ -->
+<div id="screen-design" class="screen">
+  <div class="topbar">
+    <div class="tlogo">
+      <div class="tlogo-mark">📐</div>
+      <div class="tlogo-text"><span class="tlogo-name">Progettazione Utente</span></div><button class="tlogo-home" onclick="goTo('screen-home')">🏠 Home</button><button class="tlogo-nav" id="nav-back" onclick="historyBack()" title="Indietro">‹</button><button class="tlogo-nav" id="nav-fwd" onclick="historyForward()" title="Avanti">›</button>
+    </div>
+    <div class="tbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="toggleTheme()">🌙</button>
+    </div>
+  </div>
+  <div class="content">
+    <div id="design-user-header" style="margin-bottom:14px"></div>
+    <div class="card">
+      <div class="section-header">
+        <h2>Selezione Domande</h2>
+        <div style="display:flex;gap:7px">
+          <button class="btn btn-ghost btn-sm" onclick="selectAll(true)">✓ Tutte</button>
+          <button class="btn btn-ghost btn-sm" onclick="selectAll(false)">✗ Nessuna</button>
+        </div>
+      </div>
+      <p style="font-size:.83rem;color:var(--text2);margin-bottom:14px">Seleziona le domande rilevanti per questo utente .</p>
+      <div id="questions-container"></div>
+    </div>
+    <div style="display:flex;gap:11px;justify-content:flex-end;padding-bottom:36px">
+      <button class="btn btn-ghost" onclick="resetDesign()" style="color:var(--danger);border-color:var(--danger);background:var(--dl);font-weight:600">↺ Reimposta domande</button>
+      <button class="btn btn-primary btn-lg" onclick="saveDesign()">💾 Salva Configurazione</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ COMPILE ══════ -->
+<div id="screen-compile" class="screen">
+  <div class="topbar">
+    <div class="tlogo">
+      <div class="tlogo-mark">📋</div>
+      <div class="tlogo-text"><span class="tlogo-name">Compilazione</span></div><button class="tlogo-home" onclick="goTo('screen-home')">🏠 Home</button><button class="tlogo-nav" id="nav-back" onclick="historyBack()" title="Indietro">‹</button><button class="tlogo-nav" id="nav-fwd" onclick="historyForward()" title="Avanti">›</button>
+    </div>
+    <div class="tbar-actions">
+      <button class="btn btn-nav" onclick="goTo('screen-compile')"><span class="nav-icon">📋</span> Compilazione</button>
+      <button class="btn btn-nav" onclick="goTo('screen-results')"><span class="nav-icon">📊</span> Risultati</button>
+      <button class="btn btn-ghost btn-sm" onclick="toggleTheme()">🌙</button>
+    </div>
+  </div>
+  <div class="screen-with-sidebar">
+    <div class="user-sidebar" id="compile-sidebar"></div>
+    <div class="sidebar-main">
+      <div class="content">
+        <div class="user-info-bar">
+          <div class="info-item"><label>Utente</label><span id="ci-nome">—</span></div>
+          <div class="info-item"><label>Età</label><span id="ci-eta">—</span></div>
+          <div class="info-item"><label>Servizio</label><span id="ci-servizio">—</span></div>
+        </div>
+        <!-- Day action panel — appears when a day is selected -->
+        <div id="compile-day-panel" style="display:none;margin-bottom:18px">
+          <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:16px 20px;border-color:var(--accent2)">
+            <div>
+              <div id="compile-day-label" style="font-family:var(--fd);font-size:1rem;font-weight:700;color:var(--accent)"></div>
+              <div id="compile-day-sub" style="font-size:.78rem;color:var(--text2);margin-top:3px"></div>
+            </div>
+            <button class="btn btn-primary" onclick="goTo('screen-day');showDayQuestions()">✏️ Compila questa scheda</button>
+          </div>
+        </div>
+        <div class="card cal-wrap">
+          <div class="cal-nav">
+            <button class="btn btn-ghost btn-sm" onclick="changeMonth(-1)">‹ Prec.</button>
+            <h3 id="cal-title"></h3>
+            <button class="btn btn-ghost btn-sm" onclick="changeMonth(1)">Succ. ›</button>
+          </div>
+          <div class="cal-grid" id="calendar-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ DAY ══════ -->
+<div id="screen-day" class="screen">
+  <div class="topbar">
+    <div class="tlogo">
+      <div class="tlogo-mark">📅</div>
+      <div class="tlogo-text"><span class="tlogo-name" id="day-title">Scheda</span></div><button class="tlogo-home" onclick="goTo('screen-home')">🏠 Home</button><button class="tlogo-nav" id="nav-back" onclick="historyBack()" title="Indietro">‹</button><button class="tlogo-nav" id="nav-fwd" onclick="historyForward()" title="Avanti">›</button>
+    </div>
+    <div class="tbar-actions">
+      <button class="btn btn-nav" onclick="goTo('screen-compile')"><span class="nav-icon">📋</span> Calendario</button>
+      <button class="btn btn-nav" onclick="goTo('screen-results')"><span class="nav-icon">📊</span> Risultati</button>
+      <button class="btn btn-ghost btn-sm" onclick="toggleTheme()">🌙</button>
+    </div>
+  </div>
+  <div class="content">
+    <!-- CTA shown before compiling -->
+    <div id="day-cta" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;gap:16px">
+      <div style="font-size:2.5rem">📋</div>
+      <div id="day-cta-title" style="font-family:var(--fd);font-size:1.2rem;font-weight:700;color:var(--accent)"></div>
+      <div id="day-cta-sub" style="font-size:.85rem;color:var(--text2);text-align:center;max-width:320px"></div>
+      <button class="btn btn-primary btn-lg" style="margin-top:8px" onclick="showDayQuestions()">✏️ Compila questa scheda</button>
+    </div>
+    <!-- Questions shown after clicking Compila -->
+    <div id="day-questions-wrap" style="display:none">
+      <div class="card" style="margin-bottom:8px">
+        <strong style="font-size:.86rem">Scala di Valutazione</strong>
+        <div class="ttap-legend" style="margin-top:9px">
+          <span class="tl0">0 — Non valutabile</span>
+          <span class="tl1">1 — Non emerge</span>
+          <span class="tl2">2 — Emerge c. sup. fisico</span>
+          <span class="tl3">3 — Emerge c. sup. verbale</span>
+          <span class="tl4">4 — Emerge c. indicazione</span>
+          <span class="tl5">5 — Emerge autonomamente</span>
+        </div>
+      </div>
+      <div id="day-questions-container"></div>
+    </div>
+  </div>
+  <div class="save-bar" id="day-save-bar" style="display:none">
+    <div class="save-status" id="save-status">Nessuna modifica salvata</div>
+    <button class="btn btn-primary" onclick="saveDayData()">💾 Salva Scheda</button>
+  </div>
+</div>
+
+<!-- ══════ RESULTS ══════ -->
+<div id="screen-results" class="screen">
+  <div class="topbar">
+    <div class="tlogo">
+      <div class="tlogo-mark">📊</div>
+      <div class="tlogo-text"><span class="tlogo-name">Risultati &amp; Analisi</span></div><button class="tlogo-home" onclick="goTo('screen-home')">🏠 Home</button><button class="tlogo-nav" id="nav-back" onclick="historyBack()" title="Indietro">‹</button><button class="tlogo-nav" id="nav-fwd" onclick="historyForward()" title="Avanti">›</button>
+    </div>
+    <div class="tbar-actions">
+      <button class="btn btn-nav" onclick="goTo('screen-compile')"><span class="nav-icon">📋</span> Compilazione</button>
+      <button class="btn btn-ghost btn-sm" onclick="toggleTheme()">🌙</button>
+    </div>
+  </div>
+  <div class="screen-with-sidebar">
+    <div class="user-sidebar" id="results-sidebar"></div>
+    <div class="sidebar-main">
+      <div class="content" id="results-content"></div>
+      <div class="save-bar no-print">
+        <span style="font-size:.82rem;color:var(--text3)">Esporta il report completo come PDF stampabile</span>
+        <button class="btn btn-gold btn-lg" onclick="exportPDF()">🖨️ Salva PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ MODAL: NUOVO PROFILO ══════ -->
+<div class="modal-overlay" id="modal-new-profile">
+  <div class="modal">
+    <h3>➕ Nuovo Utente</h3>
+    <div class="form-group" style="margin-bottom:13px"><label>Nome e Cognome *</label><input type="text" id="np-nome" placeholder="Es. Mario Rossi"></div>
+    <div class="form-row-2">
+      <div class="form-group"><label>Età</label><input type="number" id="np-eta" placeholder="Es. 34" min="1" max="99"></div>
+      <div class="form-group"><label>Servizio / Gruppo</label><input type="text" id="np-servizio" placeholder="Es. Laboratorio"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-new-profile')">Annulla</button>
+      <button class="btn btn-primary" onclick="createProfile()">Crea profilo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ MODAL: MODIFICA PROFILO ══════ -->
+<div class="modal-overlay" id="modal-edit-profile">
+  <div class="modal">
+    <h3>✏️ Modifica Profilo</h3>
+    <input type="hidden" id="ep-id">
+    <div class="form-group" style="margin-bottom:13px"><label>Nome e Cognome *</label><input type="text" id="ep-nome"></div>
+    <div class="form-row-2">
+      <div class="form-group"><label>Età</label><input type="number" id="ep-eta" min="1" max="99"></div>
+      <div class="form-group"><label>Servizio / Gruppo</label><input type="text" id="ep-servizio"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-profile')">Annulla</button>
+      <button class="btn btn-primary" onclick="saveEditProfile()">Salva modifiche</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ MODAL: LEGGI ABC ══════ -->
+<div class="modal-overlay" id="modal-abc-read">
+  <div class="modal" style="max-width:640px;max-height:85vh;overflow-y:auto">
+    <h3>🔍 Schemi ABC Compilati</h3>
+    <div id="abc-read-content"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-abc-read')">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ MODAL: IMPOSTAZIONI ══════ -->
+<div class="modal-overlay" id="modal-settings">
+  <div class="modal settings-modal">
+    <h3>⚙️ Impostazioni</h3>
+
+    <!-- Tab bar -->
+    <div style="display:flex;gap:0;margin-bottom:18px;border:1.5px solid var(--border);border-radius:9px;overflow:hidden">
+      <button class="settings-tab active" onclick="switchSettingsTab('backup',this)">💾 Backup</button>
+      <button class="settings-tab" onclick="switchSettingsTab('ai',this)">🤖 AI</button>
+      <button class="settings-tab" onclick="switchSettingsTab('sistema',this)">🔄 Sistema</button>
+    </div>
+
+    <!-- TAB: BACKUP -->
+    <div class="settings-tab-panel active" id="stab-backup">
+      <div class="backup-tabs" style="margin-bottom:12px">
+        <button class="backup-tab active" onclick="switchBackupTab('export')">⬇️ Esporta</button>
+        <button class="backup-tab" onclick="switchBackupTab('import')">⬆️ Importa</button>
+      </div>
+      <div class="backup-panel active" id="backup-panel-export">
+        <p style="font-size:.82rem;color:var(--text2);margin-bottom:10px">Esporta i dati in un file <strong>.json</strong> da conservare come copia di sicurezza.</p>
+        <label style="display:flex;align-items:flex-start;gap:9px;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;background:var(--bg2);cursor:pointer;margin-bottom:12px">
+          <input type="checkbox" id="backup-include-settings" checked style="width:15px;height:15px;margin-top:2px;accent-color:var(--accent);flex-shrink:0" onchange="updateBackupDescriptions()">
+          <div>
+            <div style="font-size:.84rem;font-weight:600;color:var(--text)">Includi impostazioni e preferenze</div>
+            <div style="font-size:.74rem;color:var(--text3);margin-top:2px">Tema, funzioni AI, chiave API — ripristinati all'importazione</div>
+          </div>
+        </label>
+        <div class="backup-option" onclick="exportAllBackup()">
+          <div class="bo-icon">📦</div>
+          <div><div class="bo-title">Esporta tutti i profili</div><div class="bo-desc" id="export-all-desc">Tutti gli utenti, domande, compilazioni e impostazioni.</div></div>
+        </div>
+        <div class="backup-option" id="export-single-option" onclick="exportActiveBackup()" style="display:none">
+          <div class="bo-icon">👤</div>
+          <div><div class="bo-title">Esporta solo utente attivo</div><div class="bo-desc" id="export-single-desc">Dati utente + impostazioni dell'app.</div></div>
+        </div>
+        <div class="last-backup-info" id="last-backup-info"></div>
+      </div>
+      <div class="backup-panel" id="backup-panel-import">
+        <p style="font-size:.82rem;color:var(--text2);margin-bottom:10px">Carica un file <strong>.json</strong> esportato. I profili trovati verranno aggiunti a quelli esistenti.</p>
+        <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-import-input').click()" ondragover="dzDragOver(event)" ondragleave="dzDragLeave(event)" ondrop="dzDrop(event)">
+          <span class="dz-icon">📂</span>
+          <p><strong>Clicca per scegliere il file</strong> oppure trascinalo qui</p>
+          <small>Formati accettati: .json — file ValutApp</small>
+        </div>
+        <div class="import-result" id="import-result"></div>
+        <div style="margin-top:10px;padding:10px;background:var(--bg2);border-radius:8px;font-size:.76rem;color:var(--text2)">
+          ⚠️ <strong>Se un profilo ha lo stesso ID</strong> di uno già esistente, verrà ignorato.
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: AI -->
+    <div class="settings-tab-panel" id="stab-ai">
+      <!-- Enable AI -->
+      <div id="ai-enable-section">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:13px 15px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg2);margin-bottom:14px">
+          <input type="checkbox" id="ai-enable-cb" style="width:17px;height:17px;accent-color:var(--accent);cursor:pointer;flex-shrink:0" onchange="handleEnableAI(this)">
+          <div>
+            <div style="font-size:.88rem;font-weight:600;color:var(--text)">🤖 Implementa funzioni AI</div>
+            <div style="font-size:.74rem;color:var(--text3);margin-top:2px">Attiva generazione AI nei risultati e nel laboratorio.</div>
+          </div>
+        </label>
+      </div>
+
+      <!-- AI content (shown when enabled) -->
+      <div id="ai-settings-body" style="display:none">
+        <div style="margin-bottom:14px">
+          <div class="settings-section-title">🔑 Chiave API Anthropic</div>
+          <p style="font-size:.8rem;color:var(--text2);margin-bottom:8px">Ottienila su <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent2)">console.anthropic.com</a> — salvata solo nel tuo browser.</p>
+          <div class="api-key-input-wrap">
+            <input type="password" id="settings-api-key" placeholder="sk-ant-..." style="flex:1">
+            <button class="btn btn-primary btn-sm" onclick="saveApiKey()">Salva</button>
+            <button class="btn btn-ghost btn-sm" onclick="toggleApiKeyVisibility()" id="api-key-eye" title="Mostra/Nascondi">👁</button>
+          </div>
+          <div id="api-key-status" style="font-size:.76rem;margin-top:6px;color:var(--text3)"></div>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <div class="settings-section-title">📊 Utilizzo AI</div>
+          <div style="font-size:.72rem;color:var(--text3);margin-bottom:6px">Sessione corrente</div>
+          <div class="usage-stats">
+            <div class="usage-stat"><span class="usage-stat-val" id="stat-calls">0</span><span class="usage-stat-label">Chiamate</span></div>
+            <div class="usage-stat"><span class="usage-stat-val" id="stat-tokens">0</span><span class="usage-stat-label">Token</span></div>
+            <div class="usage-stat"><span class="usage-stat-val" id="stat-cost">$0.000</span><span class="usage-stat-label">Costo</span></div>
+          </div>
+          <div style="font-size:.72rem;color:var(--text3);margin:10px 0 6px">Storico salvato</div>
+          <div class="usage-stats">
+            <div class="usage-stat"><span class="usage-stat-val" id="stat-total-calls">0</span><span class="usage-stat-label">Chiamate</span></div>
+            <div class="usage-stat"><span class="usage-stat-val" id="stat-total-tokens">0</span><span class="usage-stat-label">Token</span></div>
+            <div class="usage-stat"><span class="usage-stat-val" id="stat-total-cost">$0.000</span><span class="usage-stat-label">Costo</span></div>
+          </div>
+          <p style="font-size:.71rem;color:var(--text3);margin-top:7px">$3/MTok input · $15/MTok output (claude-sonnet-4)</p>
+          <button class="btn btn-ghost btn-sm" style="margin-top:8px;color:var(--danger);border-color:var(--danger)" onclick="resetUsageStats()">↺ Azzera statistiche</button>
+        </div>
+
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:13px 15px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg2)">
+          <input type="checkbox" id="ai-disable-cb" style="width:17px;height:17px;accent-color:var(--danger);cursor:pointer;flex-shrink:0" onchange="handleDisableAI(this)">
+          <div>
+            <div style="font-size:.88rem;font-weight:600;color:var(--danger)">🚫 Nascondi funzioni AI</div>
+            <div style="font-size:.74rem;color:var(--text3);margin-top:2px">Disattiva e nasconde tutte le funzioni AI.</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- TAB: SISTEMA -->
+    <div class="settings-tab-panel" id="stab-sistema">
+      <button class="btn btn-ghost btn-sm" id="sw-update-btn" onclick="checkForUpdates()" style="width:100%;justify-content:center;margin-bottom:8px">🔄 Verifica aggiornamenti</button>
+      <div id="sw-update-status" style="font-size:.76rem;color:var(--text3);text-align:center;min-height:16px;margin-bottom:14px"></div>
+    </div>
+
+    <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
+      <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.1.3</div>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="file-import-input" accept=".json" style="display:none" onchange="handleFileImport(this)">
+<div class="notif" id="notification"></div>
+
+<script>
+// ═══════════ QUESTION BANK ═══════════
+const QUESTION_BANK = [
+  {macro:"A. Comprensione delle Istruzioni",icon:"🧠",icfRef:"b167, d310",micro:[
+    {label:"Istruzioni semplici",questions:[
+      {id:"a01",text:"Comprende istruzioni verbali semplici (1–2 passaggi)",note:"Es. 'Prendi la spugna e pulisci il tavolo'. L'utente esegue senza bisogno di ripetizioni o dimostrazioni."},
+      {id:"a02",text:"Comprende istruzioni con supporto gestuale o visivo semplice",note:"Es. l'operatore indica con il dito l'oggetto da prendere mentre dà l'istruzione verbale."},
+      {id:"a03",text:"Mantiene l'attenzione durante la consegna di istruzioni brevi",note:"Verifica se l'utente guarda l'operatore o il materiale per almeno 30–60 secondi senza distrarsi."}]},
+    {label:"Istruzioni di media complessità",questions:[
+      {id:"a04",text:"Comprende sequenze di 3–4 passaggi",note:"Es. 'Prendi il foglio, mettilo sul tavolo, incollaci il pezzo e poi rimetti il coperchio alla colla'."},
+      {id:"a05",text:"Comprende istruzioni date in assenza di dimostrazione pratica",note:"L'operatore spiega solo a voce, senza mostrare. Valuta quanto l'utente dipende dalla dimostrazione visiva."},
+      {id:"a06",text:"Chiede chiarimenti in modo funzionale quando non capisce",note:"L'utente usa parole, gesti o simboli CAA per segnalare di non aver capito, invece di interrompere o agitarsi."}]},
+    {label:"Istruzioni complesse",questions:[
+      {id:"a07",text:"Comprende istruzioni con condizionali (es. 'se… allora…')",note:"Es. 'Se il pezzo è rosso mettilo nel cesto grande, altrimenti nel piccolo'. Richiede ragionamento flessibile."},
+      {id:"a08",text:"Segue istruzioni scritte / schede visive autonomamente",note:"L'utente usa autonomamente una scheda sequenziale fotografica senza bisogno dell'operatore."},
+      {id:"a09",text:"Generalizza le istruzioni a contesti diversi",note:"Se ha imparato la procedura al laboratorio ceramica, la applica anche al laboratorio cucina senza reinsegnamento."}]}]},
+  {macro:"B. Modalità di Lavoro",icon:"🔧",icfRef:"d230, d710, d720",micro:[
+    {label:"Lavoro in singolo",questions:[
+      {id:"b01",text:"Inizia un'attività autonomamente senza prompting",note:"L'utente si siede alla propria postazione e inizia il compito quando vede i materiali, senza che l'operatore dica 'comincia'."},
+      {id:"b02",text:"Mantiene la concentrazione sul compito per almeno 10 minuti",note:"Valutare con un'attività nota e strutturata. Considera distrazione, abbandono, stereotipie interferenti."},
+      {id:"b03",text:"Porta a termine il compito senza abbandoni prematuri",note:"L'utente completa il ciclo completo di un'attività (es. riempire tutti i sacchetti) prima di alzarsi."},
+      {id:"b04",text:"Riprende il compito dopo una pausa senza ridirezione",note:"Dopo la pausa caffè, l'utente torna alla postazione e riprende da dove aveva lasciato senza che l'operatore intervenga."}]},
+    {label:"Lavoro in catena / sequenza",questions:[
+      {id:"b05",text:"Esegue una sequenza predefinita di azioni (catena comportamentale)",note:"Es. assemblaggio in più fasi — prende il pezzo, lo posiziona, avvita, controlla, ripone. Ogni passo attiva il successivo."},
+      {id:"b06",text:"Individua l'ordine corretto delle fasi del compito",note:"Se le fasi vengono mescolate (schede disordinate), l'utente è in grado di riordinarle prima di iniziare."},
+      {id:"b07",text:"Gestisce l'errore in fase sequenziale",note:"Se sbaglia un passaggio (es. salta una vite), se ne accorge e torna indietro a correggere senza assistenza."}]},
+    {label:"Lavoro in gruppo / a turni",questions:[
+      {id:"b08",text:"Collabora con un pari nello svolgimento di un compito condiviso",note:"Es. uno incolla e l'altro taglia, alternandosi. Valuta la coordinazione e la tolleranza della presenza altrui."},
+      {id:"b09",text:"Rispetta i turni e attende il proprio senza disturbare",note:"Durante un gioco a turni o un compito in catena, l'utente attende il proprio momento senza alzarsi o vocalizzare in modo disturbante."},
+      {id:"b10",text:"Adatta il ritmo lavorativo a quello del gruppo",note:"Se il gruppo rallenta o accelera, l'utente modifica il proprio passo senza rallentare la produzione collettiva."}]}]},
+  {macro:"C. Abilità Manuali e Prassiche",icon:"✋",icfRef:"d440, d445, d570",micro:[
+    {label:"Motricità fine",questions:[
+      {id:"c01",text:"Utilizza la presa a pinza in modo funzionale",note:"Es. raccogliere perline, inserire monete in una fessura, infilare aghi o bottoni piccoli in modo controllato."},
+      {id:"c02",text:"Esegue azioni di assemblaggio semplice (es. infilare, avvitare)",note:"Es. avvitare un bullone su un dado, infilare un laccio in un buco, collegare pezzi incastro. Valuta coordinazione e forza."},
+      {id:"c03",text:"Utilizza strumenti di lavoro basilari (forbici, punzone, ecc.)",note:"Valuta presa corretta, sicurezza d'uso e precisione. Es. ritagliare lungo una linea con forbici da lavoro."},
+      {id:"c04",text:"Mantiene coordinazione bimanuale nel compito",note:"Es. tenere ferma la scatola con una mano mentre incolla con l'altra. Le due mani svolgono ruoli complementari."}]},
+    {label:"Coordinazione e precisione",questions:[
+      {id:"c05",text:"Rispetta margini / spazi nel compito",note:"Es. incollare un'etichetta dentro il riquadro prestampato, o disporre oggetti dentro i cerchi su una mappa di lavoro."},
+      {id:"c06",text:"Adatta la forza applicata allo strumento e al materiale",note:"Usa forza leggera con carta velina, forza maggiore con cartone. Evita di rompere materiali o danneggiare strumenti."},
+      {id:"c07",text:"Esegue compiti di precisione con ritmo costante",note:"Es. timbrare fogli in serie o incollare elementi ripetitivi mantenendo qualità e velocità costante per tutta la sessione."}]}]},
+  {macro:"D. Regolazione Emotiva e Comportamentale",icon:"🌡️",icfRef:"b1522, b1521, d240",micro:[
+    {label:"Autoregolazione emotiva",questions:[
+      {id:"d01",text:"Gestisce la frustrazione senza comportamenti problema evidenti",note:"Es. se il compito è difficile o va storto, l'utente si ferma, respira o chiede aiuto invece di aggredire o distruggere il materiale."},
+      {id:"d02",text:"Esprime disagio o stress in modo funzionale (verbale o con simboli)",note:"L'utente usa parole ('non mi piace', 'basta'), immagini CAA o gesti convenzionali per comunicare il proprio malessere."},
+      {id:"d03",text:"Riprende l'attività dopo un episodio di agitazione entro 5 minuti",note:"Dopo una crisi o un momento di forte emozione, l'utente torna operativo in tempi brevi con minimo supporto esterno."},
+      {id:"d04",text:"Riconosce il proprio stato emotivo su richiesta dell'operatore",note:"L'operatore chiede 'come stai?' e l'utente indica la propria emozione su una scala o termometro delle emozioni."}]},
+    {label:"Comportamenti problema",questions:[
+      {id:"d05",text:"Frequenza di comportamenti auto-lesivi o etero-diretti nelle ultime 24h",note:"Registra ogni episodio (anche 0). Es. mordersi le mani, colpire oggetti/persone. Utile per analisi funzionale ABC."},
+      {id:"d06",text:"Presenza di stereotipie che interferiscono con il compito",note:"Es. dondolamento prolungato, vocalizzazioni ripetitive o manipolazione di oggetti che impediscono di completare il lavoro assegnato."},
+      {id:"d07",text:"Rispondenza a strategie di de-escalation dell'operatore",note:"Quando l'operatore usa la strategia concordata (voce calma, pausa, oggetto calmante), l'utente si calma entro tempi ragionevoli."}]},
+    {label:"Tolleranza al cambiamento",questions:[
+      {id:"d08",text:"Gestisce variazioni non previste nella routine",note:"Es. il laboratorio preferito è occupato e l'utente deve andare in quello secondario. Valuta la reazione immediata e il recupero."},
+      {id:"d09",text:"Accetta transizioni tra un'attività e l'altra senza protesta",note:"L'operatore annuncia la fine di un'attività gradita (es. computer) e l'utente passa a quella successiva senza crisi o ritardi eccessivi."},
+      {id:"d10",text:"Reagisce adeguatamente ai 'no' dell'operatore",note:"Quando una richiesta viene negata (es. 'non puoi uscire adesso'), l'utente accetta la risposta senza aggressività o fuga."}]}]},
+  {macro:"E. Gestione delle Pause e Tempi di Lavoro",icon:"⏱️",icfRef:"d230, d4702",micro:[
+    {label:"Ritorno dalle pause",questions:[
+      {id:"e01",text:"Ritorna al posto di lavoro al segnale di fine pausa senza supporto",note:"Allo squillo del timer o alla chiamata collettiva, l'utente torna autonomamente alla postazione entro un tempo congruo (es. 2 min)."},
+      {id:"e02",text:"Rispetta la durata della pausa concordata",note:"L'utente non prolunga la pausa oltre il tempo stabilito né torna prima interrompendo la propria zona di decompressione."},
+      {id:"e03",text:"Riprende immediatamente l'attività dopo la pausa",note:"Tornato alla postazione, l'utente riprende il compito in tempi brevi senza bisogno di reindirizzo da parte dell'operatore."}]},
+    {label:"Ritmi e tempi di lavoro",questions:[
+      {id:"e04",text:"Mantiene un ritmo produttivo costante per almeno 30 minuti",note:"Valuta se l'utente mantiene una velocità di lavoro accettabile per tutta la sessione, senza frequenti fermate o rallentamenti."},
+      {id:"e05",text:"Segnala la necessità di una pausa in modo appropriato",note:"Quando è stanco o sovraccarico, l'utente usa la modalità concordata (es. alzare la mano, mostrare simbolo 'pausa') invece di abbandonare."},
+      {id:"e06",text:"Gestisce adeguatamente i tempi morti tra un compito e l'altro",note:"Tra un'attività e la successiva, l'utente rimane seduto e attende (guardandosi intorno, manipolando un oggetto calmante) senza disturbare."}]}]},
+  {macro:"F. Comunicazione e Interazione Sociale",icon:"💬",icfRef:"d330, d350, d710, d720",micro:[
+    {label:"Comunicazione con l'operatore",questions:[
+      {id:"f01",text:"Inizia interazioni con l'operatore in modo appropriato",note:"L'utente avvicina l'operatore, lo chiama per nome o tocca il braccio per richiedere attenzione, invece di urlare o tirargli i vestiti."},
+      {id:"f02",text:"Risponde a domande dirette in modo pertinente",note:"A una domanda semplice ('hai finito?', 'di che colore è?'), l'utente risponde in modo coerente — anche con un gesto o simbolo CAA."},
+      {id:"f03",text:"Utilizza sistemi alternativi di comunicazione (CAA, PECS…) se previsti",note:"L'utente usa il proprio sistema CAA (tablet, tabella PECS, comunicatore) in modo funzionale e spontaneo durante la sessione."}]},
+    {label:"Interazione con i pari",questions:[
+      {id:"f04",text:"Interagisce spontaneamente con i colleghi nel setting occupazionale",note:"Es. sorride a un collega, commenta il suo lavoro, chiede aiuto o offre materiale senza che l'operatore abbia mediato."},
+      {id:"f05",text:"Rispetta gli spazi personali degli altri utenti",note:"L'utente non invade la zona di lavoro altrui, non tocca i materiali degli altri senza chiedere, mantiene distanza adeguata."},
+      {id:"f06",text:"Gestisce i conflitti con i pari senza escalation comportamentale",note:"In caso di tensione (es. contesa di uno strumento), l'utente si ritira o chiede mediazione invece di aggredire o fuggire."}]}]},
+  {macro:"G. Autonomia Personale nel Contesto Occupazionale",icon:"🚶",icfRef:"d540, d570, d620",micro:[
+    {label:"Orientamento e spostamenti",questions:[
+      {id:"g01",text:"Si orienta autonomamente all'interno del centro",note:"L'utente raggiunge senza aiuto luoghi noti (bagno, mensa, laboratorio) seguendo percorsi abituali o segnaletica visiva."},
+      {id:"g02",text:"Raggiunge autonomamente la postazione di lavoro",note:"All'arrivo al centro, l'utente appende le cose, trova il proprio spazio e si mette al lavoro senza essere accompagnato dall'operatore."}]},
+    {label:"Cura e igiene personale",questions:[
+      {id:"g03",text:"Mantiene un'adeguata igiene personale nel contesto occupazionale",note:"L'utente arriva al centro in condizioni igieniche accettabili e, durante la giornata, si lava le mani prima dei pasti o dopo attività sporche."},
+      {id:"g04",text:"Gestisce autonomamente abbigliamento adeguato al lavoro",note:"L'utente indossa e rimuove autonomamente il grembiule o i guanti richiesti dall'attività, senza assistenza fisica."}]},
+    {label:"Gestione di oggetti e materiali",questions:[
+      {id:"g05",text:"Utilizza correttamente le attrezzature assegnate senza danneggiarle",note:"Usa forbici, punzone, coltello da cucina con la tecnica corretta e senza forzare, preservando l'integrità dello strumento."},
+      {id:"g06",text:"Custodisce i propri oggetti personali in modo adeguato",note:"L'utente mette borsa, giacca e oggetti personali nell'armadietto o nello spazio assegnato, senza lasciarli in giro."}]},
+    {label:"Autonomia operativa nel compito",questions:[
+      {id:"c08",text:"Prepara autonomamente il proprio spazio di lavoro",note:"Prima dell'attività, l'utente prende da solo i materiali necessari, li dispone correttamente e si siede pronto."},
+      {id:"c09",text:"Riordina materiali al termine del compito senza prompting",note:"Al termine, ripone strumenti al posto giusto, smaltisce scarti, lascia il tavolo ordinato senza che l'operatore lo chieda."},
+      {id:"c10",text:"Individua e segnala un errore nel prodotto finito",note:"L'utente controlla il prodotto finito e segnala (verbalmente o mostrando) un difetto, es. un pezzo mancante o storto."}]}]},
+  {macro:"H. Apprendimento e Adattamento",icon:"📚",icfRef:"d130, d155, d210",micro:[
+    {label:"Acquisizione di nuove abilità",questions:[
+      {id:"h01",text:"Apprende un nuovo compito tramite dimostrazione (modeling)",note:"L'operatore esegue il compito una o più volte, poi l'utente lo imita. Valuta quante ripetizioni servono prima che esegua correttamente."},
+      {id:"h02",text:"Consolida l'abilità acquisita nelle sessioni successive",note:"Un'abilità appresa questa settimana viene eseguita correttamente anche nelle sessioni successive senza reinserimento completo."},
+      {id:"h03",text:"Generalizza l'abilità acquisita ad altri materiali/contesti",note:"L'utente applica la tecnica imparata con la colla stick anche con il nastro adesivo, o in un laboratorio diverso da quello di apprendimento."}]},
+    {label:"Flessibilità cognitiva",questions:[
+      {id:"h04",text:"Si adatta a modifiche nel metodo di lavoro",note:"Es. il procedimento viene cambiato (nuovo ordine dei passi), l'utente lo apprende senza mostrare resistenza eccessiva."},
+      {id:"h05",text:"Risolve piccoli ostacoli pratici in modo autonomo (problem solving elementare)",note:"Es. la colla è finita — l'utente cerca autonomamente un'alternativa o chiede aiuto, senza bloccarsi o agitarsi."}]}]}
+];
+
+const TTAP_LABELS=[
+  {val:0,label:"0",title:"Non valutabile"},
+  {val:1,label:"1",title:"Non emerge"},
+  {val:2,label:"2",title:"Emerge con supporto fisico"},
+  {val:3,label:"3",title:"Emerge con supporto verbale"},
+  {val:4,label:"4",title:"Emerge con indicazione"},
+  {val:5,label:"5",title:"Emerge autonomamente"}
+];
+
+// ═══════════ STORAGE ═══════════
+let appMeta={theme:'light',activeProfileId:null};
+let profiles=[];
+let pdata={selectedQuestions:[],compilations:{}};
+let currentProfileId=null;
+let currentMonth=new Date().getMonth();
+let currentYear=new Date().getFullYear();
+let currentDay=null;
+let chartInstances={};
+
+function loadMeta(){try{const s=localStorage.getItem('valutaapp_meta');if(s)appMeta={...appMeta,...JSON.parse(s)}}catch(e){}}
+function saveMeta(){localStorage.setItem('valutaapp_meta',JSON.stringify(appMeta))}
+function loadProfiles(){try{const s=localStorage.getItem('valutaapp_plist');if(s)profiles=JSON.parse(s)}catch(e){}}
+function saveProfiles(){localStorage.setItem('valutaapp_plist',JSON.stringify(profiles))}
+function loadPdata(id){try{const s=localStorage.getItem('valutaapp_p_'+id);return s?JSON.parse(s):{selectedQuestions:[],compilations:{}}}catch(e){return{selectedQuestions:[],compilations:{}}}}
+function savePdata(id,data){localStorage.setItem('valutaapp_p_'+id,JSON.stringify(data))}
+function deletePdata(id){localStorage.removeItem('valutaapp_p_'+id)}
+
+function activateProfile(id){
+  const prof=profiles.find(p=>p.id===id);if(!prof)return;
+  currentProfileId=id;pdata=loadPdata(id);appMeta.activeProfileId=id;saveMeta();renderHomeBanner();
+}
+function clearActiveProfile(){
+  currentProfileId=null;pdata={selectedQuestions:[],compilations:{}};appMeta.activeProfileId=null;saveMeta();renderHomeBanner();renderProfilesGrid();
+}
+function getActiveProfile(){return profiles.find(p=>p.id===currentProfileId)||null}
+
+// ═══════════ PROFILE CRUD ═══════════
+function openNewProfileModal(){
+  document.getElementById('np-nome').value='';document.getElementById('np-eta').value='';document.getElementById('np-servizio').value='';
+  openModal('modal-new-profile');setTimeout(()=>document.getElementById('np-nome').focus(),120);
+}
+function createProfile(){
+  const nome=document.getElementById('np-nome').value.trim();
+  if(!nome){notify('⚠️ Inserisci almeno il nome dell\'utente.',3000);return}
+  const id='u'+Date.now();
+  const prof={id,nome,eta:document.getElementById('np-eta').value.trim(),servizio:document.getElementById('np-servizio').value.trim(),createdAt:new Date().toISOString()};
+  profiles.push(prof);saveProfiles();savePdata(id,{selectedQuestions:[],compilations:{}});
+  closeModal('modal-new-profile');activateProfile(id);renderProfilesGrid();renderHomeBanner();notify('✅ Profilo "'+nome+'" creato e attivato!');
+}
+function openEditProfile(id,e){
+  e.stopPropagation();const prof=profiles.find(p=>p.id===id);if(!prof)return;
+  document.getElementById('ep-id').value=id;document.getElementById('ep-nome').value=prof.nome;
+  document.getElementById('ep-eta').value=prof.eta||'';document.getElementById('ep-servizio').value=prof.servizio||'';
+  openModal('modal-edit-profile');
+}
+function saveEditProfile(){
+  const id=document.getElementById('ep-id').value;const nome=document.getElementById('ep-nome').value.trim();
+  if(!nome){notify('⚠️ Inserisci almeno il nome.',3000);return}
+  const idx=profiles.findIndex(p=>p.id===id);if(idx===-1)return;
+  profiles[idx].nome=nome;profiles[idx].eta=document.getElementById('ep-eta').value.trim();profiles[idx].servizio=document.getElementById('ep-servizio').value.trim();
+  saveProfiles();closeModal('modal-edit-profile');renderProfilesGrid();renderHomeBanner();if(currentProfileId===id)renderHomeBanner();notify('✅ Profilo aggiornato.');
+}
+function deleteProfile(id,e){
+  e.stopPropagation();const prof=profiles.find(p=>p.id===id);if(!prof)return;
+  if(!confirm('Eliminare definitivamente il profilo di "'+prof.nome+'"?\nTutte le compilazioni associate andranno perse.'))return;
+  profiles=profiles.filter(p=>p.id!==id);saveProfiles();deletePdata(id);
+  if(currentProfileId===id){clearActiveProfile();renderHomeBanner();}else{renderProfilesGrid();renderHomeBanner();}notify('Profilo eliminato.');
+}
+
+// ═══════════ HISTORY NAV ═══════════
+const navHistory=[];
+let navIndex=-1;
+let _navBusy=false;
+
+function navPush(screenId){
+  if(_navBusy)return;
+  // don't push duplicate of current
+  if(navHistory[navIndex]===screenId)return;
+  // discard forward history
+  navHistory.splice(navIndex+1);
+  navHistory.push(screenId);
+  navIndex=navHistory.length-1;
+  updateNavButtons();
+}
+
+function historyBack(){
+  if(navIndex<=0)return;
+  navIndex--;
+  _navBusy=true;
+  goTo(navHistory[navIndex]);
+  _navBusy=false;
+  updateNavButtons();
+}
+
+function historyForward(){
+  if(navIndex>=navHistory.length-1)return;
+  navIndex++;
+  const target=navHistory[navIndex];
+  _navBusy=true;
+  if(target==='screen-day'&&lastDayContext){
+    const {dateKey,day,month,year}=lastDayContext;
+    openDay(dateKey,day,month,year);
+  } else {
+    goTo(target);
+  }
+  _navBusy=false;
+  updateNavButtons();
+}
+
+function updateNavButtons(){
+  document.querySelectorAll('#nav-back').forEach(b=>{b.disabled=navIndex<=0});
+  document.querySelectorAll('#nav-fwd').forEach(b=>{b.disabled=navIndex>=navHistory.length-1});
+}
+
+// ═══════════ HOME ═══════════
+
+// ═══════════ NAVIGATION ═══════════
+let lastDayContext=null; // {dateKey, day, month, year}
+
+function goTo(screenId){
+
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');window.scrollTo(0,0);
+  navPush(screenId);
+  if(screenId==='screen-design-select')renderDesignSelect();
+  if(screenId==='screen-design')renderDesign();
+  if(screenId==='screen-lab')renderLab();
+  if(screenId==='screen-compile')renderCompile();
+  if(screenId==='screen-results')renderResults();
+  if(screenId==='screen-users')renderProfilesGrid();
+  updateNavButtons();
+}
+
+function renderHomeBanner(){
+  const prof=getActiveProfile();
+  // populate active-user dropdown — alphabetically sorted
+  const sel=document.getElementById('active-user-select');
+  if(sel){
+    sel.innerHTML='<option value="">— Nessuno selezionato —</option>';
+    [...profiles].sort((a,b)=>a.nome.localeCompare(b.nome,'it')).forEach(p=>{
+      const opt=document.createElement('option');
+      opt.value=p.id;opt.textContent=p.nome+(p.servizio?' ('+p.servizio+')':'');
+      if(p.id===currentProfileId)opt.selected=true;
+      sel.appendChild(opt);
+    });
+  }
+  // results badge
+  const rbadge=document.getElementById('home-results-badge');
+  if(rbadge){
+    rbadge.innerHTML=prof
+      ?`<span class="ub-dot"></span> Utente attivo: <strong>${prof.nome}</strong>`
+      :'Seleziona un utente dalla card verde';
+  }
+  // compile badge
+  const badge=document.getElementById('home-user-badge');
+  if(badge){
+    badge.innerHTML=prof
+      ?`<span class="ub-dot"></span> Utente attivo: <strong>${prof.nome}</strong>`
+      :'Seleziona un utente dalla card verde';
+  }
+  // design badge
+  const dbadge=document.getElementById('home-design-badge');
+  if(dbadge){
+    dbadge.innerHTML=prof
+      ?`<span class="ub-dot"></span> Utente attivo: <strong>${prof.nome}</strong>`
+      :'Seleziona un utente dalla tab verde';
+  }
+}
+
+function selectUserFromHome(val){
+  if(!val){clearActiveProfile();return;}
+  activateProfile(val);
+  renderHomeBanner();
+  notify('✅ Utente attivo: '+(getActiveProfile()?.nome||''));
+}
+
+function renderProfilesGrid(){
+  const grid=document.getElementById('profiles-grid');
+  if(!grid)return;
+  grid.innerHTML='';
+  if(profiles.length===0){
+    const empty=document.createElement('div');
+    empty.style.cssText='grid-column:1/-1;text-align:center;padding:28px;color:var(--text2);font-size:.88rem';
+    empty.innerHTML='<div style="font-size:2rem;margin-bottom:8px">👤</div>Nessun utente ancora. Crea il primo profilo!';
+    grid.appendChild(empty);
+  }
+  [...profiles].sort((a,b)=>a.nome.localeCompare(b.nome,'it')).forEach(prof=>{
+    const card=document.createElement('div');
+    card.className='profile-card'+(currentProfileId===prof.id?' active-profile':'');
+    card.onclick=()=>{activateProfile(prof.id);renderHomeBanner()};
+    const pd=loadPdata(prof.id);
+    const compilCount=Object.keys(pd.compilations||{}).filter(d=>Object.keys(pd.compilations[d]).length>0).length;
+    const qCount=(pd.selectedQuestions||[]).length;
+    const initials=prof.nome.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+    card.innerHTML=`
+      ${currentProfileId===prof.id?'<div class="pc-badge">Attivo</div>':''}
+      <div class="pc-avatar">${initials||'👤'}</div>
+      <div class="pc-name">${prof.nome}</div>
+      <div class="pc-meta">${[prof.eta?prof.eta+' anni':'',prof.servizio].filter(Boolean).join(' · ')||'—'}<br>
+        <span style="color:var(--accent2)">${qCount} domande · ${compilCount} sessioni</span></div>
+      <div class="pc-actions">
+        <button class="btn btn-ghost btn-sm" onclick="openEditProfile('${prof.id}',event)">✏️ Modifica</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--danger);border-color:var(--danger)" onclick="deleteProfile('${prof.id}',event)">🗑️</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+  const newCard=document.createElement('div');
+  newCard.className='profile-card profile-new';newCard.onclick=openNewProfileModal;
+  newCard.innerHTML='<div class="pn-icon">＋</div><span>Nuovo utente</span>';
+  grid.appendChild(newCard);
+}
+
+// ═══════════ THEME ═══════════
+function toggleTheme(){appMeta.theme=appMeta.theme==='light'?'dark':'light';document.body.setAttribute('data-theme',appMeta.theme);saveMeta()}
+
+// ═══════════ MODALS ═══════════
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.modal-overlay').forEach(o=>{o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')})});
+
+// ═══════════ DESIGN SELECT ═══════════
+function renderDesignSelect(){
+  const content=document.getElementById('design-select-content');
+  if(!content)return;
+
+  if(!profiles.length){
+    content.innerHTML=`<div class="empty-state"><span class="empty-icon">👤</span><h3>Nessun utente creato</h3><p>Crea prima un utente dall'<em>Area Utenti</em>.</p></div>`;
+    return;
+  }
+
+  // split profiles into designed / not designed
+  const designed=[];const toDesign=[];
+  [...profiles].sort((a,b)=>a.nome.localeCompare(b.nome,'it')).forEach(prof=>{
+    const pd=loadPdata(prof.id);
+    const hasQ=(pd.selectedQuestions||[]).length>0;
+    (hasQ?designed:toDesign).push({prof,pd});
+  });
+
+  function profileCard(prof,pd){
+    const sel=(pd.selectedQuestions||[]).length;
+    const initials=prof.nome.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+    const isActive=currentProfileId===prof.id;
+    return`<div class="profile-card${isActive?' active-profile':''}" onclick="activateAndDesign('${prof.id}')" style="cursor:pointer">
+      ${isActive?'<div class="pc-badge">Attivo</div>':''}
+      <div class="pc-avatar">${initials||'👤'}</div>
+      <div class="pc-name">${prof.nome}</div>
+      <div class="pc-meta">${[prof.eta?prof.eta+' anni':'',prof.servizio].filter(Boolean).join(' · ')||'—'}<br>
+        <span style="color:var(--accent2)">${sel} domande selezionate</span>
+      </div>
+      <div style="margin-top:10px">
+        <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();activateAndDesign('${prof.id}')">📐 Configura domande</button>
+      </div>
+    </div>`;
+  }
+
+  content.innerHTML=`
+    ${toDesign.length?`
+    <div class="card" style="margin-bottom:18px">
+      <h2 style="margin-bottom:4px;color:var(--warn)">⚠️ Da progettare <span style="font-size:.75rem;font-weight:400;color:var(--text3)">(${toDesign.length} utent${toDesign.length===1?'e':'i'})</span></h2>
+      <p style="font-size:.82rem;color:var(--text2);margin-bottom:16px">Questi utenti non hanno ancora domande selezionate.</p>
+      <div class="profiles-grid">${toDesign.map(({prof,pd})=>profileCard(prof,pd)).join('')}</div>
+    </div>`:''}
+    ${designed.length?`
+    <div class="card">
+      <h2 style="margin-bottom:4px;color:var(--accent2)">✅ Già progettati <span style="font-size:.75rem;font-weight:400;color:var(--text3)">(${designed.length} utent${designed.length===1?'e':'i'})</span></h2>
+      <p style="font-size:.82rem;color:var(--text2);margin-bottom:16px">Clicca su un utente per modificare le sue domande.</p>
+      <div class="profiles-grid">${designed.map(({prof,pd})=>profileCard(prof,pd)).join('')}</div>
+    </div>`:''}
+  `;
+}
+
+function activateAndDesign(profileId){
+  activateProfile(profileId);
+  renderHomeBanner();
+  goTo('screen-design');
+}
+
+// ═══════════ DESIGN ═══════════
+function renderDesign(){
+  const prof=getActiveProfile();
+  // read-only user header
+  const header=document.getElementById('design-user-header');
+  if(header){
+    if(prof){
+      header.innerHTML=`<div class="card" style="background:linear-gradient(130deg,var(--al) 0%,var(--card) 100%);border:1.5px solid var(--al2);padding:14px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <div style="width:40px;height:40px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--fd);font-weight:700;font-size:1rem;flex-shrink:0">${prof.nome.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase()}</div>
+        <div>
+          <div style="font-weight:700;font-size:.95rem">${prof.nome}</div>
+          <div style="font-size:.78rem;color:var(--text2)">${[prof.eta?prof.eta+' anni':'',prof.servizio].filter(Boolean).join(' · ')||'—'}</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="goTo('screen-design-select')">‹ Cambia utente</button>
+      </div>`;
+    } else {
+      header.innerHTML='';
+    }
+  }
+  const container=document.getElementById('questions-container');container.innerHTML='';
+  if(!pdata.customQuestions)pdata.customQuestions={};
+  QUESTION_BANK.forEach((macro,mi)=>{
+    const macroDiv=document.createElement('div');macroDiv.className='macro-area';
+    const sel=pdata.selectedQuestions||[];
+    const customQs=(pdata.customQuestions[macro.macro]||[]);
+    const totalQ=macro.micro.reduce((a,m)=>a+m.questions.length,0);
+    const selStd=macro.micro.reduce((a,m)=>a+m.questions.filter(q=>sel.includes(q.id)).length,0);
+    const selCustom=customQs.filter(cq=>sel.includes(cq.id)).length;
+    const selQ=selStd+selCustom;
+    const totalDisplayed=totalQ+customQs.length;
+
+    macroDiv.innerHTML=`
+      <div class="macro-header" onclick="toggleMacro(this)">
+        <h3>${macro.icon} ${macro.macro} </h3>
+        <div style="display:flex;align-items:center;gap:7px;flex-shrink:0">
+          <span class="macro-count">${selQ}/${totalDisplayed} selezionate</span>
+          <span class="chevron">▾</span>
+        </div>
+      </div>
+      <div class="macro-body">
+        <div class="select-all-row">
+          <button class="btn btn-ghost btn-sm" onclick="selectMacro(${mi},true)">✓ Seleziona tutte</button>
+          <button class="btn btn-ghost btn-sm" onclick="selectMacro(${mi},false)">✗ Deseleziona tutte</button>
+        </div>
+        ${macro.micro.map(micro=>`
+          <div class="micro-group">
+            <div class="micro-label">${micro.label}</div>
+            ${micro.questions.map(q=>{
+              // strip ICF codes from note, keep only human-readable part
+              const cleanNote=q.note?q.note.replace(/\b[a-z]\d{3,4}\s*(ICF)?:?\s*/gi,'').replace(/ICF/gi,'').trim():'';
+              return`<div class="question-item">
+                <input type="checkbox" id="q_${q.id}" value="${q.id}" ${sel.includes(q.id)?'checked':''} onchange="toggleQuestion('${q.id}',this.checked)">
+                <label for="q_${q.id}">${q.text}</label>
+                ${cleanNote?`<div class="q-note-tooltip">💡 ${cleanNote}</div>`:''}
+              </div>`;
+            }).join('')}
+          </div>`).join('')}
+
+        <div class="custom-q-area">
+          <div class="custom-q-label">✏️ Domande personalizzate per questa area</div>
+          <div class="custom-q-list" id="cql_${mi}">
+            ${customQs.map((cq,ci)=>`
+              <div class="custom-q-item">
+                <input type="checkbox" id="cq_${cq.id}" ${sel.includes(cq.id)?'checked':''} onchange="toggleQuestion('${cq.id}',this.checked)">
+                <span class="cq-text"><label for="cq_${cq.id}" style="cursor:pointer">${cq.text}</label></span>
+                <button class="cq-del" onclick="deleteCustomQ('${macro.macro}',${ci})" title="Elimina domanda">✕</button>
+              </div>`).join('')}
+          </div>
+          <div class="custom-q-add">
+            <input type="text" id="cq-input-${mi}" placeholder="Scrivi una nuova domanda libera…" onkeydown="if(event.key==='Enter')addCustomQ('${macro.macro}',${mi})">
+            <button class="btn btn-primary btn-sm" onclick="addCustomQ('${macro.macro}',${mi})">＋ Aggiungi</button>
+          </div>
+          ${macro.macro.startsWith('D.')?`
+          <div class="abc-toggle-row" style="margin-top:14px">
+            <input type="checkbox" id="abc-enabled" ${(pdata.abcEnabled||false)?'checked':''} onchange="toggleABC(this.checked)">
+            <label for="abc-enabled">📋 AGGIUNGI SCHEMI ABC alla compilazione giornaliera — Numero di schemi per giorno:
+              <select id="abc-count" onchange="setABCCount(this.value)" onclick="event.stopPropagation()">
+                ${[1,2,3,4,5].map(n=>`<option value="${n}" ${(pdata.abcCount||1)==n?'selected':''}>${n}</option>`).join('')}
+              </select>
+            </label>
+          </div>`:''}
+        </div>
+      </div>`;
+    container.appendChild(macroDiv);
+  });
+}
+function toggleMacro(h){h.classList.toggle('open');h.nextElementSibling.classList.toggle('open')}
+function toggleQuestion(id,checked){
+  if(!pdata.selectedQuestions)pdata.selectedQuestions=[];
+  if(checked&&!pdata.selectedQuestions.includes(id))pdata.selectedQuestions.push(id);
+  else pdata.selectedQuestions=pdata.selectedQuestions.filter(q=>q!==id);
+  updateMacroCounts();
+}
+function updateMacroCounts(){
+  if(!pdata.customQuestions)pdata.customQuestions={};
+  document.querySelectorAll('.macro-area').forEach((div,mi)=>{
+    const macro=QUESTION_BANK[mi];const sel=pdata.selectedQuestions||[];
+    const customQs=pdata.customQuestions[macro.macro]||[];
+    const totalQ=macro.micro.reduce((a,m)=>a+m.questions.length,0)+customQs.length;
+    const selStd=macro.micro.reduce((a,m)=>a+m.questions.filter(q=>sel.includes(q.id)).length,0);
+    const selCustom=customQs.filter(cq=>sel.includes(cq.id)).length;
+    const el=div.querySelector('.macro-count');if(el)el.textContent=`${selStd+selCustom}/${totalQ} selezionate`;
+  });
+}
+function selectMacro(mi,val){
+  if(!pdata.selectedQuestions)pdata.selectedQuestions=[];
+  if(!pdata.customQuestions)pdata.customQuestions={};
+  const macro=QUESTION_BANK[mi];
+  // standard questions
+  macro.micro.forEach(m=>m.questions.forEach(q=>{
+    if(val&&!pdata.selectedQuestions.includes(q.id))pdata.selectedQuestions.push(q.id);
+    if(!val)pdata.selectedQuestions=pdata.selectedQuestions.filter(id=>id!==q.id);
+    const cb=document.getElementById('q_'+q.id);if(cb)cb.checked=val;
+  }));
+  // custom questions
+  (pdata.customQuestions[macro.macro]||[]).forEach(cq=>{
+    if(val&&!pdata.selectedQuestions.includes(cq.id))pdata.selectedQuestions.push(cq.id);
+    if(!val)pdata.selectedQuestions=pdata.selectedQuestions.filter(id=>id!==cq.id);
+    const cb=document.getElementById('cq_'+cq.id);if(cb)cb.checked=val;
+  });
+  updateMacroCounts();
+}
+function selectAll(val){QUESTION_BANK.forEach((_,mi)=>selectMacro(mi,val))}
+
+// ── CUSTOM QUESTIONS ──
+function addCustomQ(macroName,mi){
+  const input=document.getElementById('cq-input-'+mi);
+  const text=input.value.trim();
+  if(!text){notify('⚠️ Scrivi il testo della domanda.',2500);return}
+  if(!pdata.customQuestions)pdata.customQuestions={};
+  if(!pdata.customQuestions[macroName])pdata.customQuestions[macroName]=[];
+  const id='cq_'+Date.now()+'_'+mi;
+  pdata.customQuestions[macroName].push({id,text});
+  // auto-select it
+  if(!pdata.selectedQuestions)pdata.selectedQuestions=[];
+  pdata.selectedQuestions.push(id);
+  input.value='';
+  savePdata(currentProfileId,pdata);
+  renderDesign();
+  // re-open this macro
+  const macroAreas=document.querySelectorAll('.macro-area');
+  if(macroAreas[mi]){
+    const h=macroAreas[mi].querySelector('.macro-header');
+    const b=macroAreas[mi].querySelector('.macro-body');
+    h.classList.add('open');b.classList.add('open');
+    // scroll into view
+    setTimeout(()=>macroAreas[mi].scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+  }
+  notify('✅ Domanda aggiunta e selezionata!');
+}
+function deleteCustomQ(macroName,ci){
+  if(!confirm('Eliminare questa domanda personalizzata?\nVerrà rimossa da tutte le compilazioni.'))return;
+  if(!pdata.customQuestions||!pdata.customQuestions[macroName])return;
+  const cq=pdata.customQuestions[macroName][ci];
+  if(cq){pdata.selectedQuestions=(pdata.selectedQuestions||[]).filter(id=>id!==cq.id)}
+  pdata.customQuestions[macroName].splice(ci,1);
+  savePdata(currentProfileId,pdata);
+  const mi=QUESTION_BANK.findIndex(m=>m.macro===macroName);
+  renderDesign();
+  // re-open this macro
+  if(mi>=0){
+    const macroAreas=document.querySelectorAll('.macro-area');
+    if(macroAreas[mi]){const h=macroAreas[mi].querySelector('.macro-header');const b=macroAreas[mi].querySelector('.macro-body');h.classList.add('open');b.classList.add('open')}
+  }
+  notify('Domanda eliminata.');
+}
+function syncUserData(){
+  const idx=profiles.findIndex(p=>p.id===currentProfileId);if(idx===-1)return;
+  profiles[idx].nome=document.getElementById('d-nome').value;
+  profiles[idx].eta=document.getElementById('d-eta').value;
+  profiles[idx].servizio=document.getElementById('d-servizio').value;
+}
+function saveDesign(){saveProfiles();savePdata(currentProfileId,pdata);renderHomeBanner();notify('✅ Configurazione salvata!');renderDesign()}
+function resetDesign(){
+  if(!confirm('Reimpostare tutte le domande selezionate per questo utente?\n(Le domande personalizzate create rimarranno, ma verranno deselezionate.)'))return;
+  pdata.selectedQuestions=[];
+  savePdata(currentProfileId,pdata);renderDesign();notify('Domande reimpostate.');
+}
+
+// ── ABC CONFIG ──
+function toggleABC(checked){
+  pdata.abcEnabled=checked;
+  savePdata(currentProfileId,pdata);
+  notify(checked?`✅ Schemi ABC attivati (${pdata.abcCount||1} per giorno).`:'ABC disattivati.');
+}
+function setABCCount(val){
+  pdata.abcCount=parseInt(val);
+  savePdata(currentProfileId,pdata);
+  notify(`✅ ${pdata.abcCount} schema${pdata.abcCount>1?'i':''} ABC per giorno.`);
+}
+
+// ── ABC RENDERING IN DAY SCREEN ──
+function renderABCBlocks(container,dateKey){
+  if(!pdata.abcEnabled)return;
+  const n=pdata.abcCount||1;
+  const existingABC=(pdata.abcData||{})[dateKey]||[];
+  const abcCard=document.createElement('div');
+  abcCard.className='abc-block';
+  abcCard.innerHTML=`<div class="abc-block-header">
+    <div class="abc-block-title">📋 Schemi ABC — Analisi Comportamentale</div>
+    <span style="font-size:.75rem;color:var(--warn);font-weight:600">${n} schema${n>1?'i':''} previsti</span>
+  </div>
+  <p style="font-size:.8rem;color:var(--text2);margin-bottom:16px">Compila A–B–C per ogni episodio. Usa <strong>+ Aggiungi riga</strong> per continuare la descrizione dello stesso evento (3×2, 3×3…).</p>
+  <div id="abc-entries-container"></div>`;
+  container.appendChild(abcCard);
+
+  const entryCont=abcCard.querySelector('#abc-entries-container');
+  for(let i=0;i<n;i++){
+    const schemaData=existingABC[i]||{rows:[{}]};
+    // migrate old format (flat A/B/C) to rows format
+    const rows=schemaData.rows||(schemaData.A||schemaData.B||schemaData.C||schemaData.note
+      ?[{A:schemaData.A||'',B:schemaData.B||'',C:schemaData.C||'',note:schemaData.note||''}]
+      :[{}]);
+    buildABCSchema(entryCont,i,n,rows,i===n-1);
+  }
+}
+
+function buildABCSchema(container,schemaIdx,totalSchemas,rows,isLast){
+  const wrapper=document.createElement('div');
+  wrapper.className='abc-schema-wrapper';
+  wrapper.setAttribute('data-abc-idx',schemaIdx);
+  wrapper.style.cssText=`margin-bottom:20px;padding-bottom:20px;border-bottom:${isLast?'none':'1px solid var(--border)'}`;
+
+  const header=document.createElement('div');
+  header.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px';
+  header.innerHTML=`<div style="font-size:.72rem;font-weight:700;color:var(--warn);letter-spacing:.07em;text-transform:uppercase">
+    Schema ${schemaIdx+1}${totalSchemas>1?' di '+totalSchemas:''}
+  </div>
+  <div style="display:flex;gap:6px">
+    <button class="btn btn-ghost btn-sm" style="font-size:.75rem;color:var(--warn);border-color:var(--warn)" onclick="addABCRow(this)">＋ Aggiungi riga</button>
+    <button class="btn btn-ghost btn-sm" style="font-size:.75rem;color:var(--danger);border-color:var(--danger)" onclick="resetABCSchema(this)" title="Ripristina questo schema — tutti i campi verranno svuotati e non verrà salvato">↺ Ripristina</button>
+  </div>`;
+  wrapper.appendChild(header);
+
+  const rowsContainer=document.createElement('div');
+  rowsContainer.className='abc-rows-container';
+  wrapper.appendChild(rowsContainer);
+
+  rows.forEach((row,ri)=>{
+    rowsContainer.appendChild(createABCRow(ri,row,rows.length));
+  });
+
+  // single note field per schema, at the bottom
+  const noteField=document.createElement('div');
+  noteField.className='abc-field abc-schema-note';
+  noteField.style.cssText='margin-top:10px;padding-top:10px;border-top:1px dashed var(--border2)';
+  const noteVal=rows[0]?.note||'';
+  noteField.innerHTML=`<label>📝 Note generali (intensità, durata, contesto dell'evento)</label>
+    <textarea class="abc-note" placeholder="Opzionale — valide per tutte le righe di questo schema…" rows="2">${noteVal}</textarea>`;
+  wrapper.appendChild(noteField);
+
+  container.appendChild(wrapper);
+}
+
+function createABCRow(rowIdx,data,totalRows){
+  const rowEl=document.createElement('div');
+  rowEl.className='abc-row-block';
+  rowEl.setAttribute('data-row-idx',rowIdx);
+  rowEl.style.cssText='margin-bottom:10px';
+  const showDel=totalRows>1;
+  const showLabels=rowIdx===0;
+  rowEl.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <span style="font-size:.66rem;font-weight:600;color:var(--text3);letter-spacing:.05em;text-transform:uppercase">
+        ${rowIdx===0?'Riga principale':'Continuazione '+(rowIdx+1)}
+      </span>
+      ${showDel?`<button class="btn btn-ghost btn-sm" style="font-size:.72rem;color:var(--danger);border-color:var(--danger);padding:3px 8px" onclick="removeABCRow(this)">✕ Rimuovi</button>`:''}
+    </div>
+    <div class="abc-field-row">
+      <div class="abc-field">
+        ${showLabels?`<label style="color:#7060b0">A — Antecedente</label>`:''}
+        <textarea class="abc-antecedente" placeholder="Antecedente…" rows="3">${data.A||''}</textarea>
+      </div>
+      <div class="abc-field">
+        ${showLabels?`<label style="color:var(--warn)">B — Comportamento</label>`:''}
+        <textarea class="abc-behavior" placeholder="Comportamento…" rows="3">${data.B||''}</textarea>
+      </div>
+      <div class="abc-field">
+        ${showLabels?`<label style="color:var(--accent2)">C — Conseguenza</label>`:''}
+        <textarea class="abc-consequence" placeholder="Conseguenza…" rows="3">${data.C||''}</textarea>
+      </div>
+    </div>`;
+  return rowEl;
+}
+
+function addABCRow(btn){
+  const schemaWrapper=btn.closest('.abc-schema-wrapper');
+  const rowsContainer=schemaWrapper.querySelector('.abc-rows-container');
+  const currentRows=rowsContainer.querySelectorAll('.abc-row-block').length;
+  const newRow=createABCRow(currentRows,{},currentRows+1);
+  rowsContainer.appendChild(newRow);
+  refreshABCRowControls(rowsContainer);
+  newRow.querySelector('textarea').focus();
+}
+
+function resetABCSchema(btn){
+  const wrapper=btn.closest('.abc-schema-wrapper');
+  // clear all textareas
+  wrapper.querySelectorAll('textarea').forEach(ta=>ta.value='');
+  // if extra rows were added, remove them leaving only the first
+  const rowsContainer=wrapper.querySelector('.abc-rows-container');
+  const rows=rowsContainer.querySelectorAll('.abc-row-block');
+  rows.forEach((r,i)=>{ if(i>0) r.remove(); });
+  refreshABCRowControls(rowsContainer);
+  // re-enable if it was previously cancelled
+  wrapper.style.opacity='';
+  wrapper.style.pointerEvents='';
+  const lbl=wrapper.querySelector('[style*="text-transform:uppercase"]');
+  if(lbl){
+    // restore original label (strip any " — ANNULLATO" suffix)
+    lbl.textContent=lbl.textContent.replace(/ ?— ANNULLATO/,'');
+    lbl.style.color='';
+  }
+  document.getElementById('save-status').textContent='Modifiche non salvate ●';
+  notify('↺ Schema ripristinato — i campi sono stati svuotati.',2500);
+}
+
+function removeABCRow(btn){
+  const rowEl=btn.closest('.abc-row-block');
+  const rowsContainer=rowEl.closest('.abc-rows-container');
+  rowEl.remove();
+  refreshABCRowControls(rowsContainer);
+  document.getElementById('save-status').textContent='Modifiche non salvate ●';
+}
+
+function refreshABCRowControls(rowsContainer){
+  const rows=rowsContainer.querySelectorAll('.abc-row-block');
+  rows.forEach((row,ri)=>{
+    // update label
+    const label=row.querySelector('span[style*="text-transform:uppercase"]');
+    if(label)label.textContent=ri===0?'Riga principale':'Continuazione '+(ri+1);
+    // show/hide delete button
+    const delBtn=row.querySelector('button');
+    if(rows.length===1){if(delBtn)delBtn.style.display='none'}
+    else{
+      if(!delBtn){
+        const headerRow=row.querySelector('[style*="justify-content:space-between"]');
+        const newDel=document.createElement('button');
+        newDel.className='btn btn-ghost btn-sm';
+        newDel.style.cssText='font-size:.72rem;color:var(--danger);border-color:var(--danger);padding:3px 8px';
+        newDel.textContent='✕ Rimuovi';
+        newDel.onclick=function(){removeABCRow(this)};
+        if(headerRow)headerRow.appendChild(newDel);
+      } else {delBtn.style.display=''}
+    }
+  });
+}
+
+// ── COLLECT ABC DATA ──
+function collectABCData(){
+  const schemas=document.querySelectorAll('#day-questions-container .abc-schema-wrapper');
+  if(!schemas.length)return null;
+  const result=[];
+  schemas.forEach(schema=>{
+    const rows=[];
+    schema.querySelectorAll('.abc-row-block').forEach(rowEl=>{
+      rows.push({
+        A:rowEl.querySelector('.abc-antecedente')?.value.trim()||'',
+        B:rowEl.querySelector('.abc-behavior')?.value.trim()||'',
+        C:rowEl.querySelector('.abc-consequence')?.value.trim()||''
+      });
+    });
+    // note is schema-level, stored in rows[0].note for backwards compatibility
+    const note=schema.querySelector('.abc-schema-note .abc-note')?.value.trim()||'';
+    if(rows.length>0)rows[0].note=note;
+    result.push({rows});
+  });
+  const hasContent=result.some(s=>s.rows.some(r=>r.A||r.B||r.C||r.rows?.[0]?.note)||s.rows[0]?.note);
+  return hasContent?result:null;
+}
+// ═══════════ USER SIDEBAR ═══════════
+function renderUserSidebar(containerId, onSelectFn, mode, highlightDay){
+  // mode: 'compile' = grey if no questions; 'results' = grey if no compilations
+  // highlightDay: dateKey string — show green tick if compiled on that day
+  const el=document.getElementById(containerId);
+  if(!el)return;
+  if(!profiles.length){
+    el.innerHTML=`<div style="font-size:.75rem;color:var(--text3);padding:8px 6px">Nessun utente creato</div>`;
+    return;
+  }
+  const sorted=[...profiles].sort((a,b)=>a.nome.localeCompare(b.nome,'it'));
+  el.innerHTML=`<div class="user-sidebar-title">Utenti</div>`+
+    sorted.map(p=>{
+      const pd=loadPdata(p.id);
+      const hasQ=(pd.selectedQuestions||[]).length>0;
+      const hasComp=Object.keys(pd.compilations||{}).some(d=>Object.keys(pd.compilations[d]).length>0);
+      const enabled = mode==='compile'?hasQ : mode==='results'?hasComp : true;
+      const initials=p.nome.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+      const isActive=currentProfileId===p.id;
+      const dayDone=highlightDay&&pd.compilations&&Object.keys(pd.compilations[highlightDay]||{}).length>0;
+      const tick=dayDone?`<span style="color:#22a060;font-size:.85rem;flex-shrink:0">✓</span>`:'';
+      if(!enabled){
+        return`<div class="sidebar-user-btn disabled" title="${mode==='compile'?'Domande non configurate':'Nessuna compilazione disponibile'}">
+          <div class="sidebar-user-avatar" style="opacity:.4">${initials}</div>
+          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:.4">${p.nome}</span>
+        </div>`;
+      }
+      return`<button class="sidebar-user-btn${isActive?' active':''}" onclick="${onSelectFn}('${p.id}')">
+        <div class="sidebar-user-avatar">${initials}</div>
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${p.nome}</span>
+        ${tick}
+      </button>`;
+    }).join('');
+}
+function selectCompileUser(id){
+  activateProfile(id);
+  renderHomeBanner();
+  renderCompile();
+}
+function selectResultsUser(id){
+  activateProfile(id);
+  renderHomeBanner();
+  renderResults();
+}
+
+function renderCompile(){
+  const prof=getActiveProfile();
+  // if no active user, auto-select first designed profile
+  if(!prof){
+    const first=profiles.find(p=>(loadPdata(p.id).selectedQuestions||[]).length>0);
+    if(first){activateProfile(first.id);}
+  }
+  const p=getActiveProfile();
+  document.getElementById('ci-nome').textContent=p?.nome||'—';
+  document.getElementById('ci-eta').textContent=p?.eta?p.eta+' anni':'—';
+  document.getElementById('ci-servizio').textContent=p?.servizio||'—';
+  renderUserSidebar('compile-sidebar','selectCompileUser','compile',null);
+  renderCalendar();
+}
+const MONTHS_IT=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+const DAYS_IT=['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+function renderCalendar(){
+  document.getElementById('cal-title').textContent=`${MONTHS_IT[currentMonth]} ${currentYear}`;
+  const grid=document.getElementById('calendar-grid');grid.innerHTML='';
+  DAYS_IT.forEach(d=>{const h=document.createElement('div');h.className='cal-hdr';h.textContent=d;grid.appendChild(h)});
+  const firstDay=new Date(currentYear,currentMonth,1).getDay();
+  const offset=firstDay===0?6:firstDay-1;
+  const daysInMonth=new Date(currentYear,currentMonth+1,0).getDate();
+  const today=new Date();
+  for(let i=0;i<offset;i++){const e=document.createElement('div');e.className='cal-day empty';grid.appendChild(e)}
+  for(let d=1;d<=daysInMonth;d++){
+    const dk=`${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const el=document.createElement('div');el.className='cal-day';
+    if(today.getFullYear()===currentYear&&today.getMonth()===currentMonth&&today.getDate()===d)el.classList.add('today');
+    const comp=(pdata.compilations||{})[dk];
+    const hasComp=comp&&Object.keys(comp).length>0;
+    const abcDay=(pdata.abcData||{})[dk];
+    const hasABC=abcDay&&abcDay.some&&abcDay.some(s=>{const rows=s.rows||[s];return rows.some(r=>r.A||r.B||r.C);});
+    // number
+    const numSpan=document.createElement('span');numSpan.textContent=d;el.appendChild(numSpan);
+    // dots
+    if(hasComp||hasABC){
+      const dotsDiv=document.createElement('div');dotsDiv.className='cal-dots';
+      if(hasComp){const g=document.createElement('span');g.className='cal-dot-green';dotsDiv.appendChild(g)}
+      if(hasABC){const r=document.createElement('span');r.className='cal-dot-red';dotsDiv.appendChild(r)}
+      el.appendChild(dotsDiv);
+    }
+    el.addEventListener('click',()=>openDay(dk,d,currentMonth,currentYear));
+    grid.appendChild(el);
+  }
+}
+function changeMonth(dir){
+  currentMonth+=dir;if(currentMonth<0){currentMonth=11;currentYear--}if(currentMonth>11){currentMonth=0;currentYear++}renderCalendar();
+}
+
+// ═══════════ DAY SCREEN ═══════════
+function openDay(dateKey,day,month,year){
+  if(!(pdata.selectedQuestions||[]).length){notify('⚠️ Nessuna domanda selezionata. Configura prima l\'Area Progettazione.',4000);return}
+  lastDayContext={dateKey,day,month,year};
+  currentDay=dateKey;
+  renderUserSidebar('compile-sidebar','selectCompileUser','compile',dateKey);
+  document.getElementById('day-title').textContent=`${day} ${MONTHS_IT[month]} ${year}`;
+  document.getElementById('save-status').textContent='Nessuna modifica salvata';
+  document.getElementById('save-status').className='save-status';
+  // Show day panel in compile screen (above calendar)
+  const hasComp=Object.keys((pdata.compilations||{})[dateKey]||{}).length>0;
+  const panel=document.getElementById('compile-day-panel');
+  if(panel){
+    panel.style.display='block';
+    document.getElementById('compile-day-label').textContent=`${day} ${MONTHS_IT[month]} ${year}`;
+    document.getElementById('compile-day-sub').textContent=hasComp
+      ?'✅ Scheda già compilata — clicca per modificare.'
+      :'📝 Nessuna compilazione — clicca per iniziare.';
+  }
+  // Also reset day screen state for when user clicks Compila
+  document.getElementById('day-cta').style.display='none';
+  document.getElementById('day-questions-wrap').style.display='none';
+  document.getElementById('day-save-bar').style.display='none';
+}
+
+function showDayQuestions(){
+  document.getElementById('day-cta').style.display='none';
+  document.getElementById('day-questions-wrap').style.display='block';
+  document.getElementById('day-save-bar').style.display='flex';
+  const dateKey=currentDay;
+  const existing=(pdata.compilations||{})[dateKey]||{};
+  const container=document.getElementById('day-questions-container');container.innerHTML='';
+  const customQs=pdata.customQuestions||{};
+  QUESTION_BANK.forEach(macro=>{
+    const qs=[];
+    macro.micro.forEach(micro=>micro.questions.forEach(q=>{
+      if((pdata.selectedQuestions||[]).includes(q.id))qs.push({...q,microLabel:micro.label,isCustom:false});
+    }));
+    (customQs[macro.macro]||[]).forEach(cq=>{
+      if((pdata.selectedQuestions||[]).includes(cq.id))qs.push({id:cq.id,text:cq.text,note:'',microLabel:'Domande personalizzate',isCustom:true});
+    });
+    if(!qs.length)return;
+    const mc=document.createElement('div');mc.className='card';mc.style.marginBottom='14px';
+    mc.innerHTML=`<h3 style="display:flex;align-items:center;gap:7px;margin-bottom:12px">${macro.icon} ${macro.macro}</h3>`;
+    let lastMicro=null;
+    qs.forEach(q=>{
+      if(q.microLabel!==lastMicro){
+        const ml=document.createElement('div');ml.className='micro-label';
+        ml.style.cssText=q.isCustom?'color:var(--accent3);border-color:var(--al)':'';
+        ml.textContent=q.microLabel;mc.appendChild(ml);lastMicro=q.microLabel;
+      }
+      const cv=existing[q.id]!==undefined?existing[q.id]:null;
+      const existingNote=(pdata.notes||{})[currentDay]?.[q.id]||'';
+      const hasNote=existingNote.trim().length>0;
+      const qd=document.createElement('div');qd.className='q-item';qd.setAttribute('data-qid',q.id);
+      const tooltip=q.note?`<div class="q-note-tooltip">💡 ${q.note}</div>`:'';
+      qd.innerHTML=`<div class="q-text">${q.isCustom?'<span style="font-size:.68rem;background:var(--al);color:var(--accent2);padding:1px 7px;border-radius:10px;font-weight:600;margin-right:6px;vertical-align:middle">libera</span>':''}${q.text}${tooltip}</div>
+        <div class="ttap-scale">${TTAP_LABELS.map(t=>`<button class="ttap-btn ${cv===t.val?'selected-'+t.val:''}" title="${t.title}" onclick="setScore('${q.id}',${t.val},this)">${t.label}</button>`).join('')}</div>
+        <label class="q-note-toggle">
+          <input type="checkbox" class="q-note-check" ${hasNote?'checked':''} onchange="toggleNoteArea(this)">
+          <span class="q-note-toggle-label">📝 Note</span>
+        </label>
+        <div class="q-note-area ${hasNote?'open':''}">
+          <textarea class="q-note-input" placeholder="Annotazione qualitativa su questa domanda…" oninput="document.getElementById('save-status').textContent='Modifiche non salvate ●'">${existingNote}</textarea>
+        </div>`;
+      mc.appendChild(qd);
+    });
+    container.appendChild(mc);
+  });
+  renderABCBlocks(container,dateKey);
+  window.scrollTo(0,0);
+}
+function toggleNoteArea(cb){
+  const area=cb.closest('.q-item').querySelector('.q-note-area');
+  area.classList.toggle('open',cb.checked);
+  if(cb.checked)area.querySelector('textarea').focus();
+  document.getElementById('save-status').textContent='Modifiche non salvate ●';
+}
+function setScore(qId,val,btn){
+  btn.closest('.ttap-scale').querySelectorAll('.ttap-btn').forEach(b=>b.className='ttap-btn');
+  btn.className=`ttap-btn selected-${val}`;
+  document.getElementById('save-status').textContent='Modifiche non salvate ●';
+}
+function saveDayData(){
+  const dd={};
+  const dayNotes={};
+  document.querySelectorAll('.q-item').forEach(item=>{
+    const qId=item.getAttribute('data-qid');
+    const sel=item.querySelector('.ttap-btn[class*="selected-"]');
+    if(sel){const m=sel.className.match(/selected-(\d)/);if(m)dd[qId]=parseInt(m[1])}
+    const noteInput=item.querySelector('.q-note-input');
+    if(noteInput&&noteInput.value.trim())dayNotes[qId]=noteInput.value.trim();
+  });
+  if(!pdata.compilations)pdata.compilations={};
+  pdata.compilations[currentDay]=dd;
+  // save notes
+  if(!pdata.notes)pdata.notes={};
+  if(Object.keys(dayNotes).length>0)pdata.notes[currentDay]=dayNotes;
+  else delete pdata.notes[currentDay];
+  // save ABC data
+  const abcData=collectABCData();
+  if(!pdata.abcData)pdata.abcData={};
+  if(abcData)pdata.abcData[currentDay]=abcData;
+  else delete pdata.abcData[currentDay];
+  savePdata(currentProfileId,pdata);
+  document.getElementById('save-status').textContent='✓ Salvato alle '+new Date().toLocaleTimeString('it-IT');
+  document.getElementById('save-status').className='save-status saved';notify('✅ Scheda salvata!');
+  renderUserSidebar('compile-sidebar','selectCompileUser','compile',currentDay);
+}
+
+// ═══════════ RESULTS ═══════════
+// helper: wrap a section in a card with a Mostra/Nascondi button
+function rBlock(id,title,inner,extraStyle=''){
+  return`<div class="card res-block" id="res-${id}" style="margin-bottom:18px${extraStyle?';'+extraStyle:''}">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;flex-wrap:wrap">
+      <div style="font-family:var(--fd);font-size:1rem;font-weight:700">${title}</div>
+      <button class="section-vis-btn" onclick="toggleResBlock('res-${id}',this)" data-visible="true">🚫 Nascondi</button>
+    </div>
+    <div class="res-block-body">${inner}</div>
+  </div>`;
+}
+
+function toggleResBlock(blockId,btn){
+  const body=document.querySelector(`#${blockId} .res-block-body`);
+  if(!body)return;
+  const isVisible=btn.getAttribute('data-visible')==='true';
+  const newVisible=!isVisible;
+  btn.setAttribute('data-visible',String(newVisible));
+  btn.textContent=newVisible?'🚫 Nascondi':'👁 Mostra';
+  btn.classList.toggle('hidden-section',!newVisible);
+  body.classList.toggle('section-body-hidden',!newVisible);
+}
+
+function renderResults(){
+  // auto-select first designed profile if none active
+  if(!currentProfileId){
+    const first=profiles.find(p=>(loadPdata(p.id).selectedQuestions||[]).length>0);
+    if(first)activateProfile(first.id);
+  }
+  Object.values(chartInstances).forEach(c=>{try{c.destroy()}catch(e){}});chartInstances={};
+  const content=document.getElementById('results-content');
+  const compilations=pdata.compilations||{};
+  const dates=Object.keys(compilations).filter(d=>Object.keys(compilations[d]).length>0).sort();
+  if(!dates.length){content.innerHTML=`<div class="empty-state"><span class="empty-icon">📭</span><h3>Nessuna compilazione trovata</h3><p>Compila almeno una scheda giornaliera per visualizzare i risultati.</p></div>`;return}
+  const allQIds=pdata.selectedQuestions||[];
+  const qMap={};
+  QUESTION_BANK.forEach(macro=>macro.micro.forEach(micro=>micro.questions.forEach(q=>{qMap[q.id]={...q,macro:macro.macro,microLabel:micro.label}})));
+  Object.entries(pdata.customQuestions||{}).forEach(([macroName,cqs])=>{
+    cqs.forEach(cq=>{qMap[cq.id]={id:cq.id,text:cq.text,note:'',macro:macroName,microLabel:'Domande personalizzate'}});
+  });
+  const qScores={};
+  allQIds.forEach(qId=>{const vals=dates.map(d=>compilations[d][qId]).filter(v=>v!==undefined&&v>0);if(vals.length)qScores[qId]={avg:vals.reduce((a,b)=>a+b,0)/vals.length,vals,count:vals.length}});
+  const allAvgs=Object.values(qScores).map(v=>v.avg);
+  const overallAvg=allAvgs.length?(allAvgs.reduce((a,b)=>a+b,0)/allAvgs.length).toFixed(2):'—';
+  let trendText='';
+  if(dates.length>=4){
+    const half=Math.floor(dates.length/2);
+    const avgOf=dl=>{const s=[];dl.forEach(d=>Object.values(compilations[d]).filter(v=>v>0).forEach(v=>s.push(v)));return s.length?s.reduce((a,b)=>a+b,0)/s.length:0};
+    const diff=avgOf(dates.slice(half))-avgOf(dates.slice(0,half));
+    if(diff>0.2)trendText=`📈 Trend positivo: media aumentata di <strong>+${diff.toFixed(2)}</strong> punti nel periodo recente.`;
+    else if(diff<-0.2)trendText=`📉 Trend negativo: media diminuita di <strong>${diff.toFixed(2)}</strong> punti nel periodo recente.`;
+    else trendText=`➡️ Trend stabile nel periodo osservato.`;
+  }
+  const sortedQ=Object.entries(qScores).sort((a,b)=>b[1].avg-a[1].avg);
+  const strengths=sortedQ.filter(([_,v])=>v.avg>=4).slice(0,5);
+  const weaknesses=sortedQ.filter(([_,v])=>v.avg>0&&v.avg<2.5).slice(0,5);
+  const macroAvgs={};
+  QUESTION_BANK.forEach(macro=>{const ids=macro.micro.flatMap(m=>m.questions.map(q=>q.id)).filter(id=>qScores[id]);if(ids.length)macroAvgs[macro.macro]={avg:ids.reduce((acc,id)=>acc+qScores[id].avg,0)/ids.length,icon:macro.icon}});
+  const dailyAvgs=dates.map(d=>{const vals=Object.values(compilations[d]).filter(v=>v>0);return{date:d,avg:vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0}});
+  const prof=getActiveProfile();
+
+  // ── build HTML sections, each wrapped with rBlock ──
+  const riepilogoHTML=`
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px">
+      <div><span style="font-size:.7rem;color:var(--text3);text-transform:uppercase;font-weight:700;letter-spacing:.06em">Utente</span><br><strong>${prof?.nome||'—'}</strong></div>
+      <div><span style="font-size:.7rem;color:var(--text3);text-transform:uppercase;font-weight:700;letter-spacing:.06em">Età</span><br><strong>${prof?.eta?prof.eta+' anni':'—'}</strong></div>
+      <div><span style="font-size:.7rem;color:var(--text3);text-transform:uppercase;font-weight:700;letter-spacing:.06em">Servizio</span><br><strong>${prof?.servizio||'—'}</strong></div>
+      <div><span style="font-size:.7rem;color:var(--text3);text-transform:uppercase;font-weight:700;letter-spacing:.06em">Periodo</span><br><strong>${dates[0]} → ${dates[dates.length-1]}</strong></div>
+      <div><span style="font-size:.7rem;color:var(--text3);text-transform:uppercase;font-weight:700;letter-spacing:.06em">Sessioni</span><br><strong>${dates.length}</strong></div>
+    </div>
+    <div class="results-grid" style="margin-top:16px">
+      <div class="stat-card"><h4>Media Generale</h4><div class="stat-val">${overallAvg}</div><div class="stat-sub">su scala 0–5</div></div>
+      <div class="stat-card"><h4>Domande Valutate</h4><div class="stat-val">${Object.keys(qScores).length}</div><div class="stat-sub">su ${allQIds.length} selezionate</div></div>
+      <div class="stat-card"><h4>Aree Monitorate</h4><div class="stat-val">${Object.keys(macroAvgs).length}</div><div class="stat-sub">macro aree</div></div>
+      <div class="stat-card"><h4>Giorni di Osservazione</h4><div class="stat-val">${dates.length}</div><div class="stat-sub">compilazioni effettuate</div></div>
+    </div>
+    ${trendText?`<p style="margin-top:14px">${trendText}</p>`:''}`;
+
+  const andamentoHTML=`<canvas id="chart-daily" height="80"></canvas>`;
+  const macroHTML=`<canvas id="chart-macro" height="130"></canvas>`;
+
+  const strenghtsHTML=strengths.length?`<ul class="insight-list">${strengths.map(([id,v])=>`
+    <li><span class="insight-icon">✅</span>
+    <div><strong>${qMap[id]?.text||id}</strong>
+    <div style="font-size:.74rem;color:var(--text3)">${qMap[id]?.macro||''} — ${qMap[id]?.microLabel||''}</div>
+    <div style="margin-top:3px">${renderMiniBar(v.avg)}</div></div>
+    <span class="badge badge-green" style="margin-left:auto;white-space:nowrap">${v.avg.toFixed(1)} / 5</span></li>`).join('')}</ul>`:
+    '<p style="font-size:.85rem;color:var(--text3)">Nessuna domanda con punteggio ≥ 4.</p>';
+
+  const weakHTML=weaknesses.length?`<ul class="insight-list">${weaknesses.map(([id,v])=>`
+    <li><span class="insight-icon">🔴</span>
+    <div><strong>${qMap[id]?.text||id}</strong>
+    <div style="font-size:.74rem;color:var(--text3)">${qMap[id]?.macro||''} — ${qMap[id]?.microLabel||''}</div>
+    <div style="margin-top:3px">${renderMiniBar(v.avg)}</div></div>
+    <span class="badge badge-red" style="margin-left:auto;white-space:nowrap">${v.avg.toFixed(1)} / 5</span></li>`).join('')}</ul>`:
+    '<p style="font-size:.85rem;color:var(--text3)">Nessuna area critica rilevata.</p>';
+
+  const dettaglioHTML=QUESTION_BANK.map(macro=>{
+    const ids=macro.micro.flatMap(m=>m.questions.map(q=>q.id)).filter(id=>qScores[id]);
+    if(!ids.length)return'';
+    const mAvg=ids.reduce((acc,id)=>acc+qScores[id].avg,0)/ids.length;
+    return`<div style="margin-bottom:18px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px">
+        <span>${macro.icon}</span><strong style="font-size:.9rem">${macro.macro}</strong>
+        <span class="badge ${mAvg>=3.5?'badge-green':mAvg>=2?'badge-orange':'badge-red'}" style="margin-left:auto">${mAvg.toFixed(1)}</span>
+      </div>
+      ${ids.map(id=>`
+        <div style="display:flex;align-items:center;gap:9px;padding:5px 0;border-bottom:1px solid var(--border);font-size:.81rem">
+          <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${qMap[id]?.text}">${qMap[id]?.text||id}</span>
+          <span style="width:130px;flex-shrink:0">${renderMiniBar(qScores[id].avg)}</span>
+          <strong style="width:36px;text-align:right;flex-shrink:0">${qScores[id].avg.toFixed(1)}</strong>
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+
+  // ── Build notes section with AI tab ──
+  const allNotes=pdata.notes||{};
+  const noteDates=Object.keys(allNotes).filter(d=>Object.keys(allNotes[d]).length>0).sort();
+  const hasNotes=noteDates.length>0;
+  let notesListHTML='';
+  if(hasNotes){
+    const notesByQ={};
+    noteDates.forEach(d=>{Object.entries(allNotes[d]).forEach(([qId,txt])=>{
+      if(!notesByQ[qId])notesByQ[qId]=[];
+      notesByQ[qId].push({date:d,text:txt});
+    })});
+    notesListHTML=Object.entries(notesByQ).map(([qId,entries])=>{
+      const qLabel=qMap[qId]?.text||qId;
+      return`<div class="notes-entry">
+        <div style="font-size:.8rem;font-weight:700;color:var(--accent2);margin-bottom:6px">📌 ${qLabel}</div>
+        ${entries.map(e=>`<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:5px">
+          <span style="font-size:.68rem;font-weight:700;color:var(--text3);white-space:nowrap;padding-top:3px">${e.date}</span>
+          <span class="notes-q-text">${e.text.replace(/\n/g,'<br>')}</span>
+        </div>`).join('')}
+      </div>`;
+    }).join('');
+  } else {
+    notesListHTML='<p style="font-size:.85rem;color:var(--text3)">Nessuna nota qualitativa registrata.</p>';
+  }
+  const notesHTML=`
+    <div class="ai-tabs">
+      <button class="ai-tab active" onclick="switchNoteTab('leggi',this)">📋 Leggi Note</button>
+      <button class="ai-tab" onclick="switchNoteTab('sintesi',this)">✨ Sintesi AI</button>
+    </div>
+    <div class="ai-tab-panel active" id="note-tab-leggi">${notesListHTML}</div>
+    <div class="ai-tab-panel" id="note-tab-sintesi">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="btn btn-primary btn-sm" onclick="generateNotesSummary()" ${!hasNotes?'disabled':''}>✨ Genera con AI</button>
+        <button class="btn btn-ghost btn-sm" onclick="generatePrompt('notes')" ${!hasNotes?'disabled':''}>📋 Genera Prompt</button>
+      </div>
+      <div class="ai-notes-output loading" id="notes-ai-output">${hasNotes?'Scegli un\'opzione sopra.':'Nessuna nota disponibile.'}</div>
+      <div id="notes-prompt-box" style="display:none;margin-top:12px">
+        <div style="font-size:.75rem;font-weight:600;color:var(--text2);margin-bottom:6px">📋 Prompt pronto — copialo e incollalo su Claude:</div>
+        <textarea id="notes-prompt-text" style="width:100%;height:120px;font-size:.75rem;padding:9px;border:1.5px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-family:monospace;resize:vertical" readonly></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn btn-primary btn-sm" onclick="copyAndOpenClaude('notes-prompt-text')">🔗 Copia e apri Claude</button>
+          <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('notes-prompt-text').value);notify('📋 Copiato!')">📋 Solo copia</button>
+        </div>
+      </div>
+    </div>`;
+
+  // ── AI valutazione block ──
+  const aiValHTML=`
+    <p style="font-size:.82rem;color:var(--text2);margin-bottom:12px">Genera una valutazione clinico-funzionale narrativa dai dati del periodo. <strong>Genera con AI</strong> usa la tua chiave API Anthropic (richiede chiave API Anthropic — costo stimato ~$0.01–0.03 per generazione, ovvero pochi centesimi; tariffe aggiornate su console.anthropic.com). <strong>Genera Prompt</strong> fornisce invece il testo da incollare su claude.ai, senza alcun costo.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <button class="btn btn-primary btn-sm" onclick="generateAIValutation()">✨ Genera con AI</button>
+      <button class="btn btn-ghost btn-sm" onclick="generatePrompt('val')">📋 Genera Prompt</button>
+    </div>
+    <div class="ai-val-output loading" id="ai-val-output">Scegli un'opzione sopra.</div>
+    <div id="val-prompt-box" style="display:none;margin-top:12px">
+      <div style="font-size:.75rem;font-weight:600;color:var(--text2);margin-bottom:6px">📋 Prompt pronto — copialo e incollalo su Claude:</div>
+      <textarea id="val-prompt-text" style="width:100%;height:120px;font-size:.75rem;padding:9px;border:1.5px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-family:monospace;resize:vertical" readonly></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn btn-primary btn-sm" onclick="copyAndOpenClaude('val-prompt-text')">🔗 Copia e apri Claude</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('val-prompt-text').value);notify('📋 Copiato!')">📋 Solo copia</button>
+      </div>
+    </div>`;
+
+  content.innerHTML=
+    rBlock('ai-val','🤖 Valutazione Qualitativa AI',aiValHTML)+
+    rBlock('riepilogo','📊 Riepilogo Valutazione',riepilogoHTML)+
+    rBlock('andamento','📈 Andamento Giornaliero',andamentoHTML)+
+    rBlock('macro','🗂️ Media per Macro Area',macroHTML)+
+    rBlock('forza','💪 Punti di Forza (punteggio ≥ 4)',strenghtsHTML)+
+    rBlock('critiche','⚠️ Aree Critiche (punteggio &lt; 2.5)',weakHTML)+
+    rBlock('dettaglio','📋 Dettaglio per Area',dettaglioHTML)+
+    rBlock('note','📝 Note Qualitative',notesHTML)+
+    '<div style="height:56px"></div>';
+
+  // store context for AI functions
+  window._aiResultsContext={prof,dates,overallAvg,qScores,qMap,macroAvgs,strengths,weaknesses,allNotes,noteDates};
+  renderUserSidebar('results-sidebar','selectResultsUser','results',null);
+  setTimeout(applyAIState,0);
+
+  // ── ABC results box ──
+  const abcData=pdata.abcData||{};
+  const abcDates=Object.keys(abcData).filter(d=>{
+    const schemas=abcData[d]||[];
+    return schemas.some(s=>{const rows=s.rows||[s];return rows.some(r=>r.A||r.B||r.C||r.note)});
+  }).sort();
+  if(abcDates.length>0){
+    const abcBox=document.createElement('div');
+    abcBox.className='card no-print';
+    abcBox.style.cssText='border-color:var(--warn);background:linear-gradient(135deg,var(--wl) 0%,var(--card) 80%);margin-bottom:18px';
+    abcBox.innerHTML=`
+      <h3 style="color:var(--warn);margin-bottom:10px">📋 Schemi ABC</h3>
+      <p style="font-size:.83rem;color:var(--text2);margin-bottom:14px">Sono presenti <strong>${abcDates.length}</strong> giorn${abcDates.length===1?'o':'i'} con schemi ABC compilati.</p>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <button class="btn btn-gold" onclick="openABCRead()">🔍 Leggi ABC</button>
+        <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:600;cursor:pointer;color:var(--warn)">
+          <input type="checkbox" id="print-abc-check" style="width:16px;height:16px;accent-color:var(--warn)">
+          Stampa anche ABC nel PDF
+        </label>
+      </div>`;
+    content.insertBefore(abcBox,content.lastChild);
+
+    // hidden printable ABC section
+    const abcPrint=document.createElement('div');
+    abcPrint.id='abc-print-section';
+    abcPrint.className='print-abc-section';
+    abcPrint.style.display='none';
+    abcPrint.innerHTML=`<div class="card" style="margin-bottom:18px"><h2 style="color:var(--warn)">📋 Schemi ABC Compilati</h2>
+      <p style="font-size:.82rem;color:var(--text2);margin-top:6px">Utente: <strong>${prof?.nome||'—'}</strong> — Periodo: <strong>${dates[0]} → ${dates[dates.length-1]}</strong></p></div>
+      ${abcDates.map(d=>{
+        const schemas=(abcData[d]||[]).filter(s=>{const rows=s.rows||[s];return rows.some(r=>r.A||r.B||r.C||r.note)});
+        if(!schemas.length)return'';
+        return`<div class="abc-read-entry">
+          <div class="abc-read-date">📅 ${d}</div>
+          ${schemas.map((s,si)=>{
+            const rows=s.rows||[s];
+            return`<div style="margin-bottom:${si<schemas.length-1?'14px':'0'}">
+              ${schemas.length>1?`<div style="font-size:.7rem;font-weight:700;color:var(--text3);margin-bottom:8px">Schema ${si+1}</div>`:''}
+              ${rows.map((row,ri)=>`
+                <div style="margin-bottom:${ri<rows.length-1?'10px':'0'}">
+                  ${rows.length>1?`<div style="font-size:.66rem;font-weight:600;color:var(--text3);margin-bottom:5px;text-transform:uppercase">${ri===0?'Riga principale':'Continuazione '+(ri+1)}</div>`:''}
+                  <div class="abc-read-schema">
+                    <div class="abc-read-col"><div class="abc-read-col-label ant">A — Antecedente</div><div class="abc-read-col-val">${row.A||'—'}</div></div>
+                    <div class="abc-read-col"><div class="abc-read-col-label beh">B — Comportamento</div><div class="abc-read-col-val">${row.B||'—'}</div></div>
+                    <div class="abc-read-col"><div class="abc-read-col-label con">C — Conseguenza</div><div class="abc-read-col-val">${row.C||'—'}</div></div>
+                  </div>
+                </div>`).join('')}
+              ${rows[0]?.note?`<div class="abc-read-note" style="margin-top:8px">📝 ${rows[0].note}</div>`:''}
+            </div>`;
+          }).join('')}
+        </div>`;
+      }).join('')}`;
+    content.appendChild(abcPrint);
+
+    // wire print checkbox
+    document.getElementById('print-abc-check').addEventListener('change',function(){
+      abcPrint.style.display=this.checked?'block':'none';
+    });
+  }
+
+  setTimeout(()=>{
+    const isDark=appMeta.theme==='dark';
+    const tc=isDark?'#c0b8aa':'#6a6258';
+    const gc=isDark?'#38342c':'#e2ddd3';
+    const ac=isDark?'#55c896':'#2b6050';
+    const ac2=isDark?'rgba(85,200,150,.12)':'rgba(43,96,80,.10)';
+    const ctxD=document.getElementById('chart-daily');
+    if(ctxD)chartInstances['daily']=new Chart(ctxD,{
+      type:'line',data:{labels:dailyAvgs.map(d=>d.date.slice(5)),datasets:[{label:'Media giornaliera',data:dailyAvgs.map(d=>+d.avg.toFixed(2)),borderColor:ac,backgroundColor:ac2,tension:.4,fill:true,pointRadius:4,pointBackgroundColor:ac}]},
+      options:{responsive:true,scales:{y:{min:0,max:5,ticks:{color:tc},grid:{color:gc}},x:{ticks:{color:tc},grid:{color:gc}}},plugins:{legend:{labels:{color:tc}}}}
+    });
+    const ctxM=document.getElementById('chart-macro');
+    if(ctxM){
+      const mData=Object.values(macroAvgs).map(v=>+v.avg.toFixed(2));
+      chartInstances['macro']=new Chart(ctxM,{
+        type:'bar',data:{labels:Object.entries(macroAvgs).map(([k,v])=>{
+          // Full label after the letter prefix (e.g. "A. Comprensione delle Istruzioni" → "Comprensione\ndelle Istruzioni")
+          const name=k.replace(/^[A-Z]\.\s*/,'');
+          const words=name.split(' ');
+          // Split into lines of max ~14 chars each for readability
+          const lines=[];let line='';
+          words.forEach(w=>{
+            if((line+' '+w).trim().length>14&&line){lines.push(line);line=w;}
+            else{line=(line+' '+w).trim();}
+          });
+          if(line)lines.push(line);
+          return [v.icon,...lines];
+        }),datasets:[{label:'Media',data:mData,backgroundColor:mData.map(v=>v>=4?(isDark?'rgba(85,200,150,.7)':'rgba(43,96,80,.7)'):v>=2.5?(isDark?'rgba(212,168,80,.7)':'rgba(158,118,30,.7)'):(isDark?'rgba(224,120,120,.7)':'rgba(181,48,48,.7)')),borderRadius:6}]},
+        options:{responsive:true,scales:{y:{min:0,max:5,ticks:{color:tc},grid:{color:gc}},x:{ticks:{color:tc,font:{size:10},maxRotation:0,minRotation:0,align:'center'},grid:{color:gc}}},plugins:{legend:{labels:{color:tc}}}}
+      });
+    }
+  },100);
+}
+// ═══════════ AI & SETTINGS ═══════════
+
+// ── PASSWORD DIALOG ──
+let pwdResolve=null;
+function askPassword(title,desc){
+  return new Promise(resolve=>{
+    document.getElementById('pwd-title').textContent=title||'🔐 Password richiesta';
+    document.getElementById('pwd-desc').textContent=desc||'Inserisci la password amministratore.';
+    const inp=document.getElementById('pwd-input');
+    inp.value='';
+    document.getElementById('pwd-overlay').classList.add('open');
+    setTimeout(()=>inp.focus(),80);
+    inp.onkeydown=e=>{if(e.key==='Enter')pwdResolve(true);if(e.key==='Escape')pwdResolve(false)};
+    pwdResolve=(ok)=>{
+      document.getElementById('pwd-overlay').classList.remove('open');
+      inp.onkeydown=null;
+      resolve(ok?inp.value:'');
+    };
+  });
+}
+
+// usage tracking stored in localStorage
+let aiUsageSession={calls:0,inputTokens:0,outputTokens:0};
+
+function loadUsageStats(){
+  try{return JSON.parse(localStorage.getItem('valutaapp_usage')||'{"calls":0,"inputTokens":0,"outputTokens":0}')}
+  catch(e){return{calls:0,inputTokens:0,outputTokens:0}}
+}
+function saveUsageStats(total){localStorage.setItem('valutaapp_usage',JSON.stringify(total))}
+function estimateCost(inputTok,outputTok){return(inputTok/1_000_000)*3+(outputTok/1_000_000)*15}
+function formatTokens(n){return n>=1000?(n/1000).toFixed(1)+'k':String(n)}
+
+function switchSettingsTab(tab, btn){
+  document.querySelectorAll('.settings-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.settings-tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('stab-'+tab).classList.add('active');
+}
+
+async function openSettingsModal(){
+  const pwd=await askPassword('🔐 Impostazioni','Inserisci la password per accedere alle impostazioni.');
+  if(pwd!=='ADMINADMIN'){notify('❌ Password errata.',2500);return;}
+  // reset to first tab
+  document.querySelectorAll('.settings-tab').forEach((t,i)=>t.classList.toggle('active',i===0));
+  document.querySelectorAll('.settings-tab-panel').forEach((p,i)=>p.classList.toggle('active',i===0));
+  const enabled=localStorage.getItem('valutaapp_ai_enabled')==='1';
+  const cb=document.getElementById('ai-enable-cb');
+  const enableSection=document.getElementById('ai-enable-section');
+  if(cb)cb.checked=enabled;
+  if(enableSection)enableSection.style.display=enabled?'none':'';
+  const body=document.getElementById('ai-settings-body');
+  if(body)body.style.display=enabled?'':'none';
+  const dcb=document.getElementById('ai-disable-cb');
+  if(dcb)dcb.checked=false;
+  const key=localStorage.getItem('valutaapp_apikey')||'';
+  const inp=document.getElementById('settings-api-key');
+  if(inp)inp.value=key;
+  updateApiKeyStatus();
+  updateUsageDisplay();
+  updateExportPanel();
+  openModal('modal-settings');
+}
+
+function handleEnableAI(cb){
+  if(!cb.checked){cb.checked=false;return;}
+  localStorage.setItem('valutaapp_ai_enabled','1');
+  document.getElementById('ai-settings-body').style.display='';
+  const key=localStorage.getItem('valutaapp_apikey')||'';
+  const inp=document.getElementById('settings-api-key');
+  if(inp)inp.value=key;
+  updateApiKeyStatus();
+  updateUsageDisplay();
+  applyAIState();
+  notify('✅ Funzioni AI attivate.');
+}
+
+function handleDisableAI(cb){
+  if(!cb.checked){cb.checked=false;return;}
+  localStorage.removeItem('valutaapp_ai_enabled');
+  document.getElementById('ai-settings-body').style.display='none';
+  document.getElementById('ai-enable-cb').checked=false;
+  cb.checked=false;
+  applyAIState();
+  notify('Funzioni AI nascoste.');
+  closeModal('modal-settings');
+}
+
+function applyAIState(){
+  const enabled=localStorage.getItem('valutaapp_ai_enabled')==='1';
+  // topbar badge
+  const badge=document.getElementById('ai-topbar-badge');
+  if(badge)badge.style.display=enabled?'inline-flex':'none';
+  // results AI blocks
+  const aiValBlock=document.getElementById('res-ai-val');
+  if(aiValBlock)aiValBlock.style.display=enabled?'':'none';
+  // notes AI tab button
+  document.querySelectorAll('.ai-tab[onclick*="sintesi"]').forEach(t=>{
+    t.style.display=enabled?'':'none';
+  });
+  // if AI hidden and sintesi tab was active, switch to leggi
+  if(!enabled){
+    const sintesiPanel=document.getElementById('note-tab-sintesi');
+    const leggiPanel=document.getElementById('note-tab-leggi');
+    if(sintesiPanel&&sintesiPanel.classList.contains('active')){
+      sintesiPanel.classList.remove('active');
+      if(leggiPanel)leggiPanel.classList.add('active');
+      document.querySelectorAll('.ai-tab').forEach(t=>t.classList.remove('active'));
+      const leggiTab=document.querySelector('.ai-tab[onclick*="leggi"]');
+      if(leggiTab)leggiTab.classList.add('active');
+    }
+  }
+}
+
+function updateApiKeyStatus(){
+  const key=localStorage.getItem('valutaapp_apikey')||'';
+  const el=document.getElementById('api-key-status');
+  if(!el)return;
+  if(key)el.innerHTML='<span style="color:var(--accent2)">✅ Chiave salvata</span> — le funzioni AI sono attive.';
+  else el.innerHTML='<span style="color:var(--warn)">⚠️ Nessuna chiave inserita</span> — i pulsanti AI non funzioneranno.';
+}
+
+function saveApiKey(){
+  const val=(document.getElementById('settings-api-key')?.value||'').trim();
+  if(val){localStorage.setItem('valutaapp_apikey',val);notify('✅ Chiave API salvata.');}
+  else{localStorage.removeItem('valutaapp_apikey');notify('Chiave API rimossa.');}
+  updateApiKeyStatus();
+}
+
+function toggleApiKeyVisibility(){
+  const inp=document.getElementById('settings-api-key');
+  if(!inp)return;
+  inp.type=inp.type==='password'?'text':'password';
+}
+
+function updateUsageDisplay(){
+  const total=loadUsageStats();
+  const sc=estimateCost(aiUsageSession.inputTokens,aiUsageSession.outputTokens);
+  const tc=estimateCost(total.inputTokens,total.outputTokens);
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v};
+  set('stat-calls',aiUsageSession.calls);
+  set('stat-tokens',formatTokens(aiUsageSession.inputTokens+aiUsageSession.outputTokens));
+  set('stat-cost','$'+sc.toFixed(3));
+  set('stat-total-calls',total.calls);
+  set('stat-total-tokens',formatTokens(total.inputTokens+total.outputTokens));
+  set('stat-total-cost','$'+tc.toFixed(3));
+}
+
+function resetUsageStats(){
+  if(!confirm('Azzerare le statistiche di utilizzo salvate?'))return;
+  localStorage.removeItem('valutaapp_usage');
+  aiUsageSession={calls:0,inputTokens:0,outputTokens:0};
+  updateUsageDisplay();
+  notify('Statistiche azzerate.');
+}
+
+function translateAPIError(msg){
+  if(!msg)return msg;
+  if(msg.includes('credit balance is too low')||msg.includes('Plans & Billing'))
+    return 'Credito API insufficiente. Vai su console.anthropic.com → Plans & Billing per ricaricare.';
+  if(msg.includes('invalid x-api-key')||msg.includes('invalid api key'))
+    return 'Chiave API non valida. Verificala nelle Impostazioni.';
+  if(msg.includes('rate limit'))
+    return 'Troppe richieste. Attendi qualche secondo e riprova.';
+  if(msg.includes('overloaded'))
+    return 'Il servizio AI è momentaneamente sovraccarico. Riprova tra poco.';
+  return msg;
+}
+
+async function callAnthropicAPI(prompt){
+  const key=localStorage.getItem('valutaapp_apikey')||'';
+  if(!key){
+    notify('⚠️ Nessuna chiave API. Vai in ⚙️ Impostazioni per inserirla.',4000);
+    throw new Error('Chiave API mancante.');
+  }
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key':key,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+  });
+  if(!res.ok){
+    const err=await res.json().catch(()=>({}));
+    if(res.status===401){localStorage.removeItem('valutaapp_apikey');updateApiKeyStatus();throw new Error('Chiave API non valida. Riaprila da ⚙️ Impostazioni.')}
+    throw new Error(translateAPIError(err?.error?.message||`Errore HTTP ${res.status}`));
+  }
+  const data=await res.json();
+  // track usage
+  const inTok=data.usage?.input_tokens||0;
+  const outTok=data.usage?.output_tokens||0;
+  aiUsageSession.calls++;aiUsageSession.inputTokens+=inTok;aiUsageSession.outputTokens+=outTok;
+  const total=loadUsageStats();
+  total.calls++;total.inputTokens+=inTok;total.outputTokens+=outTok;
+  saveUsageStats(total);
+  return data.content?.find(b=>b.type==='text')?.text||'Nessuna risposta ricevuta.';
+}
+
+function buildValPrompt(){
+  const ctx=window._aiResultsContext;if(!ctx)return'';
+  const {prof,dates,overallAvg,qScores,qMap,macroAvgs,strengths,weaknesses,allNotes,noteDates}=ctx;
+  const macroLines=Object.entries(macroAvgs).map(([k,v])=>`  - ${k}: ${v.avg.toFixed(2)}/5`).join('\n');
+  const strLines=strengths.slice(0,5).map(([id,v])=>`  - "${qMap[id]?.text||id}" (${v.avg.toFixed(1)}/5)`).join('\n');
+  const weakLines=weaknesses.slice(0,5).map(([id,v])=>`  - "${qMap[id]?.text||id}" (${v.avg.toFixed(1)}/5)`).join('\n');
+  let notesText='';
+  noteDates.forEach(d=>{Object.entries(allNotes[d]).forEach(([qId,txt])=>{notesText+=`  - [${d}] "${qMap[qId]?.text||qId}": ${txt}\n`;})});
+  return`Sei un clinico specializzato in valutazione funzionale ICF e TTAP per persone con disabilità in contesti socio-occupazionali.
+Redigi una valutazione clinico-funzionale di ${prof?.nome||'utente'} (${prof?.eta?prof.eta+' anni, ':''}${prof?.servizio||''}).
+DATI: periodo ${dates[0]}→${dates[dates.length-1]} (${dates.length} sessioni), media TTAP ${overallAvg}/5.
+Macro aree:
+${macroLines}
+Punti di forza:
+${strLines||'  Nessuno'}
+Aree critiche:
+${weakLines||'  Nessuna'}
+Note operatori:
+${notesText||'  Nessuna'}
+Scrivi una valutazione narrativa (max 350 parole) con: profilo funzionale generale, aree di competenza, aree prioritarie di intervento, pattern osservati, raccomandazioni operative. Stile relazione clinica professionale.`;
+}
+
+function buildNotesPrompt(){
+  const ctx=window._aiResultsContext;if(!ctx)return'';
+  const {prof,noteDates,allNotes,qMap}=ctx;
+  let notesText='';
+  noteDates.forEach(d=>{Object.entries(allNotes[d]).forEach(([qId,txt])=>{
+    notesText+=`- [${d}] ${qMap[qId]?.macro||''} — "${qMap[qId]?.text||qId}": ${txt}\n`;
+  })});
+  return`Sei un clinico specializzato in valutazione funzionale ICF e TTAP per persone con disabilità in contesti socio-occupazionali.
+Di seguito le note qualitative degli operatori per ${prof?.nome||'utente'}:
+${notesText}
+Redigi una sintesi clinica concisa (max 200 parole) che identifichi temi ricorrenti, pattern comportamentali/funzionali rilevanti ed eventuali progressi o criticità. Forma narrativa, linguaggio professionale, senza intestazioni o elenchi.`;
+}
+
+function generatePrompt(type){
+  const prompt=type==='val'?buildValPrompt():buildNotesPrompt();
+  if(!prompt){notify('⚠️ Nessun dato disponibile per generare il prompt.',3000);return;}
+  const boxId=type==='val'?'val-prompt-box':'notes-prompt-box';
+  const textId=type==='val'?'val-prompt-text':'notes-prompt-text';
+  const box=document.getElementById(boxId);
+  const ta=document.getElementById(textId);
+  if(!box||!ta)return;
+  ta.value=prompt;
+  box.style.display='block';
+  ta.scrollIntoView({behavior:'smooth',block:'nearest'});
+  notify('📋 Prompt generato! Copia e incolla su claude.ai');
+}
+
+function copyAndOpenClaude(textareaId){
+  const ta=document.getElementById(textareaId);
+  if(!ta)return;
+  navigator.clipboard.writeText(ta.value).then(()=>{
+    notify('📋 Prompt copiato! Apertura claude.ai…');
+    setTimeout(()=>window.open('https://claude.ai/new','_blank'),600);
+  }).catch(()=>{
+    // fallback: select text so user can copy manually
+    ta.select();
+    notify('⚠️ Copia manuale: seleziona il testo e premi Ctrl+C, poi vai su claude.ai');
+    window.open('https://claude.ai/new','_blank');
+  });
+}
+
+function switchNoteTab(tab,btn){
+  btn.closest('.ai-tabs').querySelectorAll('.ai-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  const panels=btn.closest('[id^="res-"]')?.querySelectorAll('.ai-tab-panel')||[];
+  panels.forEach(p=>p.classList.remove('active'));
+  document.getElementById('note-tab-'+tab)?.classList.add('active');
+}
+
+async function generateNotesSummary(){
+  const ctx=window._aiResultsContext;if(!ctx)return;
+  const out=document.getElementById('notes-ai-output');
+  out.className='ai-notes-output loading';out.textContent='⏳ Generazione sintesi in corso…';
+  const {prof,noteDates,allNotes,qMap}=ctx;
+  let notesText='';
+  noteDates.forEach(d=>{Object.entries(allNotes[d]).forEach(([qId,txt])=>{
+    notesText+=`- [${d}] ${qMap[qId]?.macro||''} — "${qMap[qId]?.text||qId}": ${txt}\n`;
+  })});
+  const prompt=`Sei un clinico specializzato in valutazione funzionale ICF e TTAP per persone con disabilità in contesti socio-occupazionali.
+Di seguito le note qualitative degli operatori per ${prof?.nome||'utente'}:
+${notesText}
+Redigi una sintesi clinica concisa (max 200 parole) che identifichi temi ricorrenti, pattern comportamentali/funzionali rilevanti ed eventuali progressi o criticità. Forma narrativa, linguaggio professionale, senza intestazioni o elenchi.`;
+  try{
+    const text=await callAnthropicAPI(prompt);
+    out.className='ai-notes-output';out.textContent=text;
+  }catch(e){out.className='ai-notes-output error';out.textContent='⚠️ '+e.message;}
+}
+
+async function generateAIValutation(){
+  const ctx=window._aiResultsContext;if(!ctx)return;
+  const out=document.getElementById('ai-val-output');
+  out.className='ai-val-output loading';out.textContent='⏳ Analisi in corso…';
+  const {prof,dates,overallAvg,qScores,qMap,macroAvgs,strengths,weaknesses,allNotes,noteDates}=ctx;
+  const macroLines=Object.entries(macroAvgs).map(([k,v])=>`  - ${k}: ${v.avg.toFixed(2)}/5`).join('\n');
+  const strLines=strengths.slice(0,5).map(([id,v])=>`  - "${qMap[id]?.text||id}" (${v.avg.toFixed(1)}/5)`).join('\n');
+  const weakLines=weaknesses.slice(0,5).map(([id,v])=>`  - "${qMap[id]?.text||id}" (${v.avg.toFixed(1)}/5)`).join('\n');
+  let notesText='';
+  noteDates.forEach(d=>{Object.entries(allNotes[d]).forEach(([qId,txt])=>{notesText+=`  - [${d}] "${qMap[qId]?.text||qId}": ${txt}\n`;})});
+  const prompt=`Sei un clinico specializzato in valutazione funzionale ICF e TTAP per persone con disabilità in contesti socio-occupazionali.
+Redigi una valutazione clinico-funzionale di ${prof?.nome||'utente'} (${prof?.eta?prof.eta+' anni, ':''}${prof?.servizio||''}).
+DATI: periodo ${dates[0]}→${dates[dates.length-1]} (${dates.length} sessioni), media TTAP ${overallAvg}/5.
+Macro aree:\n${macroLines}
+Punti di forza:\n${strLines||'  Nessuno'}
+Aree critiche:\n${weakLines||'  Nessuna'}
+Note operatori:\n${notesText||'  Nessuna'}
+Scrivi una valutazione narrativa (max 350 parole) con: profilo funzionale generale, aree di competenza, aree prioritarie di intervento, pattern osservati, raccomandazioni operative. Stile relazione clinica professionale.`;
+  try{
+    const text=await callAnthropicAPI(prompt);
+    out.className='ai-val-output';out.textContent=text;
+  }catch(e){out.className='ai-val-output error';out.textContent='⚠️ '+e.message;}
+}
+
+// ═══════════ LAB ═══════════
+function renderLab(){
+  const content=document.getElementById('lab-content');
+  if(!content)return;
+
+  // Collect all selected questions across all profiles
+  const qFreq={}; // qId → count of profiles that selected it
+  const macroFreq={}; // macroName → count
+  profiles.forEach(prof=>{
+    const pd=loadPdata(prof.id);
+    const sel=pd.selectedQuestions||[];
+    sel.forEach(qId=>{
+      qFreq[qId]=(qFreq[qId]||0)+1;
+    });
+  });
+
+  // Build qUsers: qId → [profile names]
+  const qUsers={};
+  const macroUsers={};
+  profiles.forEach(prof=>{
+    const pd=loadPdata(prof.id);
+    const sel=pd.selectedQuestions||[];
+    sel.forEach(qId=>{
+      if(!qUsers[qId])qUsers[qId]=[];
+      qUsers[qId].push(prof.nome);
+    });
+  });
+
+  if(!profiles.length){
+    content.innerHTML=`<div class="empty-state"><span class="empty-icon">👤</span><h3>Nessun profilo trovato</h3><p>Crea almeno un utente e configura le sue domande in Area Progettazione Utente.</p></div>`;
+    return;
+  }
+  if(!Object.keys(qFreq).length){
+    content.innerHTML=`<div class="empty-state"><span class="empty-icon">📐</span><h3>Nessuna domanda selezionata</h3><p>Configura le domande per i tuoi utenti in Area Progettazione Utente per vedere l'analisi del laboratorio.</p></div>`;
+    return;
+  }
+
+  // Build qMap
+  const qMap={};
+  QUESTION_BANK.forEach(macro=>macro.micro.forEach(m=>m.questions.forEach(q=>{
+    qMap[q.id]={...q,macro:macro.macro,icon:macro.icon,microLabel:m.label};
+  })));
+
+  // Macro aggregation
+  const macroData={};
+  QUESTION_BANK.forEach(macro=>{
+    const ids=macro.micro.flatMap(m=>m.questions.map(q=>q.id)).filter(id=>qFreq[id]);
+    const totalSel=ids.reduce((a,id)=>a+(qFreq[id]||0),0);
+    if(totalSel>0) macroData[macro.macro]={icon:macro.icon,count:totalSel,ids};
+  });
+
+  // build macroUsers: macroName → unique user names
+  QUESTION_BANK.forEach(macro=>{
+    const names=new Set();
+    macro.micro.flatMap(m=>m.questions.map(q=>q.id)).filter(id=>qUsers[id]).forEach(id=>{
+      (qUsers[id]||[]).forEach(n=>names.add(n));
+    });
+    if(names.size>0)macroUsers[macro.macro]=[...names];
+  });
+
+  // also collect custom questions per macro
+  profiles.forEach(prof=>{
+    const pd=loadPdata(prof.id);
+    const sel=pd.selectedQuestions||[];
+    Object.entries(pd.customQuestions||{}).forEach(([macroName,cqs])=>{
+      cqs.forEach(cq=>{
+        if(sel.includes(cq.id)){
+          if(!macroData[macroName])macroData[macroName]={icon:'✏️',count:0,ids:[]};
+          macroData[macroName].count++;
+          if(!macroData[macroName].ids.includes(cq.id))macroData[macroName].ids.push(cq.id);
+          qFreq[cq.id]=(qFreq[cq.id]||0)+1;
+          qMap[cq.id]={id:cq.id,text:cq.text,macro:macroName,icon:'✏️',microLabel:'Personalizzata'};
+        }
+      });
+    });
+  });
+
+  const totalProfiles=profiles.length;
+  const sortedMacro=Object.entries(macroData).sort((a,b)=>b[1].count-a[1].count);
+  const maxCount=sortedMacro[0]?.[1]?.count||1;
+
+  // Top questions globally
+  const topQuestions=Object.entries(qFreq)
+    .filter(([id])=>qMap[id])
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,10);
+
+  // Build AI context string for lab
+  const labContext=sortedMacro.map(([k,v])=>`- ${v.icon} ${k}: ${v.count} selezioni`).join('\n');
+  const topQContext=topQuestions.map(([id,n])=>`- "${qMap[id]?.text||id}" (${n} utenti)`).join('\n');
+
+  const isDark=document.body.getAttribute('data-theme')==='dark';
+  const accentColor=isDark?'rgba(85,200,150,.75)':'rgba(43,96,80,.75)';
+  const warnColor=isDark?'rgba(224,152,88,.75)':'rgba(173,95,26,.75)';
+  const dangerColor=isDark?'rgba(224,120,120,.75)':'rgba(181,48,48,.75)';
+
+  function barColor(count,max){
+    const r=count/max;
+    if(r>=0.6)return isDark?'rgba(85,200,150,.8)':'rgba(43,96,80,.8)';
+    if(r>=0.3)return isDark?'rgba(212,168,80,.8)':'rgba(158,118,30,.8)';
+    return isDark?'rgba(120,120,180,.6)':'rgba(90,74,138,.5)';
+  }
+
+  const aiEnabled=localStorage.getItem('valutaapp_ai_enabled')==='1';
+
+  content.innerHTML=`
+  <div class="card" style="margin-bottom:14px;background:linear-gradient(135deg,var(--al) 0%,var(--card) 80%)">
+    <h2 style="margin-bottom:6px">🔬 Analisi Laboratorio</h2>
+    <p style="font-size:.83rem;color:var(--text2)">Basata su <strong>${totalProfiles}</strong> profil${totalProfiles===1?'o':'i'} configurati. Le aree e le domande più selezionate indicano su cosa puntare nelle attività e nell'organizzazione del laboratorio.</p>
+  </div>
+
+  <!-- Macro bar chart -->
+  <div class="card" style="margin-bottom:14px">
+    <h3 style="margin-bottom:14px">📊 Aree Funzionali — Rilevanza nel Laboratorio</h3>
+    <p style="font-size:.78rem;color:var(--text3);margin-bottom:14px">Numero di selezioni cumulative per area (somma di tutti gli utenti). Più alta la barra, più quella competenza è centrale per la tua utenza.</p>
+    <canvas id="lab-chart-macro" height="110"></canvas>
+  </div>
+
+  <!-- Top questions -->
+  <div class="card" style="margin-bottom:14px">
+    <h3 style="margin-bottom:12px">🎯 Domande più Rilevanti</h3>
+    <p style="font-size:.78rem;color:var(--text3);margin-bottom:14px">Le 10 domande selezionate dal maggior numero di utenti — quelle su cui il laboratorio dovrebbe investire maggiori risorse.</p>
+    <div>
+      ${topQuestions.map(([id,n])=>{
+        const q=qMap[id];const pct=Math.round((n/totalProfiles)*100);
+        const userNames=(qUsers[id]||[]).join(', ');
+        return`<div style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;gap:8px">
+            <span style="font-size:.82rem;font-weight:500;flex:1;min-width:0">${q?.icon||''} <strong style="font-size:.7rem;color:var(--text3)">${(q?.macro||'').replace(/^[A-Z]\. /,'')}</strong> — ${q?.text||id}</span>
+            <span title="👤 ${userNames}" style="font-size:.75rem;font-weight:700;color:var(--accent2);white-space:nowrap;cursor:help;border-bottom:1.5px dotted var(--accent2)">${n}/${totalProfiles} utenti</span>
+          </div>
+          <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:${n/totalProfiles>=0.6?'var(--accent2)':n/totalProfiles>=0.3?'var(--warn)':'var(--text3)'};border-radius:3px;transition:width .4s"></div>
+          </div>
+          <div style="font-size:.7rem;color:var(--text3);margin-top:3px">👤 ${userNames}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>
+
+  <!-- Areas detail cards -->
+  <div class="card" style="margin-bottom:14px">
+    <h3 style="margin-bottom:14px">🗂️ Dettaglio per Area</h3>
+    ${sortedMacro.map(([macroName,mv])=>{
+      const domande=mv.ids.map(id=>({id,n:qFreq[id]||0,text:qMap[id]?.text||id})).sort((a,b)=>b.n-a.n);
+      const priority=mv.count/maxCount;
+      const badge=priority>=0.6?'badge-green':priority>=0.3?'badge-orange':'badge-red';
+      const label=priority>=0.6?'Alta priorità':priority>=0.3?'Media priorità':'Bassa priorità';
+      return`<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="font-size:1.1rem">${mv.icon}</span>
+          <strong style="font-size:.9rem">${macroName}</strong>
+          <span class="badge ${badge}" style="margin-left:auto">${label}</span>
+          <span style="font-size:.76rem;color:var(--text3)">${mv.count} sel.</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px">
+          ${domande.map(d=>`<span style="font-size:.72rem;padding:2px 9px;border-radius:12px;background:var(--bg2);border:1px solid var(--border2);color:var(--text2)">
+            ${d.text} <strong style="color:var(--accent2)">${d.n}</strong>
+          </span>`).join('')}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
+
+  <!-- AI tab -->
+  ${aiEnabled?`<div class="card" id="lab-ai-block">
+    <h3 style="margin-bottom:6px">🤖 Consigli per il Laboratorio</h3>
+    <p style="font-size:.82rem;color:var(--text2);margin-bottom:14px">Suggerimenti pratici su attività, strategie e organizzazione del laboratorio basati sui profili dei tuoi utenti. <strong>Genera con AI</strong> usa la tua chiave API Anthropic (costo stimato ~$0.01–0.03 per generazione). <strong>Genera Prompt</strong> fornisce il testo da incollare su claude.ai, senza alcun costo.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <button class="btn btn-primary btn-sm" onclick="generateLabAI()">✨ Genera con AI</button>
+      <button class="btn btn-ghost btn-sm" onclick="generateLabPrompt()">📋 Genera Prompt</button>
+    </div>
+    <div class="ai-val-output loading" id="lab-ai-output">Scegli un'opzione sopra.</div>
+    <div id="lab-prompt-box" style="display:none;margin-top:12px">
+      <div style="font-size:.75rem;font-weight:600;color:var(--text2);margin-bottom:6px">📋 Prompt pronto — copialo e incollalo su Claude:</div>
+      <textarea id="lab-prompt-text" style="width:100%;height:140px;font-size:.75rem;padding:9px;border:1.5px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-family:monospace;resize:vertical" readonly></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn btn-primary btn-sm" onclick="copyAndOpenClaude('lab-prompt-text')">🔗 Copia e apri Claude</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('lab-prompt-text').value);notify('📋 Copiato!')">📋 Solo copia</button>
+      </div>
+    </div>
+  </div>`:''}
+  <div style="height:40px"></div>`;
+
+  // store lab context for AI
+  window._labContext={labContext,topQContext,totalProfiles,sortedMacro,qMap,qFreq,qUsers,macroUsers};
+
+  // render chart
+  setTimeout(()=>{
+    const isDarkNow=document.body.getAttribute('data-theme')==='dark';
+    const tc=isDarkNow?'#c0b8aa':'#6a6258';
+    const gc=isDarkNow?'#38342c':'#e2ddd3';
+    const ctx=document.getElementById('lab-chart-macro');
+    if(ctx){
+      const labels=sortedMacro.map(([k,v])=>{
+        const name=k.replace(/^[A-Z]\.\s*/,'');
+        const words=name.split(' ');
+        const lines=[];let line='';
+        words.forEach(w=>{if((line+' '+w).trim().length>12&&line){lines.push(line);line=w;}else{line=(line+' '+w).trim();}});
+        if(line)lines.push(line);
+        return[v.icon,...lines];
+      });
+      const data=sortedMacro.map(([,v])=>v.count);
+      const colors=sortedMacro.map(([,v])=>barColor(v.count,maxCount));
+      if(chartInstances['lab'])try{chartInstances['lab'].destroy()}catch(e){}
+      chartInstances['lab']=new Chart(ctx,{
+        type:'bar',
+        data:{labels,datasets:[{label:'Selezioni totali',data,backgroundColor:colors,borderRadius:6}]},
+        options:{responsive:true,scales:{
+          y:{min:0,ticks:{color:tc,stepSize:1},grid:{color:gc}},
+          x:{ticks:{color:tc,font:{size:10},maxRotation:0,align:'center'},grid:{color:gc}}
+        },plugins:{
+          legend:{labels:{color:tc}},
+          tooltip:{callbacks:{
+            afterBody:(items)=>{
+              const idx=items[0]?.dataIndex;
+              const macroName=sortedMacro[idx]?.[0];
+              const users=(window._labContext?.macroUsers||{})[macroName]||[];
+              return users.length?['','👤 Utenti: '+users.join(', ')]:[];
+            }
+          }}
+        }}
+      });
+    }
+  },100);
+}
+
+function switchLabTab(tab,btn){
+  btn.closest('.ai-tabs').querySelectorAll('.ai-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('lab-tab-analisi')?.classList.remove('active');
+  document.getElementById('lab-tab-ai')?.classList.remove('active');
+  document.getElementById('lab-tab-'+tab)?.classList.add('active');
+}
+
+function buildLabPromptText(){
+  const ctx=window._labContext;
+  if(!ctx)return'';
+  return`Sei un esperto di progettazione di laboratori socio-occupazionali per persone con disabilità intellettiva e/o dello spettro autistico.
+
+Analizza i seguenti dati raccolti da ${ctx.totalProfiles} utenti di un centro socio-occupazionale.
+
+AREE FUNZIONALI più selezionate dagli operatori per i propri utenti:
+${ctx.labContext}
+
+DOMANDE/COMPETENZE più rilevanti (numero di utenti per i quali è stata selezionata):
+${ctx.topQContext}
+
+Sulla base di questi dati, fornisci consigli pratici e professionali per migliorare il laboratorio socio-occupazionale. In particolare indica:
+1. Quali tipologie di attività sarebbe opportuno implementare o potenziare
+2. A quali aspetti dell'ambiente e dell'organizzazione prestare attenzione
+3. Strategie e approcci metodologici che si adattano meglio a questi profili
+4. Eventuali aree di bassa priorità su cui si possono allocare meno risorse
+
+Rispondi in modo pratico, concreto e professionale, come se stessi consigliando un'équipe di operatori. Massimo 400 parole, forma narrativa con sottotitoli chiari.`;
+}
+
+async function generateLabAI(){
+  const out=document.getElementById('lab-ai-output');
+  if(!out)return;
+  out.className='ai-val-output loading';out.textContent='⏳ Analisi in corso…';
+  const prompt=buildLabPromptText();
+  if(!prompt){out.className='ai-val-output error';out.textContent='⚠️ Nessun dato disponibile.';return;}
+  try{
+    const text=await callAnthropicAPI(prompt);
+    out.className='ai-val-output';out.textContent=text;
+  }catch(e){out.className='ai-val-output error';out.textContent='⚠️ '+e.message;}
+}
+
+function generateLabPrompt(){
+  const prompt=buildLabPromptText();
+  if(!prompt){notify('⚠️ Nessun dato disponibile.',3000);return;}
+  const box=document.getElementById('lab-prompt-box');
+  const ta=document.getElementById('lab-prompt-text');
+  if(!box||!ta)return;
+  ta.value=prompt;
+  box.style.display='block';
+  ta.scrollIntoView({behavior:'smooth',block:'nearest'});
+  notify('📋 Prompt generato!');
+}
+
+function renderMiniBar(val){
+  const pct=(val/5)*100;
+  const color=val>=4?'var(--accent2)':val>=2.5?'var(--warn)':'var(--danger)';
+  return`<div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;width:100px;display:inline-block;vertical-align:middle"><div style="height:100%;width:${pct}%;background:${color};border-radius:3px"></div></div>`;
+}
+
+function openABCRead(){
+  const abcData=pdata.abcData||{};
+  const abcDates=Object.keys(abcData).filter(d=>{
+    const schemas=abcData[d]||[];
+    return schemas.some(s=>{
+      const rows=s.rows||[s];
+      return rows.some(r=>r.A||r.B||r.C||r.note);
+    });
+  }).sort();
+  const container=document.getElementById('abc-read-content');
+  if(!abcDates.length){container.innerHTML='<p style="color:var(--text2);font-size:.88rem">Nessuno schema ABC compilato.</p>';openModal('modal-abc-read');return}
+  container.innerHTML=abcDates.map(d=>{
+    const schemas=(abcData[d]||[]).filter(s=>{const rows=s.rows||[s];return rows.some(r=>r.A||r.B||r.C||r.note)});
+    if(!schemas.length)return'';
+    return`<div class="abc-read-entry">
+      <div class="abc-read-date">📅 ${d} — ${schemas.length} schema${schemas.length>1?'i':''}</div>
+      ${schemas.map((s,si)=>{
+        const rows=s.rows||[s];
+        return`<div style="margin-bottom:${si<schemas.length-1?'14px':'0'}">
+          ${schemas.length>1?`<div style="font-size:.7rem;font-weight:700;color:var(--text3);margin-bottom:8px">Schema ${si+1}</div>`:''}
+          ${rows.map((row,ri)=>`
+            <div style="margin-bottom:${ri<rows.length-1?'10px':'0'}">
+              ${rows.length>1?`<div style="font-size:.66rem;font-weight:600;color:var(--text3);margin-bottom:5px;letter-spacing:.04em;text-transform:uppercase">${ri===0?'Riga principale':'Continuazione '+(ri+1)}</div>`:''}
+              <div class="abc-read-schema">
+                <div class="abc-read-col"><div class="abc-read-col-label ant">A — Antecedente</div><div class="abc-read-col-val">${row.A||'<em style="opacity:.45">—</em>'}</div></div>
+                <div class="abc-read-col"><div class="abc-read-col-label beh">B — Comportamento</div><div class="abc-read-col-val">${row.B||'<em style="opacity:.45">—</em>'}</div></div>
+                <div class="abc-read-col"><div class="abc-read-col-label con">C — Conseguenza</div><div class="abc-read-col-val">${row.C||'<em style="opacity:.45">—</em>'}</div></div>
+              </div>
+            </div>`).join('')}
+          ${rows[0]?.note?`<div class="abc-read-note" style="margin-top:8px">📝 ${rows[0].note}</div>`:''}
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+  openModal('modal-abc-read');
+}
+
+// ═══════════ BACKUP ═══════════
+function switchBackupTab(tab){
+  document.querySelectorAll('.backup-tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&tab==='export')||(i===1&&tab==='import')));
+  document.getElementById('backup-panel-export').classList.toggle('active',tab==='export');
+  document.getElementById('backup-panel-import').classList.toggle('active',tab==='import');
+  if(tab==='export')updateExportPanel();
+  if(tab==='import')document.getElementById('import-result').className='import-result';
+}
+function updateExportPanel(){
+  const singleOpt=document.getElementById('export-single-option');
+  const prof=getActiveProfile();
+  if(prof){singleOpt.style.display='flex';}else{singleOpt.style.display='none';}
+  updateBackupDescriptions();
+  const last=appMeta.lastBackup;
+  document.getElementById('last-backup-info').textContent=last?'↻ Ultimo backup: '+new Date(last).toLocaleString('it-IT'):'Nessun backup ancora effettuato.';
+}
+function includeSettings(){
+  return document.getElementById('backup-include-settings')?.checked !== false;
+}
+
+function updateBackupDescriptions(){
+  const withSettings=includeSettings();
+  const allDesc=document.getElementById('export-all-desc');
+  if(allDesc)allDesc.textContent=withSettings
+    ?'Tutti gli utenti, domande, compilazioni e impostazioni dell\'app.'
+    :'Solo utenti, domande e compilazioni (senza impostazioni).';
+  const prof=getActiveProfile();
+  const singleDesc=document.getElementById('export-single-desc');
+  if(singleDesc)singleDesc.textContent=withSettings
+    ?(prof?'Dati di '+prof.nome+' + impostazioni dell\'app.':'Dati utente + impostazioni dell\'app.')
+    :(prof?'Solo i dati di '+prof.nome+' (senza impostazioni).':'Solo i dati utente (senza impostazioni).');
+}
+
+function buildBackupPayload(profileList){
+  const withSettings=includeSettings();
+  const data={
+    _app:'ValutaApp',
+    _version:3,
+    _exportedAt:new Date().toISOString(),
+    profiles:profileList,
+    profileData:{}
+  };
+  if(withSettings){
+    data.settings={
+      theme:appMeta.theme||'light',
+      aiEnabled:localStorage.getItem('valutaapp_ai_enabled')||'',
+      apiKey:localStorage.getItem('valutaapp_apikey')||'',
+      usage:localStorage.getItem('valutaapp_usage')||''
+    };
+  }
+  profileList.forEach(p=>{data.profileData[p.id]=loadPdata(p.id)});
+  return data;
+}
+function downloadJSON(payload,filename){
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  appMeta.lastBackup=new Date().toISOString();saveMeta();updateExportPanel();
+}
+function exportAllBackup(){
+  if(!profiles.length){notify('⚠️ Nessun profilo da esportare.',3000);return}
+  const payload=buildBackupPayload(profiles);const date=new Date().toISOString().slice(0,10);
+  downloadJSON(payload,`valutaapp_backup_${date}.json`);
+  notify('✅ Backup di '+profiles.length+' profil'+(profiles.length===1?'o':'i')+' scaricato!');
+}
+function exportActiveBackup(){
+  const prof=getActiveProfile();if(!prof){notify('⚠️ Nessun utente attivo.',3000);return}
+  const payload=buildBackupPayload([prof]);const safeName=prof.nome.replace(/[^a-zA-Z0-9]/g,'_').toLowerCase();
+  const date=new Date().toISOString().slice(0,10);downloadJSON(payload,`valutaapp_${safeName}_${date}.json`);
+  notify('✅ Backup di '+prof.nome+' scaricato!');
+}
+function handleFileImport(input){
+  const file=input.files[0];if(!file)return;input.value='';
+  const reader=new FileReader();reader.onload=e=>{processImport(e.target.result)};reader.readAsText(file);
+}
+function processImport(jsonText){
+  const result=document.getElementById('import-result');
+  try{
+    const data=JSON.parse(jsonText);
+    if(data._app!=='ValutaApp'||!Array.isArray(data.profiles)){
+      result.className='import-result err';result.textContent='❌ File non riconosciuto. Assicurati di usare un backup esportato da ValutaApp.';return;
+    }
+    let added=0,skipped=0;
+    data.profiles.forEach(prof=>{
+      if(profiles.find(p=>p.id===prof.id)){skipped++;return}
+      profiles.push(prof);const pd=(data.profileData||{})[prof.id]||{selectedQuestions:[],compilations:{}};savePdata(prof.id,pd);added++;
+    });
+    saveProfiles();renderProfilesGrid();renderHomeBanner();
+
+    // Restore settings if present
+    const s=data.settings||{};
+    let settingsRestored=[];
+    if(s.theme&&['light','dark'].includes(s.theme)){
+      appMeta.theme=s.theme;saveMeta();
+      document.body.setAttribute('data-theme',s.theme);
+      settingsRestored.push('tema');
+    }
+    if(s.aiEnabled==='1'){
+      localStorage.setItem('valutaapp_ai_enabled','1');
+      settingsRestored.push('funzioni AI');
+    }
+    if(s.apiKey){
+      localStorage.setItem('valutaapp_apikey',s.apiKey);
+      settingsRestored.push('chiave API');
+    }
+    if(s.usage){
+      localStorage.setItem('valutaapp_usage',s.usage);
+      settingsRestored.push('statistiche AI');
+    }
+    applyAIState();
+
+    result.className='import-result ok';
+    const exportDate=data._exportedAt?' (backup del '+new Date(data._exportedAt).toLocaleDateString('it-IT')+')':'';
+    const settingsNote=settingsRestored.length?`<br><span style="font-size:.78rem">⚙️ Impostazioni ripristinate: ${settingsRestored.join(', ')}.</span>`:'';
+    result.innerHTML=`✅ Importazione completata${exportDate}:<br><strong>${added}</strong> profil${added===1?'o':'i'} aggiunt${added===1?'o':'i'}${skipped?`, <strong>${skipped}</strong> già present${skipped===1?'e':'i'} (ignorat${skipped===1?'o':'i'})`:''}${settingsNote}.`;
+    notify('✅ Importati '+added+' profil'+(added===1?'o':'i')+'!');
+  }catch(e){result.className='import-result err';result.textContent='❌ Errore nella lettura del file. Il file potrebbe essere corrotto.'}
+}
+function dzDragOver(e){e.preventDefault();document.getElementById('drop-zone').classList.add('drag-over')}
+function dzDragLeave(e){document.getElementById('drop-zone').classList.remove('drag-over')}
+function dzDrop(e){
+  e.preventDefault();document.getElementById('drop-zone').classList.remove('drag-over');
+  const file=e.dataTransfer.files[0];if(!file)return;
+  const reader=new FileReader();reader.onload=ev=>{processImport(ev.target.result)};reader.readAsText(file);
+}
+
+// ═══════════ PDF ═══════════
+function exportPDF(){
+  // mark hidden result blocks as no-print
+  document.querySelectorAll('.res-block-body.section-body-hidden').forEach(el=>{
+    el.closest('.res-block')?.classList.add('_pdf-hidden');
+  });
+  document.querySelectorAll('._pdf-hidden').forEach(el=>el.style.setProperty('display','none','important'));
+  notify('🖨️ Apertura finestra di stampa...');
+  setTimeout(()=>{
+    window.print();
+    setTimeout(()=>{
+      document.querySelectorAll('._pdf-hidden').forEach(el=>{el.style.removeProperty('display');el.classList.remove('_pdf-hidden')});
+    },1200);
+  },300);
+}
+
+// ═══════════ NOTIFY ═══════════
+function notify(msg,duration=2800){
+  const el=document.getElementById('notification');el.textContent=msg;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),duration);
+}
+
+// ═══════════ INIT ═══════════
+loadMeta();loadProfiles();
+document.body.setAttribute('data-theme',appMeta.theme);
+if(appMeta.activeProfileId&&profiles.find(p=>p.id===appMeta.activeProfileId)){activateProfile(appMeta.activeProfileId)}
+renderHomeBanner();
+applyAIState();
+navPush('screen-home');
+</script>
+
+<div id="pwd-overlay">
+  <div id="pwd-box">
+    <h4 id="pwd-title">🔐 Password richiesta</h4>
+    <p id="pwd-desc">Inserisci la password amministratore per continuare.</p>
+    <input type="text" id="pwd-input" placeholder="password" autocomplete="off" style="-webkit-text-security:disc;font-size:.95rem">
+    <div id="pwd-actions">
+      <button class="btn btn-ghost btn-sm" onclick="pwdResolve(false)">Annulla</button>
+      <button class="btn btn-primary btn-sm" onclick="pwdResolve(true)">Conferma</button>
+    </div>
+  </div>
+</div>
+<!-- ══════ SERVICE WORKER ══════ -->
+<div id="sw-toast" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a4a36;color:#fff;padding:12px 20px;border-radius:12px;font-size:.84rem;font-weight:600;box-shadow:0 8px 28px rgba(0,0,0,.25);z-index:99999;align-items:center;gap:12px;white-space:nowrap">
+  <span id="sw-toast-msg"></span>
+  <button id="sw-toast-btn" onclick="swApplyUpdate()" style="background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.5);color:#fff;padding:4px 12px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:700">Aggiorna ora</button>
+</div>
+
+<script>
+// ── Service Worker registration ──
+let swReg = null;
+let swWaiting = null;
+
+(function registerSW() {
+  const host = location.hostname;
+  if (host === 'localhost' || host === '127.0.0.1' || host.includes('claudeusercontent.com')) return;
+  if (!('serviceWorker' in navigator)) return;
+
+  navigator.serviceWorker.register('./sw.js').then(reg => {
+    swReg = reg;
+
+    // Check if there's already a waiting SW
+    if (reg.waiting) { swWaiting = reg.waiting; showUpdateToast(null); }
+
+    reg.addEventListener('updatefound', () => {
+      const installing = reg.installing;
+      installing?.addEventListener('statechange', () => {
+        if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+          swWaiting = installing;
+          showUpdateToast(null);
+        }
+      });
+    });
+  }).catch(() => {}); // silent fail
+
+  // When controller changes (after skipWaiting), reload
+  navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
+
+  // Listen for messages from SW
+  navigator.serviceWorker.addEventListener('message', event => {
+    if (event.data?.type === 'NEW_VERSION') showUpdateToast(event.data.version);
+    if (event.data?.type === 'VERSION_RESPONSE') {
+      const el = document.getElementById('sw-update-status');
+      if (el) el.textContent = `✅ Sei alla versione più recente (${event.data.version})`;
+    }
+  });
+})();
+
+function showUpdateToast(version) {
+  const toast = document.getElementById('sw-toast');
+  const msg = document.getElementById('sw-toast-msg');
+  if (!toast || !msg) return;
+  msg.textContent = version ? `✅ Versione ${version} disponibile!` : '🆕 Aggiornamento disponibile!';
+  toast.style.display = 'inline-flex';
+}
+
+function swApplyUpdate() {
+  if (swWaiting) {
+    swWaiting.postMessage({ type: 'SKIP_WAITING' });
+  } else if (swReg?.waiting) {
+    swReg.waiting.postMessage({ type: 'SKIP_WAITING' });
+  }
+  document.getElementById('sw-toast').style.display = 'none';
+}
+
+function checkForUpdates() {
+  const btn = document.getElementById('sw-update-btn');
+  const status = document.getElementById('sw-update-status');
+  if (!status) return;
+
+  const host = location.hostname;
+  if (host === 'localhost' || host === '127.0.0.1' || host.includes('claudeusercontent.com')) {
+    status.textContent = 'ℹ️ Aggiornamenti disponibili solo su GitHub Pages.';
+    return;
+  }
+  if (!('serviceWorker' in navigator)) {
+    status.textContent = '⚠️ Service Worker non supportato da questo browser.';
+    return;
+  }
+  if (!swReg) {
+    status.textContent = '⚠️ Service Worker non ancora registrato.';
+    return;
+  }
+
+  status.textContent = '⏳ Controllo in corso…';
+  if (btn) btn.disabled = true;
+
+  swReg.update().then(() => {
+    if (btn) btn.disabled = false;
+    if (swReg.waiting) {
+      swWaiting = swReg.waiting;
+      status.textContent = '🆕 Aggiornamento trovato! Premi il toast in basso per applicarlo.';
+      showUpdateToast(null);
+    } else {
+      status.textContent = '✅ Sei alla versione più recente.';
+      setTimeout(() => { if (status) status.textContent = ''; }, 4000);
+    }
+  }).catch(err => {
+    if (btn) btn.disabled = false;
+    if (!navigator.onLine) {
+      status.textContent = '📡 Nessuna connessione. Riprova quando sei online.';
+    } else {
+      status.textContent = '⚠️ Impossibile verificare: ' + (err.message || 'errore sconosciuto');
+    }
+  });
+}
+</script>
+</body>
+</html>

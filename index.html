@@ -569,14 +569,12 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
       <div class="area-card work-compile-card" onclick="goTo('screen-compile')" style="padding:22px 16px">
         <div class="ac-icon">📋</div>
         <h3>Area Compilazione Utente</h3>
-        <p>Compila le schede giornaliere dell'utente attivo</p>
-        <div class="compile-badge" id="home-user-badge"></div>
+        <p>Compila le schede giornaliere</p>
       </div>
       <div class="area-card work-results-card" onclick="goTo('screen-results')" style="padding:22px 16px">
         <div class="ac-icon">📊</div>
         <h3>Area Risultati Utente</h3>
-        <p>Visualizza analisi e grafici per l'utente attivo</p>
-        <div class="compile-badge" id="home-results-badge"></div>
+        <p>Visualizza analisi e grafici</p>
       </div>
     </div>
 
@@ -595,7 +593,6 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         <div class="ac-icon">📐</div>
         <h3>Area Progettazione Utente</h3>
         <p>Configura le domande per ogni utente</p>
-        <div class="compile-badge" id="home-design-badge"></div>
       </div>
       <div class="area-card lab-card" onclick="goTo('screen-lab')">
         <div class="ac-icon">🔬</div>
@@ -617,7 +614,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         <div class="instr-step"><div class="instr-num">3</div><div><strong>Attiva gli schemi ABC (opzionale)</strong> — In Area Progettazione Utente, nell'area D <em>Regolazione Emotiva</em>, spunta <strong>Aggiungi schemi ABC</strong> e scegli quanti schemi per giorno (1–5). Gli schemi ABC documentano episodi con Antecedente, Comportamento e Conseguenza, inclusi nel PDF finale.</div></div>
         <div class="instr-step"><div class="instr-num">4</div><div><strong>Compila ogni giorno</strong> — Clicca <em>Area Compilazione Utente</em>. Sulla sinistra appare la barra con tutti gli utenti: quelli senza domande configurate sono grigi. Seleziona un utente e clicca un giorno nel calendario (🟢 = compilato, 🔴 = con ABC). Sopra il calendario appare una card con la data selezionata e il pulsante <strong>✏️ Compila questa scheda</strong>: cliccalo per aprire le domande. Assegna punteggi 0–5, aggiungi note con <strong>📝 Note</strong>, compila gli ABC se attivi. Quando apri una scheda, la barra laterale mostra una ✓ verde accanto agli utenti già compilati in quel giorno. Salva con il pulsante in basso.</div></div>
         <div class="instr-step"><div class="instr-num">5</div><div><strong>Leggi i risultati</strong> — Clicca <em>Area Risultati Utente</em>. La barra laterale mostra tutti gli utenti: quelli senza compilazioni sono grigi. Clicca un utente per vederne i risultati: riepilogo statistico, grafico di andamento, medie per macro area, punti di forza (≥4), aree critiche (&lt;2.5), dettaglio per domanda, note qualitative. Usa <strong>🚫 Nascondi</strong> per escludere sezioni dalla stampa, poi esporta con <strong>🖨️ Salva PDF</strong>. La barra laterale non viene inclusa nel PDF.</div></div>
-        <div class="instr-step"><div class="instr-num">6</div><div><strong>Analisi del laboratorio</strong> — Clicca <em>Area Progettazione Laboratorio</em>. Non richiede utente attivo: aggrega le domande configurate per tutti gli utenti. Mostra grafico per area funzionale, top 10 domande con utenti interessati (passa il cursore su "x/x utenti" per vedere i nomi), dettaglio per area con badge Alta/Media/Bassa priorità. Se le funzioni AI sono attive, è disponibile la sezione <em>Consigli AI</em>.</div></div>
+        <div class="instr-step"><div class="instr-num">6</div><div><strong>Analisi del laboratorio</strong> — Clicca <em>Area Progettazione Laboratorio</em>. Non richiede utente selezionato: aggrega le domande configurate per tutti gli utenti. Mostra grafico per area funzionale, top 10 domande con utenti interessati (passa il cursore su "x/x utenti" per vedere i nomi), dettaglio per area con badge Alta/Media/Bassa priorità. Se le funzioni AI sono attive, è disponibile la sezione <em>Consigli AI</em>.</div></div>
         <div class="instr-step"><div class="instr-num">7</div><div><strong>Funzioni AI (opzionali)</strong> — Apri <strong>⚙️ Impostazioni</strong> (richiede password) e spunta <em>Implementa funzioni AI</em>. Nei Risultati appaiono <em>Valutazione Qualitativa AI</em> e <em>Sintesi Note AI</em>; nel Laboratorio compare <em>Consigli AI</em>. Scegli <strong>Genera con AI</strong> (chiave API Anthropic, ~$0.01–0.03 a generazione) oppure <strong>Genera Prompt</strong> per usare claude.ai gratuitamente.</div></div>
         <div class="instr-step"><div class="instr-num">8</div><div><strong>Impostazioni e backup</strong> — Il pulsante <strong>⚙️</strong> in alto (protetto da password) raccoglie: attivazione AI, chiave API e contatori, backup e ripristino, verifica aggiornamenti. Il backup esporta profili, compilazioni e preferenze in un file <em>.json</em> — puoi scegliere se includere anche le impostazioni. Per ripristinare su un altro dispositivo, importa lo stesso file dalla sezione <em>Backup & Ripristino</em>.</div></div>
       </div>
@@ -646,7 +643,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.1.5</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.1.6</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -685,7 +682,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         <h2 style="margin:0">👥 Gestione Utenti</h2>
         <button class="btn btn-primary" onclick="openNewProfileModal()">＋ Nuovo utente</button>
       </div>
-      <p style="font-size:.84rem;color:var(--text2);margin-bottom:18px">Clicca su un profilo per attivarlo. L'utente attivo è quello su cui lavorerai in Progettazione e Compilazione.</p>
+      <p style="font-size:.84rem;color:var(--text2);margin-bottom:18px">Clicca su un profilo per modificarlo o eliminarlo.</p>
       <div class="profiles-grid" id="profiles-grid"></div>
     </div>
   </div>
@@ -1001,7 +998,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.1.5</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.1.6</div>
     </div>
   </div>
 </div>
@@ -1252,33 +1249,14 @@ function renderHomeBanner(){
     });
   }
   // results badge
-  const rbadge=document.getElementById('home-results-badge');
-  if(rbadge){
-    rbadge.innerHTML=prof
-      ?`<span class="ub-dot"></span> Utente attivo: <strong>${prof.nome}</strong>`
-      :'Seleziona un utente dalla card verde';
-  }
-  // compile badge
-  const badge=document.getElementById('home-user-badge');
-  if(badge){
-    badge.innerHTML=prof
-      ?`<span class="ub-dot"></span> Utente attivo: <strong>${prof.nome}</strong>`
-      :'Seleziona un utente dalla card verde';
-  }
-  // design badge
-  const dbadge=document.getElementById('home-design-badge');
-  if(dbadge){
-    dbadge.innerHTML=prof
-      ?`<span class="ub-dot"></span> Utente attivo: <strong>${prof.nome}</strong>`
-      :'Seleziona un utente dalla tab verde';
-  }
+
 }
 
 function selectUserFromHome(val){
   if(!val){clearActiveProfile();return;}
   activateProfile(val);
   renderHomeBanner();
-  notify('✅ Utente attivo: '+(getActiveProfile()?.nome||''));
+
 }
 
 function renderProfilesGrid(){
@@ -1300,7 +1278,7 @@ function renderProfilesGrid(){
     const qCount=(pd.selectedQuestions||[]).length;
     const initials=prof.nome.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
     card.innerHTML=`
-      ${currentProfileId===prof.id?'<div class="pc-badge">Attivo</div>':''}
+
       <div class="pc-avatar">${initials||'👤'}</div>
       <div class="pc-name">${prof.nome}</div>
       <div class="pc-meta">${[prof.eta?prof.eta+' anni':'',prof.servizio].filter(Boolean).join(' · ')||'—'}<br>

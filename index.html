@@ -261,6 +261,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 .cal-dot-red{width:7px;height:7px;border-radius:50%;background:#d03030;box-shadow:0 0 0 1.5px rgba(208,48,48,.3)}
 .cal-day.today .cal-dot-green{background:#fff;box-shadow:0 0 0 1.5px rgba(255,255,255,.5)}
 .cal-day.today .cal-dot-red{background:#ffaaaa;box-shadow:0 0 0 1.5px rgba(255,255,255,.4)}
+.cal-day.selected{outline:2.5px solid var(--danger);outline-offset:-2px;border-radius:4px}
 
 /* ── TTAP ── */
 .q-item:last-child{border-bottom:none}
@@ -839,10 +840,6 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
     <div class="user-sidebar" id="results-sidebar"></div>
     <div class="sidebar-main">
       <div class="content" id="results-content"></div>
-      <div class="save-bar no-print">
-        <span style="font-size:.82rem;color:var(--text3)">Esporta il report completo come PDF stampabile</span>
-        <button class="btn btn-gold btn-lg" onclick="exportPDF()">🖨️ Salva PDF</button>
-      </div>
     </div>
   </div>
 </div>
@@ -1842,6 +1839,7 @@ function renderCalendar(){
       if(hasABC){const r=document.createElement('span');r.className='cal-dot-red';dotsDiv.appendChild(r)}
       el.appendChild(dotsDiv);
     }
+    el.setAttribute('data-key',dk);
     el.addEventListener('click',()=>openDay(dk,d,currentMonth,currentYear));
     grid.appendChild(el);
   }
@@ -1852,6 +1850,9 @@ function changeMonth(dir){
 
 // ═══════════ DAY SCREEN ═══════════
 function openDay(dateKey,day,month,year){
+  // highlight selected day
+  document.querySelectorAll('.cal-day.selected').forEach(el=>el.classList.remove('selected'));
+  document.querySelectorAll('.cal-day[data-key="'+dateKey+'"]').forEach(el=>el.classList.add('selected'));
   if(!(pdata.selectedQuestions||[]).length){notify('⚠️ Nessuna domanda selezionata. Configura prima l\'Area Progettazione.',4000);return}
   lastDayContext={dateKey,day,month,year};
   currentDay=dateKey;
@@ -2152,6 +2153,15 @@ function renderResults(){
   // store context for AI functions
   window._aiResultsContext={prof,dates,overallAvg,qScores,qMap,macroAvgs,strengths,weaknesses,allNotes,noteDates};
   renderUserSidebar('results-sidebar','selectResultsUser','results',null);
+  // Add PDF button at bottom of sidebar
+  const rSidebar=document.getElementById('results-sidebar');
+  if(rSidebar){
+    const pdfBtn=document.createElement('div');
+    pdfBtn.className='no-print';
+    pdfBtn.style.cssText='margin-top:auto;padding-top:12px;border-top:1px solid var(--border)';
+    pdfBtn.innerHTML='<button class="btn btn-gold" style="width:100%;justify-content:center;font-size:.82rem" onclick="exportPDF()">🖨️ Salva PDF</button><div style="font-size:.68rem;color:var(--text3);text-align:center;margin-top:5px">Esporta report PDF</div>';
+    rSidebar.appendChild(pdfBtn);
+  }
   setTimeout(applyAIState,0);
 
   // ── ABC results box ──

@@ -643,7 +643,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.1.6</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.1.7</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -727,6 +727,9 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
       <div id="questions-container"></div>
     </div>
     <div style="display:flex;gap:11px;justify-content:flex-end;padding-bottom:36px">
+      <div id="design-q-counter" style="margin-right:auto;display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--al);border:1.5px solid var(--al2);border-radius:10px;font-size:.84rem;font-weight:600;color:var(--accent)">
+        <span>📋</span><span id="design-q-count">0</span><span style="font-weight:400;color:var(--text2)">domande selezionate</span>
+      </div>
       <button class="btn btn-ghost" onclick="resetDesign()" style="color:var(--danger);border-color:var(--danger);background:var(--dl);font-weight:600">↺ Reimposta domande</button>
       <button class="btn btn-primary btn-lg" onclick="saveDesign()">💾 Salva Configurazione</button>
     </div>
@@ -998,7 +1001,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.1.6</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.1.7</div>
     </div>
   </div>
 </div>
@@ -1168,7 +1171,11 @@ function deleteProfile(id,e){
   e.stopPropagation();const prof=profiles.find(p=>p.id===id);if(!prof)return;
   if(!confirm('Eliminare definitivamente il profilo di "'+prof.nome+'"?\nTutte le compilazioni associate andranno perse.'))return;
   profiles=profiles.filter(p=>p.id!==id);saveProfiles();deletePdata(id);
-  if(currentProfileId===id){clearActiveProfile();renderHomeBanner();}else{renderProfilesGrid();renderHomeBanner();}notify('Profilo eliminato.');
+  if(currentProfileId===id){clearActiveProfile();}
+  renderProfilesGrid();renderHomeBanner();
+  renderUserSidebar('results-sidebar','selectResultsUser','results',null);
+  renderUserSidebar('compile-sidebar','selectCompileUser','compile',null);
+  notify('Profilo eliminato.');
 }
 
 // ═══════════ HISTORY NAV ═══════════
@@ -1445,13 +1452,20 @@ function renderDesign(){
       </div>`;
     container.appendChild(macroDiv);
   });
+  updateDesignCounter();
 }
 function toggleMacro(h){h.classList.toggle('open');h.nextElementSibling.classList.toggle('open')}
+function updateDesignCounter(){
+  const n=(pdata.selectedQuestions||[]).length;
+  const el=document.getElementById('design-q-count');
+  if(el)el.textContent=n;
+}
 function toggleQuestion(id,checked){
   if(!pdata.selectedQuestions)pdata.selectedQuestions=[];
   if(checked&&!pdata.selectedQuestions.includes(id))pdata.selectedQuestions.push(id);
   else pdata.selectedQuestions=pdata.selectedQuestions.filter(q=>q!==id);
   updateMacroCounts();
+  updateDesignCounter();
 }
 function updateMacroCounts(){
   if(!pdata.customQuestions)pdata.customQuestions={};
@@ -1482,7 +1496,7 @@ function selectMacro(mi,val){
   });
   updateMacroCounts();
 }
-function selectAll(val){QUESTION_BANK.forEach((_,mi)=>selectMacro(mi,val))}
+function selectAll(val){QUESTION_BANK.forEach((_,mi)=>selectMacro(mi,val));updateDesignCounter()}
 
 // ── CUSTOM QUESTIONS ──
 function addCustomQ(macroName,mi){

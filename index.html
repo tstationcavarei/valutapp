@@ -508,6 +508,9 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 .tag-perf-table tr:last-child td{border-bottom:none}
 .tag-perf-table tr:hover td{background:var(--bg2)}
 /* ── TAGS SCREEN ── */
+.results-filter-bar{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:12px 16px;background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);margin-bottom:14px;box-shadow:var(--sh)}
+.results-filter-bar input[type="radio"]{width:auto;accent-color:var(--accent)}
+.results-filter-bar input[type="date"]{width:auto;padding:4px 8px;font-size:.82rem}
 .area-card.tags-card{background:linear-gradient(140deg,#5a2a7a 0%,#8a44b8 100%);border:2px solid #5a2a7a;color:#fff;box-shadow:0 5px 20px rgba(90,42,122,.35)}
 .tags-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:22px}
 .tag-item-card{background:linear-gradient(150deg,#f2eef8 0%,#f8f6f0 100%);border:1.5px solid #c8b8dc;border-left:4px solid #8a44b8;border-radius:var(--r);padding:13px 13px 11px;position:relative;transition:all .2s;box-shadow:0 2px 8px rgba(90,42,122,.10)}
@@ -548,9 +551,11 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
   *{visibility:hidden}
   #screen-results{visibility:visible;display:block !important;position:absolute;top:0;left:0;width:100%}
   #screen-results *{visibility:visible}
-  .topbar,.save-bar,.no-print,.section-vis-btn{display:none !important}
+  .topbar,.save-bar,.no-print,.section-vis-btn,.user-sidebar,#results-sidebar,.results-filter-bar{display:none !important}
   .section-body-hidden,.res-block-body.section-body-hidden{display:none !important}
   body{background:#fff !important;margin:0;padding:0}
+  .screen-with-sidebar{display:block !important}
+  .sidebar-main{margin-left:0 !important}
   #results-content{padding:16px 24px}
   .card,.chart-wrap,.stat-card,.abc-read-entry{break-inside:avoid;page-break-inside:avoid}
   .results-grid{display:grid !important;grid-template-columns:1fr 1fr}
@@ -686,7 +691,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.3.2</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.3.3</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1095,7 +1100,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.3.2</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.3.3</div>
     </div>
   </div>
 </div>
@@ -1156,7 +1161,7 @@ const QUESTION_BANK = [
       {id:"d04",text:"Mantiene coordinazione bimanuale nei compiti che lo richiedono",note:"Es. tenere ferma una scatola con una mano mentre con l'altra si incolla o si avvita: valutare la coordinazione spontanea delle due mani.",scores:{0:"Non valutabile: nessun compito bimanuale in sessione.",1:"Usa una sola mano: l'altra resta inattiva.",2:"La mano di appoggio va guidata fisicamente (es. tenere ferma la scatola).",3:"Tiene fermo il pezzo con una mano se l'operatore lo ricorda a voce.",4:"Usa le due mani, ma commette alcuni errori.",5:"Coordina da solo le due mani (tiene la scatola e incolla)."}}]},
     {label:"Coordinazione e precisione",questions:[
       {id:"d05",text:"Rispetta margini / spazi in un compito",note:"Es. apporre un'etichetta dentro un riquadro, colorare dentro un bordo: osservare se l'utente rispetta i margini senza superarli.",scores:{0:"Non valutabile: nessun compito con margini o spazi in sessione.",1:"Non rispetta alcun limite: non riconosce i bordi e i riquadri.",2:"Resta nei bordi e riquadri con leggero prompt fisico.",3:"Resta nei bordi e riquadri se l'operatore ricorda a voce quali sono.",4:"Resta nei bordi e riquadri in autonomia, ma commette alcuni errori.",5:"Rispetta da solo margini e spazi (es. etichetta dentro il riquadro)."}},
-      {id:"d06",text:"Adatta la forza applicata allo strumento e al materiale strumento utilizzato",note:"Es. non strappare carta velina ma nemmeno non riuscire a piegarla: verificare se l'utente calibra la pressione in base al materiale.",scores:{0:"Non valutabile: nessun materiale che richiedeva di regolare la forza usato in sessione.",1:"Rompe o danneggia il materiale, o non riesce a manipolarlo adeguatamente.",2:"Regola la forza solo con prompt fisico.",3:"Regola la forza se l'operatore dice 'piano' o 'più forte'.",4:"Regola la forza in autonomia, ma commette alcuni errori.",5:"Regola da solo la forza in base al materiale e strumento."}},
+      {id:"d06",text:"Adatta la forza applicata allo strumento e al materiale utilizzato",note:"Es. non strappare carta velina ma nemmeno non riuscire a piegarla: verificare se l'utente calibra la pressione in base al materiale.",scores:{0:"Non valutabile: nessun materiale che richiedeva di regolare la forza usato in sessione.",1:"Rompe o danneggia il materiale, o non riesce a manipolarlo adeguatamente.",2:"Regola la forza solo con prompt fisico.",3:"Regola la forza se l'operatore dice 'piano' o 'più forte'.",4:"Regola la forza in autonomia, ma commette alcuni errori.",5:"Regola da solo la forza in base al materiale e strumento."}},
       {id:"d07",text:"Esegue compiti di precisione",note:"Es. timbrare in serie, forare fogli in posizione precisa: valutare costanza e accuratezza nel raggiungimento del risultato atteso.",scores:{0:"Non valutabile: nessun compito di precisione in sessione (es. timbrare in serie).",1:"Non raggiunge un risultato accettabile nemmeno con prompt fisico.",2:"Raggiunge il risultato solo con prompt fisico.",3:"Raggiunge il risultato se l'operatore lo guida verbalmente.",4:"Raggiunge il risultato in autonomia, ma commette alcuni errori.",5:"Esegue da solo compiti di precisione, con qualità costante."}}]}]},
   {macro:"E. Regolazione Emotiva e Comportamentale",icon:"🌡️",icfRef:"b1522, b1521, d240",micro:[
     {label:"Autoregolazione emotiva",questions:[
@@ -1191,7 +1196,7 @@ const QUESTION_BANK = [
       {id:"g03",text:"Utilizza sistemi alternativi di comunicazione (CAA, PECS, PULSANTI VOCALI…) se previsti",note:"Es. tablet con PECS o pulsante vocale: verificare se l'utente usa lo strumento spontaneamente per comunicare bisogni o richieste.",scores:{0:"Non valutabile: sistema non previsto, o non usato in sessione.",1:"Non usa il sistema, anche se disponibile.",2:"Lo usa solo con la mano guidata sullo strumento.",3:"Lo usa se l'operatore lo invita a voce ('dimmelo con il tablet').",4:"Lo usa in autonomia ma talvolta si dimentica o commette alcuni errori.",5:"Lo usa spontaneamente e in modo funzionale (tablet, PECS, pulsanti vocali)."}}]},
     {label:"Interazione con i pari",questions:[
       {id:"g04",text:"Interagisce spontaneamente con i colleghi nel setting occupazionale",note:"Osservare se l'utente avvia o risponde a interazioni con i colleghi (saluto, commento sul lavoro, richiesta di aiuto) in modo funzionale e appropriato.",scores:{0:"Non valutabile: nessun momento di contatto con i colleghi.",1:"Interagisce in modo totalmente disfunzionale.",2:"Non interagisce con i colleghi anche con la mediazione dell'operatore.",3:"Interagisce solo se l'operatore lo accompagna e guida l'interazione.",4:"Interagisce saltuariamente, in modo funzionale.",5:"Interagisce in modo del tutto funzionale."}},
-      {id:"g05",text:"Rispetta gli spazi personali degli altri utenti",note:"Valutare se l'utente mantiene una distanza corporea adeguata dai colleghi senza invadere lo spazio personale altrui, anche in ambienti stretti.",scores:{0:"Non valutabile: nessuna occasione di vicinanza ai colleghi.",1:"Invade gli spazi altrui continuamente nonostante l'intervento dell'operatore.",2:"Rispetta gli spazi solo se mediato fisicamente dall'operatore.",3:"Rispetta gli spazi con con richiami a voce o solo se presenti dei marcatori.",4:"Rispetta gli spazi nella maggior parte delle occasioni.",5:"Mantiene gli spazi in modo del tutto adeguato."}},
+      {id:"g05",text:"Rispetta gli spazi personali degli altri utenti",note:"Valutare se l'utente mantiene una distanza corporea adeguata dai colleghi senza invadere lo spazio personale altrui, anche in ambienti stretti.",scores:{0:"Non valutabile: nessuna occasione di vicinanza ai colleghi.",1:"Invade gli spazi altrui continuamente nonostante l'intervento dell'operatore.",2:"Rispetta gli spazi solo se mediato fisicamente dall'operatore.",3:"Rispetta gli spazi con richiami a voce o solo se presenti dei marcatori.",4:"Rispetta gli spazi nella maggior parte delle occasioni.",5:"Mantiene gli spazi in modo del tutto adeguato."}},
       {id:"g06",text:"Gestisce i conflitti con i pari senza escalation comportamentale",note:"Es. disputa per un materiale, commento sgradito di un pari: osservare se l'utente gestisce il conflitto senza aggressioni fisiche o fuga prolungata.",scores:{0:"Non valutabile: nessun conflitto avvenuto in sessione.",1:"Reagisce con aggressione o fuga e non rientra nemmeno con l'intervento dell'operatore.",2:"Reagisce con aggressione o fuga, ma si placa con l'intervento sostenuto dell'operatore.",3:"Reagisce con aggressione o fuga, ma si placa con l'intervento verbale dell'operatore.",4:"Reazioni sopra le righe che però rientrano in autonomia.",5:"Si ritira o si chiede mediazione da solo, senza escalation."}}]}]},
   {macro:"H. Autonomia Personale nel Contesto Occupazionale",icon:"🚶",icfRef:"d540, d570, d620",micro:[
     {label:"Orientamento e spostamenti",questions:[
@@ -1203,7 +1208,7 @@ const QUESTION_BANK = [
       {id:"h05",text:"Gestisce autonomamente un abbigliamento adeguato alla situazione o evento",note:"Es. indossare la divisa nei giorni previsti, vestirsi in modo formale per un evento: valutare se l'utente rispetta le indicazioni senza eccessive rassicurazioni.",scores:{0:"Non valutabile: nessuna situazione che richiedeva un abbigliamento specifico.",1:"Non indossa quanto previsto (es: divisa) neanche su richiesta diretta (es: mettiti questa maglia).",2:"Non indossa quanto previsto (es: divisa) neanche se gli è stato ricordato (es: domani vieni con la divisa).",3:"Indossa quanto previsto solo se è stato ricordato, anche se è già venuto a conoscenza delle richieste di abbigliamento.",4:"Indossa quanto previsto, ma solo dopo aver richiesto lui stesso eccessive rassicurazioni.",5:"Indossa quanto previsto autonomamente ed eventualmente pone domande coerenti."}}]},
     {label:"Gestione di oggetti e materiali",questions:[
       {id:"h06",text:"Gestisce correttamente oggetti a lui assegnati senza danneggiarli",note:"Es. forbici, sigillatrice, stampante: osservare se l'utente usa gli strumenti assegnati con tecnica corretta, senza romperli o danneggiarli.",scores:{0:"Non valutabile: nessun oggetto assegnato usato in sessione.",1:"Danneggia di proposito gli oggetti assegnati.",2:"Danneggia per errore gli oggetti assegnati.",3:"Non danneggia gli oggetti solo se supervisionato dall'operatore.",4:"Non danneggia gli oggetti, ma talvolta emette qualche comportamento a rischio.",5:"Usa e conserva da solo gli oggetti (forbici, sigillatrice) con tecnica corretta, senza danni."}},
-      {id:"h07",text:"Custodisce i propri oggetti personali in modo adeguato",note:"Es. occhiali, telefono, portafoglio, chiavi: valutare se l'utente sa dove ha lasciato i propri oggetti e li custodisce in modo ordinato.",scores:{0:"Non valutabile: nessun oggetto personale con sé in sessione.",1:"Perde oggetti personali lasciandoli in posti casuali di cui poi si dimentica.",2:"Tende a dimenticarsi i suoi oggetti personali, non li riordina solo se sollecitato dall'operatore (es: ricorda di mettere nello zaino i tuoi occhiali).",3:"Tende a lasciare i suoi oggetti personali in giro e li riordina solo su richiesta dell'op. In caso di spostamenti però si ricorda di averli.",4:"Tende a mettere correttamente a posto i suoi oggetti personali, ma talvolta ne dimentica qualcuno in giro.",5:"A cura dei propri oggetti ed è ordinato nel tenerli e curarli."}}]},
+      {id:"h07",text:"Custodisce i propri oggetti personali in modo adeguato",note:"Es. occhiali, telefono, portafoglio, chiavi: valutare se l'utente sa dove ha lasciato i propri oggetti e li custodisce in modo ordinato.",scores:{0:"Non valutabile: nessun oggetto personale con sé in sessione.",1:"Perde oggetti personali lasciandoli in posti casuali di cui poi si dimentica.",2:"Tende a dimenticarsi i suoi oggetti personali, li riordina solo se sollecitato dall'operatore (es: ricorda di mettere nello zaino i tuoi occhiali).",3:"Tende a lasciare i suoi oggetti personali in giro e li riordina solo su richiesta dell'op. In caso di spostamenti però si ricorda di averli.",4:"Tende a mettere correttamente a posto i suoi oggetti personali, ma talvolta ne dimentica qualcuno in giro.",5:"Ha cura dei propri oggetti ed è ordinato nel tenerli e curarli."}}]},
     {label:"Autonomia operativa nel compito",questions:[
       {id:"h08",text:"Prepara autonomamente il proprio spazio di lavoro (ove possibile)",note:"Valutare se l'utente prende da solo i materiali necessari e allestisce la postazione prima di iniziare, senza attendere che l'operatore lo prepari.",scores:{0:"Non valutabile: nessuna preparazione richiesta in sessione.",1:"Non prepara nulla: si siede senza materiali.",2:"Prepara solo con la mano guidata dall'operatore.",3:"Prepara se l'operatore elenca a voce i materiali.",4:"Prepara seguendo una foto o una lista dei materiali, o con un cenno.",5:"Prende e dispone da solo tutto il necessario e si siede pronto."}},
       {id:"h09",text:"Recupera autonomamente i materiali necessari quando finiti, senza attendere l'operatore",note:"Osservare se, finito il materiale (es. etichette, sacchetti), l'utente va autonomamente a rifornirsi senza bloccarsi o attendere l'operatore.",scores:{0:"Non valutabile: nessun materiale esaurito in sessione.",1:"Resta fermo o si agita quando il materiale finisce.",2:"Va a prenderlo solo se accompagnato fisicamente.",3:"Lo recupera se l'operatore glielo dice a voce.",4:"Lo recupera con un cenno verso lo scaffale.",5:"Lo recupera da solo, senza attendere l'operatore."}},
@@ -1215,11 +1220,11 @@ const QUESTION_BANK = [
     {label:"Acquisizione di nuove abilità",questions:[
       {id:"i01",text:"Chiede chiarimenti in modo funzionale quando non capisce un'istruzione",note:"Osservare se l'utente chiede spiegazioni in modo funzionale (alzando la mano, usando simboli CAA) quando non ha compreso una consegna.",scores:{0:"Non valutabile: nessuna istruzione poco chiara in sessione.",1:"Resta bloccato o si agita senza chiedere, nonostante la mediazione dell'operatore.",2:"Chiede solo se l'operatore insiste nel valutare la comprensione.",3:"Chiede se l'operatore domanda a voce 'hai capito?'.",4:"Chiede nella maggioranza dei casi.",5:"Usa da solo parole, gesti o simboli CAA per dire che non ha capito."}},
       {id:"i02",text:"Generalizza le abilità acquisite ad altri materiali/contesti in modo funzionale",note:"Es. abilità appresa con materiale A applicata a materiale B o in un laboratorio diverso: valutare il trasferimento spontaneo della competenza.",scores:{0:"Non valutabile: nessun nuovo materiale o contesto proposto in sessione.",1:"Non applica l'abilità fuori dal contesto in cui l'ha appresa.",2:"La applica in un nuovo contesto solo se seguito in modo costante dall'op.",3:"La applica con spiegazioni a voce (es. 'fai come abbiamo fatto prima').",4:"Ipotizza un eventuale utilizzo, ma ha bisogno di molte rassicurazioni.",5:"La applica da solo ad altri materiali o laboratori."}},
-      {id:"i03",text:"Consolida le abilità acquisite nelle sessioni successive",note:"Nella sessione successiva, verificare quanto dell'abilità appresa viene ricordato e quale livello di supporto è ancora necessario per ripartire.",scores:{0:"Non valutabile: nessuna abilità appresa da verificare in sessione.",1:"Ogni sessione riparte da zero.",2:"Recupera l'abilità più rapidamente, ma la base di partenza è sempre zero.",3:"Ricorda alcune parti, ma la maggioranza va riappresa.",4:"Ricorda buona parte dell'abilità, la necessità di adattamenti in alcuni punti.",5:"Esegue correttamente da solo l'abilità appresa nelle sessioni precedenti."}}]},
+      {id:"i03",text:"Consolida le abilità acquisite nelle sessioni successive",note:"Nella sessione successiva, verificare quanto dell'abilità appresa viene ricordato e quale livello di supporto è ancora necessario per ripartire.",scores:{0:"Non valutabile: nessuna abilità appresa da verificare in sessione.",1:"Ogni sessione riparte da zero.",2:"Recupera l'abilità più rapidamente, ma la base di partenza è sempre zero.",3:"Ricorda alcune parti, ma la maggioranza va riappresa.",4:"Ricorda buona parte dell'abilità, necessita di adattamenti in alcuni punti.",5:"Esegue correttamente da solo l'abilità appresa nelle sessioni precedenti."}}]},
     {label:"Flessibilità cognitiva",questions:[
       {id:"i04",text:"Si adatta a modifiche nel metodo di lavoro",note:"Es. cambio di strumento, inversione dell'ordine dei passaggi: osservare se l'utente accetta la modifica e applica il nuovo metodo senza resistenza.",scores:{0:"Non valutabile: nessuna modifica del metodo in sessione.",1:"Rifiuta la modifica o la ignora anche con supporto o richiesta dell'op.",2:"Applica il nuovo metodo solo con supporto costante dell'operatore.",3:"Applica il nuovo metodo con iniziale guida dell'operatore, ma commette qualche errore.",4:"Applica il nuovo metodo con iniziale guida dell'operatore, e poi lo esegue correttamente.",5:"Apprende subito il nuovo metodo, senza resistenza e senza errori."}},
       {id:"i05",text:"Accetta lavori nuovi proposti dall'operatore",note:"Valutare la reazione immediata alla proposta di un compito nuovo o non familiare: apertura, curiosità, resistenza o rifiuto.",scores:{0:"Non valutabile: nessun lavoro nuovo proposto in sessione.",1:"Rifiuta il lavoro nuovo nonostante la mediazione dell'operatore.",2:"Accetta un lavoro nuovo solo con una lunga mediazione dell'operatore.",3:"Accetta un lavoro nuovo dopo una breve mediazione dell'operatore.",4:"Accetta subito un lavoro nuovo, ma tende a lamentarsi.",5:"Accetta e inizia da solo, con interesse."}},
-      {id:"i06",text:"Risolve piccoli ostacoli pratici in modo autonomo (problem solving elementare)",note:"Es. materiale finito, strumento bloccato, elemento mancante: osservare se l'utente trova una soluzione pratica in autonomia senza agitarsi.",scores:{0:"Non valutabile: nessun ostacolo pratico in sessione.",1:"Si blocca o si agita senza reagire anche con supporto dell'op.",2:"Si blocca o si agita senza reagire, ma poi procede se supportato dall'op.",3:"Risolve se l'operatore suggerisce a voce la soluzione. Autonomamente, ma in modo approssimativo.",4:"Risolve in autonomia in modo discreto.",5:"Risolve in autonomia in modo corretto."}},
+      {id:"i06",text:"Risolve piccoli ostacoli pratici in modo autonomo (problem solving elementare)",note:"Es. materiale finito, strumento bloccato, elemento mancante: osservare se l'utente trova una soluzione pratica in autonomia senza agitarsi.",scores:{0:"Non valutabile: nessun ostacolo pratico in sessione.",1:"Si blocca o si agita senza reagire anche con supporto dell'op.",2:"Si blocca o si agita senza reagire, ma poi procede se supportato dall'op.",3:"Risolve se l'operatore suggerisce a voce la soluzione.",4:"Risolve in autonomia in modo discreto.",5:"Risolve in autonomia in modo corretto."}},
       {id:"i07",text:"Gestisce situazioni complesse in modo autonomo (problem solving avanzato)",note:"Es. compagno assente, modifica imprevista della postazione, conflitto da risolvere: valutare la capacità di elaborare una strategia autonoma e funzionale.",scores:{0:"Non valutabile: nessuna situazione complessa in sessione.",1:"Non gestisce o rifiuta la situazione, nemmeno con supporto dell'operatore.",2:"Risolve solo con il supporto costante dell'op.",3:"Risolve se l'operatore suggerisce la strategia. Oppure ne elabora una lui stesso, ma con risultati approssimativi.",4:"Risolve in autonomia in modo discreto.",5:"Risolve da solo in modo corretto e avvisa l'operatore quando serve."}}]}]}
 ];
 
@@ -2281,6 +2286,67 @@ function toggleResBlock(blockId,btn){
   body.classList.toggle('section-body-hidden',!newVisible);
 }
 
+let _resultsFilter={mode:'all',month:'',from:'',to:''};
+function applyResultsFilter(allDates){
+  const f=_resultsFilter;
+  if(f.mode==='all')return allDates;
+  if(f.mode==='month'&&f.month){return allDates.filter(d=>d.startsWith(f.month))}
+  if(f.mode==='range'){
+    return allDates.filter(d=>{
+      if(f.from&&d<f.from)return false;
+      if(f.to&&d>f.to)return false;
+      return true;
+    });
+  }
+  return allDates;
+}
+function buildResultsFilterUI(allDates){
+  // extract distinct months
+  const months=[...new Set(allDates.map(d=>d.slice(0,7)))].sort();
+  const monthOpts=months.map(m=>{
+    const [y,mo]=m.split('-');
+    const label=new Date(+y,+mo-1,1).toLocaleString('it-IT',{month:'long',year:'numeric'});
+    return`<option value="${m}"${_resultsFilter.month===m?'selected':''}>${label}</option>`;
+  }).join('');
+  return`<div class="results-filter-bar no-print" id="results-filter-bar">
+    <span style="font-size:.75rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">🔍 Filtro periodo:</span>
+    <label style="display:flex;align-items:center;gap:5px;cursor:pointer">
+      <input type="radio" name="rfmode" value="all" ${_resultsFilter.mode==='all'?'checked':''} onchange="setResultsFilterMode('all')">
+      <span style="font-size:.83rem">Tutto</span>
+    </label>
+    <label style="display:flex;align-items:center;gap:5px;cursor:pointer">
+      <input type="radio" name="rfmode" value="month" ${_resultsFilter.mode==='month'?'checked':''} onchange="setResultsFilterMode('month')">
+      <span style="font-size:.83rem">Per mese:</span>
+    </label>
+    <select id="rf-month-sel" style="padding:4px 8px;border-radius:6px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:.82rem;min-width:140px" ${_resultsFilter.mode!=='month'?'disabled':''} onchange="setResultsFilterMonth(this.value)">
+      <option value="">— scegli mese —</option>${monthOpts}
+    </select>
+    <label style="display:flex;align-items:center;gap:5px;cursor:pointer">
+      <input type="radio" name="rfmode" value="range" ${_resultsFilter.mode==='range'?'checked':''} onchange="setResultsFilterMode('range')">
+      <span style="font-size:.83rem">Da:</span>
+    </label>
+    <input type="date" id="rf-from" value="${_resultsFilter.from}" ${_resultsFilter.mode!=='range'?'disabled':''} style="padding:4px 8px;border-radius:6px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:.82rem" onchange="setResultsFilterRange()">
+    <span style="font-size:.83rem" id="rf-to-label">A:</span>
+    <input type="date" id="rf-to" value="${_resultsFilter.to}" ${_resultsFilter.mode!=='range'?'disabled':''} style="padding:4px 8px;border-radius:6px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:.82rem" onchange="setResultsFilterRange()">
+  </div>`;
+}
+function setResultsFilterMode(mode){
+  _resultsFilter.mode=mode;
+  if(mode==='month'&&!_resultsFilter.month){
+    // auto-pick last month available
+    const allDates=Object.keys(pdata.compilations||{}).filter(d=>Object.keys((pdata.compilations||{})[d]).length>0).sort();
+    const months=[...new Set(allDates.map(d=>d.slice(0,7)))].sort();
+    if(months.length)_resultsFilter.month=months[months.length-1];
+  }
+  renderResults();
+}
+function setResultsFilterMonth(val){_resultsFilter.month=val;if(val)renderResults();}
+function setResultsFilterRange(){
+  _resultsFilter.from=document.getElementById('rf-from')?.value||'';
+  _resultsFilter.to=document.getElementById('rf-to')?.value||'';
+  renderResults();
+}
+
 function renderResults(){
   // auto-select first designed profile if none active
   if(!currentProfileId){
@@ -2290,8 +2356,11 @@ function renderResults(){
   Object.values(chartInstances).forEach(c=>{try{c.destroy()}catch(e){}});chartInstances={};
   const content=document.getElementById('results-content');
   const compilations=pdata.compilations||{};
-  const dates=Object.keys(compilations).filter(d=>Object.keys(compilations[d]).length>0).sort();
-  if(!dates.length){content.innerHTML=`<div class="empty-state"><span class="empty-icon">📭</span><h3>Nessuna compilazione trovata</h3><p>Compila almeno una scheda giornaliera per visualizzare i risultati.</p></div>`;return}
+  const allDates=Object.keys(compilations).filter(d=>Object.keys(compilations[d]).length>0).sort();
+  if(!allDates.length){content.innerHTML=`<div class="empty-state"><span class="empty-icon">📭</span><h3>Nessuna compilazione trovata</h3><p>Compila almeno una scheda giornaliera per visualizzare i risultati.</p></div>`;return}
+  const filterUI=buildResultsFilterUI(allDates);
+  const dates=applyResultsFilter(allDates);
+  if(!dates.length){content.innerHTML=filterUI+`<div class="empty-state"><span class="empty-icon">🔍</span><h3>Nessuna compilazione nel periodo selezionato</h3><p>Modifica il filtro per vedere altri dati.</p></div>`;return}
   const allQIds=pdata.selectedQuestions||[];
   const qMap={};
   QUESTION_BANK.forEach(macro=>macro.micro.forEach(micro=>micro.questions.forEach(q=>{qMap[q.id]={...q,macro:macro.macro,microLabel:micro.label}})));
@@ -2495,6 +2564,7 @@ function renderResults(){
     </div>`;
 
   content.innerHTML=
+    filterUI+
     rBlock('ai-val','🤖 Valutazione Qualitativa AI',aiValHTML)+
     rBlock('riepilogo','📊 Riepilogo Valutazione',riepilogoHTML)+
     rBlock('andamento','📈 Andamento Giornaliero',andamentoHTML)+
@@ -3371,9 +3441,18 @@ function processImport(jsonText){
     if(data._app!=='ValutaApp'||!Array.isArray(data.profiles)){
       result.className='import-result err';result.textContent='❌ File non riconosciuto. Assicurati di usare un backup esportato da ValutaApp.';return;
     }
-    let added=0,skipped=0;
+    let added=0,skipped=0,overwritten=0;
     data.profiles.forEach(prof=>{
-      if(profiles.find(p=>p.id===prof.id)){skipped++;return}
+      const existing=profiles.find(p=>p.id===prof.id);
+      if(existing){
+        const choice=confirm(`L'utente "${prof.nome}" è già presente.\n\nPremi OK per sovrascrivere i dati esistenti, oppure Annulla per tenerli invariati.`);
+        if(choice){
+          const idx=profiles.indexOf(existing);profiles[idx]=prof;
+          const pd=(data.profileData||{})[prof.id]||{selectedQuestions:[],compilations:{}};savePdata(prof.id,pd);
+          overwritten++;
+        } else {skipped++;}
+        return;
+      }
       profiles.push(prof);const pd=(data.profileData||{})[prof.id]||{selectedQuestions:[],compilations:{}};savePdata(prof.id,pd);added++;
     });
     saveProfiles();renderProfilesGrid();renderHomeBanner();
@@ -3403,8 +3482,10 @@ function processImport(jsonText){
     result.className='import-result ok';
     const exportDate=data._exportedAt?' (backup del '+new Date(data._exportedAt).toLocaleDateString('it-IT')+')':'';
     const settingsNote=settingsRestored.length?`<br><span style="font-size:.78rem">⚙️ Impostazioni ripristinate: ${settingsRestored.join(', ')}.</span>`:'';
-    result.innerHTML=`✅ Importazione completata${exportDate}:<br><strong>${added}</strong> profil${added===1?'o':'i'} aggiunt${added===1?'o':'i'}${skipped?`, <strong>${skipped}</strong> già present${skipped===1?'e':'i'} (ignorat${skipped===1?'o':'i'})`:''}${settingsNote}.`;
-    notify('✅ Importati '+added+' profil'+(added===1?'o':'i')+'!');
+    const overwrittenNote=overwritten?`, <strong>${overwritten}</strong> sovrascritto/i`:'';
+    const skippedNote=skipped?`, <strong>${skipped}</strong> ignorato/i`:'';
+    result.innerHTML=`✅ Importazione completata${exportDate}:<br><strong>${added}</strong> aggiunto/i${overwrittenNote}${skippedNote}${settingsNote}.`;
+    notify('✅ Importati: '+added+' nuovi'+(overwritten?', '+overwritten+' sovrascritti':'')+'!');
   }catch(e){result.className='import-result err';result.textContent='❌ Errore nella lettura del file. Il file potrebbe essere corrotto.'}
 }
 function dzDragOver(e){e.preventDefault();document.getElementById('drop-zone').classList.add('drag-over')}

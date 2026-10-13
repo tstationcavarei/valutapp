@@ -643,7 +643,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.2.1</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.2.2</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1001,7 +1001,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.2.1</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.2.2</div>
     </div>
   </div>
 </div>
@@ -1440,7 +1440,7 @@ function renderDesign(){
             <div class="micro-label">${micro.label}</div>
             ${micro.questions.map(q=>{
               // strip ICF codes from note, keep only human-readable part; fallback to scores descriptors
-              const rawNote=q.note||(q.scores?`Sufficiente (3): ${q.scores[3]}  |  Ottimo (5): ${q.scores[5]}`:'');
+              const rawNote=q.note||(q.scores?`Minimo (1): ${q.scores[1]}  |  Ottimo (5): ${q.scores[5]}`:'');
               const cleanNote=rawNote?rawNote.replace(/\b[a-z]\d{3,4}\s*(ICF)?:?\s*/gi,'').replace(/ICF/gi,'').trim():'';
               return`<div class="question-item">
                 <input type="checkbox" id="q_${q.id}" value="${q.id}" ${sel.includes(q.id)?'checked':''} onchange="toggleQuestion('${q.id}',this.checked)">
@@ -1923,7 +1923,7 @@ function showDayQuestions(){
       const existingNote=(pdata.notes||{})[currentDay]?.[q.id]||'';
       const hasNote=existingNote.trim().length>0;
       const qd=document.createElement('div');qd.className='q-item';qd.setAttribute('data-qid',q.id);
-      const noteText=q.note||(q.scores?`Sufficiente (3): ${q.scores[3]}  |  Ottimo (5): ${q.scores[5]}`:'');
+      const noteText=q.note||(q.scores?`Minimo (1): ${q.scores[1]}  |  Ottimo (5): ${q.scores[5]}`:'');
       const tooltip=noteText?`<div class="q-note-tooltip">💡 ${noteText}</div>`:'';
       qd.innerHTML=`<div class="q-text">${q.isCustom?'<span style="font-size:.68rem;background:var(--al);color:var(--accent2);padding:1px 7px;border-radius:10px;font-weight:600;margin-right:6px;vertical-align:middle">libera</span>':''}${q.text}${tooltip}</div>
         <div class="ttap-scale">${TTAP_LABELS.map(t=>`<button class="ttap-btn ${cv===t.val?'selected-'+t.val:''}" title="${(q.scores&&q.scores[t.val])?q.scores[t.val]:t.title}" onclick="setScore('${q.id}',${t.val},this)">${t.label}</button>`).join('')}</div>

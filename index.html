@@ -547,6 +547,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 }
 
 /* ── PRINT ── */
+.print-user-header{display:none}
 @media print{
   *{visibility:hidden}
   #screen-results{visibility:visible;display:block !important;position:absolute;top:0;left:0;width:100%}
@@ -561,6 +562,12 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
   .results-grid{display:grid !important;grid-template-columns:1fr 1fr}
   .abc-read-schema{display:grid !important;grid-template-columns:1fr 1fr 1fr}
   canvas{max-width:100% !important}
+  .print-user-header{display:block !important;text-align:center;padding:18px 0 14px;margin-bottom:6px;border-bottom:2px solid #2b6050}
+  .print-user-header h1{font-family:'Playfair Display',Georgia,serif;font-size:2rem;color:#2b6050;font-weight:700;margin-bottom:4px}
+  .print-user-header p{font-size:.82rem;color:#555;margin:0}
+  /* tag table: unwrap overflow so tutto si stampa */
+  .tag-perf-scroll{overflow:visible !important;width:auto !important}
+  .tag-perf-table{font-size:.7rem}
   :root{--bg:#fff;--bg2:#f5f5f5;--card:#fff;--border:#ddd;--text:#111;--text2:#555;--text3:#888;--accent:#2b6050;--accent2:#3d8068;--al:#e0f0e8;--al2:#c8e8d8;--danger:#b53030;--dl:#fce8e8;--warn:#ad5f1a;--wl:#fdecd8;--gold:#9e761e}
 }
 
@@ -691,7 +698,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.3.3</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.3.4</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1100,7 +1107,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.3.3</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.3.4</div>
     </div>
   </div>
 </div>
@@ -2318,7 +2325,7 @@ function buildResultsFilterUI(allDates){
       <input type="radio" name="rfmode" value="month" ${_resultsFilter.mode==='month'?'checked':''} onchange="setResultsFilterMode('month')">
       <span style="font-size:.83rem">Per mese:</span>
     </label>
-    <select id="rf-month-sel" style="padding:4px 8px;border-radius:6px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:.82rem;min-width:140px" ${_resultsFilter.mode!=='month'?'disabled':''} onchange="setResultsFilterMonth(this.value)">
+    <select id="rf-month-sel" style="padding:4px 8px;border-radius:6px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:.82rem;min-width:140px;${_resultsFilter.mode!=='month'?'display:none':''}" onchange="setResultsFilterMonth(this.value)">
       <option value="">— scegli mese —</option>${monthOpts}
     </select>
     <label style="display:flex;align-items:center;gap:5px;cursor:pointer">
@@ -2491,7 +2498,7 @@ function renderResults(){
     </tr>`;
     tagPerfHTML=`
       <p style="font-size:.82rem;color:var(--text2);margin-bottom:14px">Confronto delle medie per macro area, raggruppate per tipo di lavoro osservato. Solo le aree con almeno una valutazione nel contesto di quel tag vengono mostrate.</p>
-      <div style="overflow-x:auto">
+      <div class="tag-perf-scroll" style="overflow-x:auto">
         <table class="tag-perf-table">
           ${tableHeader}
           <tbody>${tableRows}${overallRow}</tbody>
@@ -2563,7 +2570,9 @@ function renderResults(){
       </div>
     </div>`;
 
+  const printHeader=`<div class="print-user-header"><h1>${prof?.nome||'—'}</h1><p>${prof?.servizio?prof.servizio+' — ':''}${dates[0]} → ${dates[dates.length-1]}</p></div>`;
   content.innerHTML=
+    printHeader+
     filterUI+
     rBlock('ai-val','🤖 Valutazione Qualitativa AI',aiValHTML)+
     rBlock('riepilogo','📊 Riepilogo Valutazione',riepilogoHTML)+

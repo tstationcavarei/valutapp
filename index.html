@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.3.9</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.4.0</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1170,7 +1170,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.3.9</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.4.0</div>
     </div>
   </div>
 </div>
@@ -3431,16 +3431,27 @@ function renderCoverage(){
     return;
   }
 
-  // Build qMap from QUESTION_BANK (id → {text, macro, icon, microLabel})
+  // Build qMap from QUESTION_BANK
   const qMap={};
   QUESTION_BANK.forEach(macro=>macro.micro.forEach(m=>m.questions.forEach(q=>{
-    qMap[q.id]={...q,macro:macro.macro,icon:macro.icon,microLabel:m.label};
+    qMap[q.id]={...q,macro:macro.macro,icon:macro.icon};
   })));
 
-  let globalCritical=0,globalScarsa=0,globalOK=0,globalTotal=0;
-  const usersData=[];
+  // Helper: dato array di counts, restituisce soglia sotto-media
+  // Regola: media dell'utente su tutte le sue domande.
+  // Una domanda è "sotto-media" se count < (media - 0.5 * stddev) E scarto assoluto >= 1.
+  // Se stddev ≈ 0 (tutti uguali) → nessuna lacuna.
+  function calcThreshold(counts){
+    if(!counts.length)return{mean:0,threshold:0,flat:true};
+    const mean=counts.reduce((a,b)=>a+b,0)/counts.length;
+    const variance=counts.reduce((s,c)=>s+(c-mean)**2,0)/counts.length;
+    const std=Math.sqrt(variance);
+    if(std<0.5)return{mean,threshold:mean,flat:true}; // tutti troppo simili
+    return{mean,threshold:mean-0.5*std,flat:false};
+  }
 
-  // globalMacro: macroName → {icon, critical, scarsa, ok, total}
+  const usersData=[];
+  // globalMacro per panoramica: macroName → {icon, underCount, totalQuestions (aggregato utenti)}
   const globalMacro={};
 
   profiles.forEach(prof=>{
@@ -3449,7 +3460,7 @@ function renderCoverage(){
     if(!sel.length)return;
 
     const compilations=pd.compilations||{};
-    // Count non-zero compilations per qId
+    // Conta compilazioni con score>0 per ogni qId
     const qCount={};
     sel.forEach(id=>{ qCount[id]=0; });
     Object.values(compilations).forEach(dayScores=>{
@@ -3458,38 +3469,39 @@ function renderCoverage(){
       });
     });
 
-    // Group by macro (standard questions)
+    // Costruisci macroMap con testo domanda
     const macroMap={};
     QUESTION_BANK.forEach(macro=>{
-      const macroIds=macro.micro.flatMap(m=>m.questions.map(q=>q.id)).filter(id=>sel.includes(id));
-      if(macroIds.length>0){
-        macroMap[macro.macro]={icon:macro.icon,questions:macroIds.map(id=>({
-          id,count:qCount[id]||0,
-          text:qMap[id]?.text||id
-        }))};
-      }
+      const ids=macro.micro.flatMap(m=>m.questions.map(q=>q.id)).filter(id=>sel.includes(id));
+      if(ids.length) macroMap[macro.macro]={icon:macro.icon,questions:ids.map(id=>({id,count:qCount[id]||0,text:qMap[id]?.text||id}))};
     });
-    // Custom questions
-    Object.entries(pd.customQuestions||{}).forEach(([macroName,cqs])=>{
+    Object.entries(pd.customQuestions||{}).forEach(([mName,cqs])=>{
       cqs.filter(cq=>sel.includes(cq.id)).forEach(cq=>{
-        if(!macroMap[macroName])macroMap[macroName]={icon:'✏️',questions:[]};
-        macroMap[macroName].questions.push({id:cq.id,count:qCount[cq.id]||0,text:cq.text});
+        if(!macroMap[mName])macroMap[mName]={icon:'✏️',questions:[]};
+        macroMap[mName].questions.push({id:cq.id,count:qCount[cq.id]||0,text:cq.text});
       });
     });
 
-    let uCritical=0,uScarsa=0,uOK=0;
+    // Calcola soglia globale sull'utente (tutti i suoi count insieme)
+    const allCounts=Object.values(qCount);
+    const{mean,threshold,flat}=calcThreshold(allCounts);
+
+    // Marca ogni domanda come sotto-media
+    let underTotal=0;
     Object.entries(macroMap).forEach(([mName,mv])=>{
-      if(!globalMacro[mName])globalMacro[mName]={icon:mv.icon,critical:0,scarsa:0,ok:0,total:0};
       mv.questions.forEach(q=>{
-        if(q.count===0){uCritical++;globalMacro[mName].critical++;}
-        else if(q.count<5){uScarsa++;globalMacro[mName].scarsa++;}
-        else{uOK++;globalMacro[mName].ok++;}
+        q.under=!flat&&q.count<threshold&&(mean-q.count)>=1;
+        if(q.under)underTotal++;
+      });
+      // Aggiorna globalMacro
+      if(!globalMacro[mName])globalMacro[mName]={icon:mv.icon,under:0,total:0};
+      mv.questions.forEach(q=>{
         globalMacro[mName].total++;
+        if(q.under)globalMacro[mName].under++;
       });
     });
-    const uTotal=uCritical+uScarsa+uOK;
-    globalCritical+=uCritical;globalScarsa+=uScarsa;globalOK+=uOK;globalTotal+=uTotal;
-    usersData.push({prof,macroMap,uCritical,uScarsa,uOK,uTotal});
+
+    usersData.push({prof,macroMap,underTotal,mean:Math.round(mean*10)/10,flat});
   });
 
   if(!usersData.length){
@@ -3497,120 +3509,88 @@ function renderCoverage(){
     return;
   }
 
-  // Sort users: most critical first, then most scarsa
-  usersData.sort((a,b)=>b.uCritical-a.uCritical||(b.uScarsa-a.uScarsa));
+  // Sort: più lacune prima
+  usersData.sort((a,b)=>b.underTotal-a.underTotal);
 
   // AI context
   const covContextLines=usersData.map(u=>{
     const macroLines=Object.entries(u.macroMap).map(([mName,mv])=>{
-      const cr=mv.questions.filter(q=>q.count===0).length;
-      const sc=mv.questions.filter(q=>q.count>0&&q.count<5).length;
-      const ok=mv.questions.filter(q=>q.count>=5).length;
-      return`  ${mv.icon} ${mName}: ${cr} critiche, ${sc} scarse, ${ok} OK (tot. ${mv.questions.length})`;
-    }).join('\n');
-    return`Utente: ${u.prof.nome}\n${macroLines}`;
+      const under=mv.questions.filter(q=>q.under);
+      if(!under.length)return null;
+      return`  ${mv.icon} ${mName}: ${under.map(q=>`"${q.text.slice(0,60)}" (${q.count} comp.)`).join(', ')}`;
+    }).filter(Boolean).join('\n');
+    return`Utente: ${u.prof.nome} (media ${u.mean} comp/domanda)\n${macroLines||'  Nessuna lacuna'}`;
   }).join('\n\n');
-  window._coverageContext={totalUsers:usersData.length,globalCritical,globalScarsa,globalOK,globalTotal,covContextLines};
+  window._coverageContext={totalUsers:usersData.length,covContextLines};
 
   const aiEnabled=(appMeta.aiEnabled&&(appMeta.anthropicKey||appMeta.allowAI));
 
-  // ── SEZIONE GLOBALE PER AREA ──
-  // Sort macro by (critical+scarsa) desc
-  const sortedGlobalMacro=Object.entries(globalMacro)
-    .filter(([,v])=>v.critical+v.scarsa>0)
-    .sort((a,b)=>(b[1].critical+b[1].scarsa)-(a[1].critical+a[1].scarsa));
+  // ── PANORAMICA GLOBALE PER AREA ──
+  const sortedGlobal=Object.entries(globalMacro)
+    .filter(([,v])=>v.under>0)
+    .sort((a,b)=>b[1].under-a[1].under);
 
-  const globalMacroRows=sortedGlobalMacro.map(([mName,mv])=>{
-    const lacune=mv.critical+mv.scarsa;
-    const pct=mv.total?Math.round((mv.ok/mv.total)*100):0;
-    const barColor=pct>=60?'var(--accent2)':pct>=30?'var(--warn)':'var(--danger)';
+  const globalRows=sortedGlobal.map(([mName,mv])=>{
+    const pct=mv.total?Math.round(((mv.total-mv.under)/mv.total)*100):100;
+    const barColor=pct>=80?'var(--accent2)':pct>=50?'var(--warn)':'var(--danger)';
     return`<div class="cov-macro-row" style="padding:9px 0">
       <span class="cov-macro-icon">${mv.icon}</span>
       <span class="cov-macro-name" style="font-size:.88rem">${mName}</span>
-      <div class="cov-macro-pills">
-        ${mv.critical>0?`<span class="cov-pill cov-pill-red">🔴 ${mv.critical}</span>`:''}
-        ${mv.scarsa>0?`<span class="cov-pill cov-pill-orange">🟡 ${mv.scarsa}</span>`:''}
-      </div>
+      <span class="cov-pill cov-pill-orange" style="font-size:.7rem">${mv.under} sotto-media</span>
       <div class="cov-bar-wrap" style="width:70px"><div class="cov-bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
-      <span style="font-size:.7rem;color:var(--text3);min-width:32px;text-align:right">${mv.ok}/${mv.total}</span>
+      <span style="font-size:.7rem;color:var(--text3);min-width:32px;text-align:right">${mv.total-mv.under}/${mv.total} OK</span>
     </div>`;
   }).join('');
 
   const globalSection=`<div class="card" style="margin-bottom:20px">
     <h2 style="font-family:var(--fd);font-size:1.15rem;margin-bottom:4px">📊 Panoramica Globale per Area</h2>
-    <p style="font-size:.8rem;color:var(--text2);margin-bottom:14px">Domande carenti aggregate su tutti gli utenti — solo le aree con lacune. 🔴 = mai valutato &nbsp;🟡 = 1–4 compilazioni</p>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
-      <div class="cov-summary-tile"><div class="cst-num" style="color:var(--danger)">${globalCritical}</div><div class="cst-label">Critiche<br><span style="font-size:.62rem;font-weight:400;text-transform:none">0 compilazioni</span></div></div>
-      <div class="cov-summary-tile"><div class="cst-num" style="color:var(--warn)">${globalScarsa}</div><div class="cst-label">Scarse<br><span style="font-size:.62rem;font-weight:400;text-transform:none">1–4 compilazioni</span></div></div>
-      <div class="cov-summary-tile"><div class="cst-num" style="color:var(--accent2)">${globalOK}</div><div class="cst-label">Sufficienti<br><span style="font-size:.62rem;font-weight:400;text-transform:none">5+ compilazioni</span></div></div>
-    </div>
-    ${sortedGlobalMacro.length?globalMacroRows:`<p style="font-size:.84rem;color:var(--accent2)">✅ Tutte le aree hanno copertura sufficiente.</p>`}
+    <p style="font-size:.8rem;color:var(--text2);margin-bottom:14px">Domande sotto-media rispetto alle altre domande dello stesso utente — aggregate per area funzionale. Solo aree con lacune.</p>
+    ${sortedGlobal.length?globalRows:`<p style="font-size:.84rem;color:var(--accent2);padding:6px 0">✅ Nessuna lacuna rilevata: tutte le domande hanno una copertura omogenea.</p>`}
   </div>`;
 
   // ── CARD PER UTENTE ──
   const userCards=usersData.map((u,ui)=>{
-    // Solo aree con almeno una domanda carente
-    const problematicAreas=Object.entries(u.macroMap).filter(([,mv])=>
-      mv.questions.some(q=>q.count<5)
-    );
-    if(!problematicAreas.length){
-      // utente tutto OK: mostra solo badge verde, nessun dettaglio
+    if(u.flat||!u.underTotal){
+      const msg=u.flat?'Compilazioni omogenee — nessuna lacuna rilevata':'Copertura uniforme';
       return`<div class="cov-user-card" style="padding:13px 18px;display:flex;align-items:center;gap:12px">
         <span style="font-size:1.1rem">🟢</span>
         <span class="cov-user-name" style="font-size:.95rem">${u.prof.nome}</span>
-        <span class="cov-stat-badge cov-stat-green" style="margin-left:auto">Copertura completa</span>
+        <span class="cov-stat-badge cov-stat-green" style="margin-left:auto">${msg}</span>
+        <span style="font-size:.72rem;color:var(--text3)">media ${u.mean}</span>
       </div>`;
     }
 
+    const problematicAreas=Object.entries(u.macroMap).filter(([,mv])=>mv.questions.some(q=>q.under));
+
     const areaBlocks=problematicAreas.map(([mName,mv],ai)=>{
-      const badQs=mv.questions.filter(q=>q.count<5).sort((a,b)=>a.count-b.count);
-      const cr=badQs.filter(q=>q.count===0).length;
-      const sc=badQs.filter(q=>q.count>0).length;
+      const underQs=mv.questions.filter(q=>q.under).sort((a,b)=>a.count-b.count);
       const blockId=`cov-${ui}-${ai}`;
-
-      // Domande carenti (nascoste, espanse al click)
-      const qRows=badQs.map(q=>{
-        const badge=q.count===0
-          ?`<span class="cov-pill cov-pill-red" style="font-size:.66rem">🔴 Nessuna</span>`
-          :`<span class="cov-pill cov-pill-orange" style="font-size:.66rem">🟡 ${q.count}</span>`;
-        return`<div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
-          ${badge}
+      const qRows=underQs.map(q=>`<div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
+          <span style="font-size:.72rem;font-weight:700;color:var(--warn);white-space:nowrap;padding-top:2px">${q.count} comp.</span>
           <span style="font-size:.8rem;color:var(--text);line-height:1.45;flex:1">${q.text}</span>
-        </div>`;
-      }).join('');
-
-      const pillsHeader=[
-        cr>0?`<span class="cov-pill cov-pill-red">🔴 ${cr}</span>`:'',
-        sc>0?`<span class="cov-pill cov-pill-orange">🟡 ${sc}</span>`:''
-      ].filter(Boolean).join('');
+        </div>`).join('');
 
       return`<div style="border:1.5px solid var(--border);border-radius:var(--rs);overflow:hidden;margin-bottom:8px">
         <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;background:var(--bg2);user-select:none"
              onclick="const b=document.getElementById('${blockId}');b.style.display=b.style.display==='none'?'block':'none';this.querySelector('.cov-chevron').textContent=b.style.display==='none'?'▸':'▾'">
-          <span style="font-size:.9rem">${mv.icon}</span>
+          <span>${mv.icon}</span>
           <span style="font-size:.84rem;font-weight:700;color:var(--text);flex:1">${mName}</span>
-          <div style="display:flex;gap:4px">${pillsHeader}</div>
-          <span class="cov-chevron" style="font-size:.7rem;color:var(--text3);margin-left:4px">▸</span>
+          <span class="cov-pill cov-pill-orange" style="font-size:.7rem">${underQs.length} da valutare</span>
+          <span class="cov-chevron" style="font-size:.7rem;color:var(--text3);margin-left:6px">▸</span>
         </div>
         <div id="${blockId}" style="display:none;padding:6px 12px 10px">
-          <div style="font-size:.72rem;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px">Domande da valutare</div>
+          <div style="font-size:.7rem;color:var(--text3);margin-bottom:6px">Media utente: <strong>${u.mean}</strong> compilazioni/domanda</div>
           ${qRows}
         </div>
       </div>`;
     }).join('');
 
-    const urgIcon=u.uCritical>0?'🔴':u.uScarsa>0?'🟡':'🟢';
-    const headerStats=[
-      u.uCritical>0?`<span class="cov-stat-badge cov-stat-red">🔴 ${u.uCritical}</span>`:'',
-      u.uScarsa>0?`<span class="cov-stat-badge cov-stat-orange">🟡 ${u.uScarsa}</span>`:'',
-      `<span class="cov-stat-badge cov-stat-green">🟢 ${u.uOK}/${u.uTotal}</span>`
-    ].filter(Boolean).join('');
-
     return`<div class="cov-user-card" id="cov-user-${ui}">
       <div class="cov-user-header" onclick="const b=document.getElementById('cov-body-${ui}');b.style.display=b.style.display==='none'?'block':'none';this.querySelector('.cov-user-chevron').textContent=b.style.display==='none'?'▸':'▾'">
-        <div class="cov-user-name">${urgIcon} ${u.prof.nome}</div>
+        <div class="cov-user-name">🟡 ${u.prof.nome}</div>
         <div style="display:flex;align-items:center;gap:8px">
-          <div class="cov-user-stats">${headerStats}</div>
+          <span class="cov-stat-badge cov-stat-orange">${u.underTotal} domande sotto-media</span>
+          <span style="font-size:.72rem;color:var(--text3)">media ${u.mean}</span>
           <span class="cov-user-chevron" style="font-size:.75rem;color:var(--text3)">▾</span>
         </div>
       </div>
@@ -3621,7 +3601,7 @@ function renderCoverage(){
   // ── AI SECTION ──
   const aiSection=`<div class="card" style="margin-top:24px">
     <h3 style="font-family:var(--fd);font-size:1.05rem;margin-bottom:6px">🤖 Consigli AI per il Laboratorio</h3>
-    <p style="font-size:.83rem;color:var(--text2);margin-bottom:14px">Genera un resoconto su come organizzare il laboratorio per coprire le aree carenti.</p>
+    <p style="font-size:.83rem;color:var(--text2);margin-bottom:14px">Genera un resoconto su come organizzare il laboratorio per coprire le domande sotto-media.</p>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
       ${aiEnabled?`<button class="btn btn-primary btn-sm" onclick="generateCoverageAI()">✨ Genera con AI</button>`:''}
       <button class="btn btn-ghost btn-sm" onclick="generateCoveragePrompt()">📋 Genera Prompt</button>

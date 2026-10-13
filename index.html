@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.3.8</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.3.9</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1170,7 +1170,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.3.8</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.3.9</div>
     </div>
   </div>
 </div>
@@ -3622,19 +3622,19 @@ function renderCoverage(){
   const aiSection=`<div class="card" style="margin-top:24px">
     <h3 style="font-family:var(--fd);font-size:1.05rem;margin-bottom:6px">🤖 Consigli AI per il Laboratorio</h3>
     <p style="font-size:.83rem;color:var(--text2);margin-bottom:14px">Genera un resoconto su come organizzare il laboratorio per coprire le aree carenti.</p>
-    ${aiEnabled?`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
-      <button class="btn btn-primary btn-sm" onclick="generateCoverageAI()">✨ Genera con AI</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+      ${aiEnabled?`<button class="btn btn-primary btn-sm" onclick="generateCoverageAI()">✨ Genera con AI</button>`:''}
       <button class="btn btn-ghost btn-sm" onclick="generateCoveragePrompt()">📋 Genera Prompt</button>
     </div>
-    <div id="coverage-ai-output" class="ai-val-output" style="min-height:60px"></div>
+    ${aiEnabled?`<div id="coverage-ai-output" class="ai-val-output" style="min-height:60px"></div>`:''}
     <div id="coverage-prompt-box" style="display:none;margin-top:14px">
-      <label style="font-size:.78rem;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase">Prompt generato</label>
+      <label style="font-size:.78rem;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase">Prompt generato — copialo e aprilo su claude.ai</label>
       <textarea id="coverage-prompt-text" class="form-control" rows="8" style="margin-top:6px;font-size:.78rem;font-family:monospace;resize:vertical" readonly></textarea>
-      <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="navigator.clipboard.writeText(document.getElementById('coverage-prompt-text').value).then(()=>notify('📋 Copiato!'))">📋 Copia</button>
-    </div>`
-    :`<div style="background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:14px 16px;font-size:.84rem;color:var(--text2)">
-      🔒 Funzioni AI disattivate. Attivale nelle <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:.78rem" onclick="openSettingsModal()">⚙️ Impostazioni</button>
-    </div>`}
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('coverage-prompt-text').value).then(()=>notify('📋 Copiato!'))">📋 Copia</button>
+        <button class="btn btn-primary btn-sm" onclick="copyAndOpenClaude('coverage-prompt-text')">🔗 Copia e apri Claude</button>
+      </div>
+    </div>
   </div>`;
 
   content.innerHTML=globalSection+userCards+aiSection;

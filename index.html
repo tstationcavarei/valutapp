@@ -516,6 +516,31 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 .results-filter-bar input[type="radio"]{width:auto;accent-color:var(--accent)}
 .results-filter-bar input[type="date"]{width:auto;padding:4px 8px;font-size:.82rem}
 .area-card.tags-card{background:linear-gradient(140deg,#5a2a7a 0%,#8a44b8 100%);border:2px solid #5a2a7a;color:#fff;box-shadow:0 5px 20px rgba(90,42,122,.35)}
+.area-card.coverage-card{background:linear-gradient(140deg,#1a4a6a 0%,#2a6e9e 100%);border:2px solid #1a4a6a;color:#fff;box-shadow:0 5px 20px rgba(26,74,106,.35)}
+/* coverage screen */
+.cov-user-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:18px 20px;margin-bottom:16px;box-shadow:var(--sh)}
+.cov-user-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;cursor:pointer}
+.cov-user-name{font-family:var(--fd);font-size:1.05rem;font-weight:700;color:var(--text)}
+.cov-user-stats{display:flex;gap:10px;font-size:.75rem;font-weight:600}
+.cov-stat-badge{padding:3px 10px;border-radius:10px}
+.cov-stat-red{background:var(--dl);color:var(--danger)}
+.cov-stat-orange{background:var(--wl);color:var(--warn)}
+.cov-stat-green{background:var(--al);color:var(--accent2)}
+.cov-macro-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:.83rem}
+.cov-macro-row:last-child{border-bottom:none}
+.cov-macro-icon{width:26px;text-align:center;flex-shrink:0}
+.cov-macro-name{flex:1;font-weight:600;color:var(--text)}
+.cov-macro-pills{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.cov-pill{padding:2px 8px;border-radius:8px;font-size:.68rem;font-weight:700}
+.cov-pill-red{background:var(--dl);color:var(--danger)}
+.cov-pill-orange{background:var(--wl);color:var(--warn)}
+.cov-pill-green{background:var(--al);color:var(--accent2)}
+.cov-bar-wrap{width:90px;height:6px;background:var(--border);border-radius:3px;overflow:hidden;flex-shrink:0}
+.cov-bar-fill{height:100%;border-radius:3px;transition:width .3s}
+.cov-summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.cov-summary-tile{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:16px;text-align:center;box-shadow:var(--sh)}
+.cov-summary-tile .cst-num{font-family:var(--fd);font-size:1.6rem;font-weight:700}
+.cov-summary-tile .cst-label{font-size:.72rem;color:var(--text3);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-top:3px}
 .tags-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:22px}
 .tag-item-card{background:linear-gradient(150deg,#f2eef8 0%,#f8f6f0 100%);border:1.5px solid #c8b8dc;border-left:4px solid #8a44b8;border-radius:var(--r);padding:13px 13px 11px;position:relative;transition:all .2s;box-shadow:0 2px 8px rgba(90,42,122,.10)}
 [data-theme="dark"] .tag-item-card{background:linear-gradient(150deg,#221830 0%,#1e1b14 100%);border-color:#4a3860;border-left-color:#a060d8}
@@ -548,6 +573,11 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
   .topbar{padding:0 14px}
   .profiles-grid{grid-template-columns:1fr 1fr}
   .hero{padding:36px 16px 28px}
+  .cov-summary-grid{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+  /* 3-col daily cards → 1 col on small screens */
+  .hero > div[style*="grid-template-columns:1fr 1fr 1fr"]{grid-template-columns:1fr !important}
 }
 
 /* ── PRINT ── */
@@ -622,7 +652,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <!-- SEZIONE 1: Lavoro quotidiano (utente attivo + compilazione) -->
     <div class="home-section-label">📋 Lavoro quotidiano</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:680px;margin:0 auto 32px">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;max-width:1020px;margin:0 auto 32px">
       <div class="area-card work-compile-card" onclick="goTo('screen-compile')" style="padding:22px 16px">
         <div class="ac-icon">📋</div>
         <h3>Area Compilazione Utente</h3>
@@ -632,6 +662,11 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         <div class="ac-icon">📊</div>
         <h3>Area Risultati Utente</h3>
         <p>Visualizza analisi e grafici</p>
+      </div>
+      <div class="area-card coverage-card" onclick="goTo('screen-coverage')" style="padding:22px 16px">
+        <div class="ac-icon">🔍</div>
+        <h3>Area Lacune</h3>
+        <p>Copertura compilazioni per utente</p>
       </div>
     </div>
 
@@ -675,10 +710,11 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         <div class="instr-step"><div class="instr-num">2</div><div><strong>Configura le domande per ogni utente</strong> — Clicca <em>Area Progettazione Utente</em>. Appare la lista di tutti gli utenti divisi in <em>Da progettare</em> e <em>Già progettati</em>. Clicca su un utente per accedere alla sua configurazione: spunta le domande tra le 8 macro aree funzionali, aggiungi domande personalizzate se necessario. Tieni il cursore su una domanda per 1–2 secondi per vedere un esempio pratico. Salva con <strong>💾 Salva Configurazione</strong>. I dati anagrafici si modificano solo dall'Area Utenti.</div></div>
         <div class="instr-step"><div class="instr-num">3</div><div><strong>Attiva gli schemi ABC (opzionale)</strong> — In Area Progettazione Utente, nell'area D <em>Regolazione Emotiva</em>, spunta <strong>Aggiungi schemi ABC</strong> e scegli quanti schemi per giorno (1–5). Gli schemi ABC documentano episodi con Antecedente, Comportamento e Conseguenza, inclusi nel PDF finale.</div></div>
         <div class="instr-step"><div class="instr-num">4</div><div><strong>Compila ogni giorno</strong> — Clicca <em>Area Compilazione Utente</em>. Sulla sinistra appare la barra con tutti gli utenti: quelli senza domande configurate sono grigi. Seleziona un utente e clicca un giorno nel calendario (🟢 = compilato, 🔴 = con ABC). Sopra il calendario appare una card con la data selezionata e il pulsante <strong>✏️ Compila questa scheda</strong>: cliccalo per aprire le domande. Assegna punteggi 0–5, aggiungi note con <strong>📝 Note</strong>, compila gli ABC se attivi. Quando apri una scheda, la barra laterale mostra una ✓ verde accanto agli utenti già compilati in quel giorno. Salva con il pulsante in basso.</div></div>
-        <div class="instr-step"><div class="instr-num">5</div><div><strong>Leggi i risultati</strong> — Clicca <em>Area Risultati Utente</em>. La barra laterale mostra tutti gli utenti: quelli senza compilazioni sono grigi. Clicca un utente per vederne i risultati: riepilogo statistico, grafico di andamento, medie per macro area, punti di forza (≥4), aree critiche (&lt;2.5), dettaglio per domanda, note qualitative. Usa <strong>🚫 Nascondi</strong> per escludere sezioni dalla stampa, poi esporta con <strong>🖨️ Salva PDF</strong>. La barra laterale non viene inclusa nel PDF.</div></div>
-        <div class="instr-step"><div class="instr-num">6</div><div><strong>Analisi del laboratorio</strong> — Clicca <em>Area Progettazione Laboratorio</em>. Non richiede utente selezionato: aggrega le domande configurate per tutti gli utenti. Mostra grafico per area funzionale, top 10 domande con utenti interessati (passa il cursore su "x/x utenti" per vedere i nomi), dettaglio per area con badge Alta/Media/Bassa priorità. Se le funzioni AI sono attive, è disponibile la sezione <em>Consigli AI</em>.</div></div>
-        <div class="instr-step"><div class="instr-num">7</div><div><strong>Funzioni AI (opzionali)</strong> — Apri <strong>⚙️ Impostazioni</strong> (richiede password) e spunta <em>Implementa funzioni AI</em>. Nei Risultati appaiono <em>Valutazione Qualitativa AI</em> e <em>Sintesi Note AI</em>; nel Laboratorio compare <em>Consigli AI</em>. Scegli <strong>Genera con AI</strong> (chiave API Anthropic, ~$0.01–0.03 a generazione) oppure <strong>Genera Prompt</strong> per usare claude.ai gratuitamente.</div></div>
-        <div class="instr-step"><div class="instr-num">8</div><div><strong>Impostazioni e backup</strong> — Il pulsante <strong>⚙️</strong> in alto (protetto da password) raccoglie: attivazione AI, chiave API e contatori, backup e ripristino, verifica aggiornamenti. Il backup esporta profili, compilazioni e preferenze in un file <em>.json</em> — puoi scegliere se includere anche le impostazioni. Per ripristinare su un altro dispositivo, importa lo stesso file dalla sezione <em>Backup & Ripristino</em>.</div></div>
+        <div class="instr-step"><div class="instr-num">5</div><div><strong>Monitora le lacune di copertura</strong> — Clicca <em>Area Lacune</em> (il nuovo quadratone blu nella sezione Lavoro quotidiano). Mostra per ogni utente quante domande hanno zero compilazioni (critiche 🔴), poche compilazioni (scarse 🟡) o copertura sufficiente (🟢). Un riepilogo globale in cima indica i totali. Se le funzioni AI sono attive, usa <em>Consigli AI</em> per ricevere suggerimenti su come organizzare il laboratorio per coprire le aree mancanti.</div></div>
+        <div class="instr-step"><div class="instr-num">6</div><div><strong>Leggi i risultati</strong> — Clicca <em>Area Risultati Utente</em>. La barra laterale mostra tutti gli utenti: quelli senza compilazioni sono grigi. Clicca un utente per vederne i risultati: riepilogo statistico, grafico di andamento, medie per macro area, punti di forza (≥4), aree critiche (&lt;2.5), dettaglio per domanda, note qualitative. Usa <strong>🚫 Nascondi</strong> per escludere sezioni dalla stampa, poi esporta con <strong>🖨️ Salva PDF</strong>. La barra laterale non viene inclusa nel PDF.</div></div>
+        <div class="instr-step"><div class="instr-num">7</div><div><strong>Analisi del laboratorio</strong> — Clicca <em>Area Progettazione Laboratorio</em>. Non richiede utente selezionato: aggrega le domande configurate per tutti gli utenti. Mostra grafico per area funzionale, top 10 domande con utenti interessati (passa il cursore su "x/x utenti" per vedere i nomi), dettaglio per area con badge Alta/Media/Bassa priorità. Se le funzioni AI sono attive, è disponibile la sezione <em>Consigli AI</em>.</div></div>
+        <div class="instr-step"><div class="instr-num">8</div><div><strong>Funzioni AI (opzionali)</strong> — Apri <strong>⚙️ Impostazioni</strong> (richiede password) e spunta <em>Implementa funzioni AI</em>. Nei Risultati appaiono <em>Valutazione Qualitativa AI</em> e <em>Sintesi Note AI</em>; nel Laboratorio compare <em>Consigli AI</em>. Scegli <strong>Genera con AI</strong> (chiave API Anthropic, ~$0.01–0.03 a generazione) oppure <strong>Genera Prompt</strong> per usare claude.ai gratuitamente.</div></div>
+        <div class="instr-step"><div class="instr-num">9</div><div><strong>Impostazioni e backup</strong> — Il pulsante <strong>⚙️</strong> in alto (protetto da password) raccoglie: attivazione AI, chiave API e contatori, backup e ripristino, verifica aggiornamenti. Il backup esporta profili, compilazioni e preferenze in un file <em>.json</em> — puoi scegliere se includere anche le impostazioni. Per ripristinare su un altro dispositivo, importa lo stesso file dalla sezione <em>Backup & Ripristino</em>.</div></div>
       </div>
     </div>
 
@@ -705,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.3.6</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.3.7</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -722,6 +758,26 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
   <div class="content" id="lab-content">
     <div class="empty-state">
       <span class="empty-icon">🔬</span>
+      <h3>Caricamento...</h3>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ COVERAGE ══════ -->
+<div id="screen-coverage" class="screen">
+  <div class="topbar">
+    <div class="tlogo">
+      <div class="tlogo-mark">🔍</div>
+      <div class="tlogo-text"><span class="tlogo-name">Area Lacune</span></div>
+      <button class="tlogo-home" onclick="goTo('screen-home')">🏠 Home</button><button class="tlogo-nav" id="nav-back" onclick="historyBack()" title="Indietro">‹</button><button class="tlogo-nav" id="nav-fwd" onclick="historyForward()" title="Avanti">›</button>
+    </div>
+    <div class="tbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="toggleTheme()">🌙</button>
+    </div>
+  </div>
+  <div class="content" id="coverage-content">
+    <div class="empty-state">
+      <span class="empty-icon">🔍</span>
       <h3>Caricamento...</h3>
     </div>
   </div>
@@ -1114,7 +1170,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.3.6</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.3.7</div>
     </div>
   </div>
 </div>
@@ -1458,6 +1514,7 @@ function goTo(screenId){
   if(screenId==='screen-results')renderResults();
   if(screenId==='screen-users')renderProfilesGrid();
   if(screenId==='screen-tags')renderTagsGrid();
+  if(screenId==='screen-coverage')renderCoverage();
   updateNavButtons();
 }
 
@@ -3362,6 +3419,234 @@ function generateLabPrompt(){
   ta.scrollIntoView({behavior:'smooth',block:'nearest'});
   notify('📋 Prompt generato!');
 }
+
+// ══════ COVERAGE / LACUNE ══════
+
+function renderCoverage(){
+  const content=document.getElementById('coverage-content');
+  if(!content)return;
+
+  if(!profiles.length){
+    content.innerHTML=`<div class="empty-state"><span class="empty-icon">👤</span><h3>Nessun profilo trovato</h3><p>Crea almeno un utente in Area Utenti.</p></div>`;
+    return;
+  }
+
+  // Build qMap from QUESTION_BANK
+  const qMap={};
+  QUESTION_BANK.forEach(macro=>macro.micro.forEach(m=>m.questions.forEach(q=>{
+    qMap[q.id]={...q,macro:macro.macro,icon:macro.icon,microLabel:m.label};
+  })));
+
+  // Thresholds: 0 = critica (red), 1-4 = scarsa (orange), 5+ = sufficiente (green)
+  function covClass(n){return n===0?'red':n<5?'orange':'green';}
+  function covLabel(n){return n===0?'Nessuna':n<5?'Scarsa ('+n+')':'OK ('+n+')';}
+  function covPillClass(n){return n===0?'cov-pill cov-pill-red':n<5?'cov-pill cov-pill-orange':'cov-pill cov-pill-green';}
+
+  let globalCritical=0,globalScarsa=0,globalOK=0,globalTotal=0;
+  const usersData=[];
+
+  profiles.forEach(prof=>{
+    const pd=loadPdata(prof.id);
+    const sel=pd.selectedQuestions||[];
+    if(!sel.length)return; // skip users with no configured questions
+
+    const compilations=pd.compilations||{};
+
+    // Count compilations per qId
+    const qCount={};
+    sel.forEach(qId=>{ qCount[qId]=0; });
+    Object.values(compilations).forEach(dayScores=>{
+      Object.entries(dayScores).forEach(([qId,score])=>{
+        if(sel.includes(qId)&&score>0) qCount[qId]=(qCount[qId]||0)+1;
+      });
+    });
+
+    // Group by macro
+    const macroMap={};
+    QUESTION_BANK.forEach(macro=>{
+      const macroIds=macro.micro.flatMap(m=>m.questions.map(q=>q.id)).filter(id=>sel.includes(id));
+      if(macroIds.length>0){
+        macroMap[macro.macro]={icon:macro.icon,questions:macroIds.map(id=>({id,count:qCount[id]||0}))};
+      }
+    });
+    // custom questions
+    Object.entries(pd.customQuestions||{}).forEach(([macroName,cqs])=>{
+      cqs.filter(cq=>sel.includes(cq.id)).forEach(cq=>{
+        if(!macroMap[macroName])macroMap[macroName]={icon:'✏️',questions:[]};
+        macroMap[macroName].questions.push({id:cq.id,count:qCount[cq.id]||0,label:cq.text});
+      });
+    });
+
+    // Compute per-user stats
+    let uCritical=0,uScarsa=0,uOK=0;
+    Object.values(macroMap).forEach(mv=>{
+      mv.questions.forEach(q=>{
+        if(q.count===0)uCritical++;
+        else if(q.count<5)uScarsa++;
+        else uOK++;
+      });
+    });
+    const uTotal=uCritical+uScarsa+uOK;
+    globalCritical+=uCritical;globalScarsa+=uScarsa;globalOK+=uOK;globalTotal+=uTotal;
+
+    usersData.push({prof,macroMap,uCritical,uScarsa,uOK,uTotal});
+  });
+
+  if(!usersData.length){
+    content.innerHTML=`<div class="empty-state"><span class="empty-icon">📐</span><h3>Nessuna domanda configurata</h3><p>Configura le domande per i tuoi utenti in Area Progettazione Utente.</p></div>`;
+    return;
+  }
+
+  // Sort: users with most critical first
+  usersData.sort((a,b)=>b.uCritical-a.uCritical||(b.uScarsa-a.uScarsa));
+
+  // Store coverage context for AI
+  const covContextLines=usersData.map(u=>{
+    const macroLines=Object.entries(u.macroMap).map(([mName,mv])=>{
+      const cr=mv.questions.filter(q=>q.count===0).length;
+      const sc=mv.questions.filter(q=>q.count>0&&q.count<5).length;
+      const ok=mv.questions.filter(q=>q.count>=5).length;
+      return`  ${mv.icon} ${mName}: ${cr} critiche, ${sc} scarse, ${ok} sufficienti (tot. ${mv.questions.length})`;
+    }).join('\n');
+    return`Utente: ${u.prof.nome}\n${macroLines}`;
+  }).join('\n\n');
+  window._coverageContext={
+    totalUsers:usersData.length,
+    globalCritical,globalScarsa,globalOK,globalTotal,
+    covContextLines
+  };
+
+  const aiEnabled=(appMeta.aiEnabled&&(appMeta.anthropicKey||appMeta.allowAI));
+
+  // Build summary tiles
+  const summaryHTML=`<div class="cov-summary-grid">
+    <div class="cov-summary-tile">
+      <div class="cst-num" style="color:var(--danger)">${globalCritical}</div>
+      <div class="cst-label">Domande Critiche<br><span style="font-size:.65rem;font-weight:400;text-transform:none">(0 compilazioni)</span></div>
+    </div>
+    <div class="cov-summary-tile">
+      <div class="cst-num" style="color:var(--warn)">${globalScarsa}</div>
+      <div class="cst-label">Domande Scarse<br><span style="font-size:.65rem;font-weight:400;text-transform:none">(1–4 compilazioni)</span></div>
+    </div>
+    <div class="cov-summary-tile">
+      <div class="cst-num" style="color:var(--accent2)">${globalOK}</div>
+      <div class="cst-label">Domande Sufficienti<br><span style="font-size:.65rem;font-weight:400;text-transform:none">(5+ compilazioni)</span></div>
+    </div>
+  </div>`;
+
+  // Build user cards
+  const userCards=usersData.map((u,ui)=>{
+    const macroRows=Object.entries(u.macroMap).map(([mName,mv])=>{
+      const cr=mv.questions.filter(q=>q.count===0).length;
+      const sc=mv.questions.filter(q=>q.count>0&&q.count<5).length;
+      const ok=mv.questions.filter(q=>q.count>=5).length;
+      const pct=mv.questions.length?Math.round((ok/mv.questions.length)*100):0;
+      const barColor=pct>=60?'var(--accent2)':pct>=30?'var(--warn)':'var(--danger)';
+      const pills=[
+        cr>0?`<span class="cov-pill cov-pill-red">🔴 ${cr} critiche</span>`:'',
+        sc>0?`<span class="cov-pill cov-pill-orange">🟡 ${sc} scarse</span>`:'',
+        ok>0?`<span class="cov-pill cov-pill-green">🟢 ${ok} OK</span>`:''
+      ].filter(Boolean).join('');
+      return`<div class="cov-macro-row">
+        <span class="cov-macro-icon">${mv.icon}</span>
+        <span class="cov-macro-name">${mName}</span>
+        <div class="cov-macro-pills">${pills}</div>
+        <div class="cov-bar-wrap"><div class="cov-bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+        <span style="font-size:.7rem;color:var(--text3);min-width:28px;text-align:right">${pct}%</span>
+      </div>`;
+    }).join('');
+    const urgColor=u.uCritical>0?'var(--danger)':u.uScarsa>0?'var(--warn)':'var(--accent2)';
+    const urgIcon=u.uCritical>0?'🔴':u.uScarsa>0?'🟡':'🟢';
+    return`<div class="cov-user-card" id="cov-user-${ui}">
+      <div class="cov-user-header" onclick="this.nextElementSibling.classList.toggle('section-body-hidden')">
+        <div class="cov-user-name">${urgIcon} ${u.prof.nome}</div>
+        <div class="cov-user-stats">
+          ${u.uCritical>0?`<span class="cov-stat-badge cov-stat-red">🔴 ${u.uCritical} critiche</span>`:``}
+          ${u.uScarsa>0?`<span class="cov-stat-badge cov-stat-orange">🟡 ${u.uScarsa} scarse</span>`:``}
+          <span class="cov-stat-badge cov-stat-green">🟢 ${u.uOK}/${u.uTotal} OK</span>
+        </div>
+      </div>
+      <div>${macroRows}</div>
+    </div>`;
+  }).join('');
+
+  // AI section
+  const aiSection=`<div class="card" style="margin-top:24px">
+    <h3 style="font-family:var(--fd);font-size:1.05rem;margin-bottom:6px">🤖 Consigli AI per il Laboratorio</h3>
+    <p style="font-size:.83rem;color:var(--text2);margin-bottom:14px">Genera un resoconto professionale su come organizzare le attività di laboratorio per coprire le aree carenti.</p>
+    ${aiEnabled?`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+      <button class="btn btn-primary btn-sm" onclick="generateCoverageAI()">✨ Genera con AI</button>
+      <button class="btn btn-ghost btn-sm" onclick="generateCoveragePrompt()">📋 Genera Prompt</button>
+    </div>
+    <div id="coverage-ai-output" class="ai-val-output" style="min-height:60px"></div>
+    <div id="coverage-prompt-box" style="display:none;margin-top:14px">
+      <label style="font-size:.78rem;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase">Prompt generato</label>
+      <textarea id="coverage-prompt-text" class="form-control" rows="8" style="margin-top:6px;font-size:.78rem;font-family:monospace;resize:vertical" readonly></textarea>
+      <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="navigator.clipboard.writeText(document.getElementById('coverage-prompt-text').value).then(()=>notify('📋 Copiato!'))">📋 Copia</button>
+    </div>`
+    :`<div style="background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:14px 16px;font-size:.84rem;color:var(--text2)">
+      🔒 Funzioni AI disattivate. Attivale nelle <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:.78rem" onclick="openSettingsModal()">⚙️ Impostazioni</button>
+    </div>`}
+  </div>`;
+
+  content.innerHTML=`
+    <div class="card" style="margin-bottom:18px">
+      <h2 style="font-family:var(--fd);font-size:1.2rem;margin-bottom:6px">🔍 Copertura Compilazioni</h2>
+      <p style="font-size:.83rem;color:var(--text2);margin-bottom:16px">Per ogni utente, stato delle compilazioni per area funzionale. <strong style="color:var(--danger)">Critica</strong> = mai valutato, <strong style="color:var(--warn)">Scarsa</strong> = 1–4 compilazioni, <strong style="color:var(--accent2)">OK</strong> = 5+.</p>
+      ${summaryHTML}
+    </div>
+    ${userCards}
+    ${aiSection}`;
+}
+
+function buildCoveragePromptText(){
+  const ctx=window._coverageContext;
+  if(!ctx)return'';
+  return`Sei un esperto di progettazione di laboratori socio-occupazionali per persone con disabilità intellettiva e/o dello spettro autistico.
+
+Analizza i seguenti dati di copertura delle compilazioni per ${ctx.totalUsers} utenti di un centro socio-occupazionale.
+In totale, su ${ctx.globalTotal} domande configurate:
+- ${ctx.globalCritical} domande non hanno ancora nessuna compilazione (critiche)
+- ${ctx.globalScarsa} domande hanno compilazioni insufficienti (1–4, scarse)
+- ${ctx.globalOK} domande hanno copertura sufficiente (5+ compilazioni)
+
+DETTAGLIO PER UTENTE E AREA FUNZIONALE:
+${ctx.covContextLines}
+
+Sulla base di questi dati, fornisci consigli pratici e professionali su come organizzare le prossime giornate di laboratorio per colmare le lacune di osservazione. In particolare indica:
+1. Quali utenti e aree funzionali richiedono attenzione prioritaria
+2. Come strutturare attività di laboratorio che permettano di osservare e valutare le aree carenti
+3. Suggerimenti pratici per contestualizzare le osservazioni nelle normali attività del laboratorio
+4. Proposte di programmazione settimanale per coprire sistematicamente le lacune
+
+Rispondi in modo pratico, concreto e professionale, come se stessi consigliando un'équipe di operatori. Massimo 500 parole, forma narrativa con sottotitoli chiari.`;
+}
+
+async function generateCoverageAI(){
+  const out=document.getElementById('coverage-ai-output');
+  if(!out)return;
+  out.className='ai-val-output loading';out.textContent='⏳ Analisi in corso…';
+  const prompt=buildCoveragePromptText();
+  if(!prompt){out.className='ai-val-output error';out.textContent='⚠️ Nessun dato disponibile.';return;}
+  try{
+    const text=await callAnthropicAPI(prompt);
+    out.className='ai-val-output';out.textContent=text;
+  }catch(e){out.className='ai-val-output error';out.textContent='⚠️ '+e.message;}
+}
+
+function generateCoveragePrompt(){
+  const prompt=buildCoveragePromptText();
+  if(!prompt){notify('⚠️ Nessun dato disponibile.',3000);return;}
+  const box=document.getElementById('coverage-prompt-box');
+  const ta=document.getElementById('coverage-prompt-text');
+  if(!box||!ta)return;
+  ta.value=prompt;
+  box.style.display='block';
+  ta.scrollIntoView({behavior:'smooth',block:'nearest'});
+  notify('📋 Prompt generato!');
+}
+
+// ══════ END COVERAGE ══════
 
 function renderMiniBar(val){
   const pct=(val/5)*100;

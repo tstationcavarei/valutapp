@@ -487,6 +487,26 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 .abc-read-note{font-size:.78rem;color:var(--text2);margin-top:6px;font-style:italic}
 /* print ABC */
 .print-abc-section{page-break-before:always}
+
+/* ── WORK TAGS ── */
+.wtag-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:.78rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border2);background:var(--bg2);color:var(--text2);transition:all var(--t);user-select:none}
+.wtag-chip:hover{border-color:var(--accent);color:var(--accent);background:var(--al)}
+.wtag-chip.selected{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 2px 8px rgba(43,96,80,.28)}
+.wtag-chip-manage{cursor:default}
+.wtag-chip-manage:hover{border-color:var(--border2);color:var(--text2);background:var(--bg2)}
+.wtag-remove{background:none;border:none;cursor:pointer;font-size:.7rem;color:inherit;opacity:.7;padding:0 0 0 3px;line-height:1;display:inline-flex;align-items:center}
+.wtag-remove:hover{opacity:1}
+.wtag-chips-wrap{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px;min-height:28px}
+.wtag-selector-bar{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:16px}
+.wtag-selector-bar h4{font-size:.78rem;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+/* tag result badge in results section */
+.wtag-badge{display:inline-block;padding:2px 9px;border-radius:12px;font-size:.72rem;font-weight:600;background:var(--al);color:var(--accent2);margin-right:4px;margin-bottom:4px}
+/* tag performance table */
+.tag-perf-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.tag-perf-table th{font-size:.68rem;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;padding:6px 10px;border-bottom:2px solid var(--border2);text-align:left}
+.tag-perf-table td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+.tag-perf-table tr:last-child td{border-bottom:none}
+.tag-perf-table tr:hover td{background:var(--bg2)}
 @media(max-width:600px){.abc-field-row{grid-template-columns:1fr}.abc-read-schema{grid-template-columns:1fr}}
 .last-backup-info{font-size:.73rem;color:var(--text3);margin-top:7px;text-align:center}
 
@@ -601,6 +621,23 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
       </div>
     </div>
 
+    <!-- TAG DI LAVORO inline card -->
+    <div class="card instr-card" style="margin-top:16px;background:linear-gradient(150deg,#f0eef8 0%,#f4f2e8 100%);border:1.5px solid #c4b8d8" id="work-tags-home-card">
+      <div class="instr-toggle" onclick="this.nextElementSibling.classList.toggle('open');if(this.nextElementSibling.classList.contains('open'))renderWorkTagsPanel()">
+        <span>🏷️</span><strong style="color:#3a1a6a">Tag di Lavoro</strong>
+        <span style="margin-left:auto;color:#7a5a9a;font-size:.78rem">▾ espandi</span>
+      </div>
+      <div class="instr-body">
+        <p style="font-size:.84rem;color:var(--text2);margin-bottom:14px">Definisci liberamente le tipologie di lavoro del laboratorio (es. <em>ripetitivo, precisione, assemblaggio, conteggio, nuovo…</em>). In fase di compilazione potrai associare uno o più tag a ogni scheda giornaliera.</p>
+        <div class="wtag-chips-wrap" id="work-tags-panel"></div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+          <input id="new-tag-input" type="text" placeholder="Nuovo tag…" style="max-width:220px;flex:1"
+            onkeydown="if(event.key==='Enter')submitNewTag()">
+          <button class="btn btn-primary btn-sm" onclick="submitNewTag()">＋ Aggiungi</button>
+        </div>
+      </div>
+    </div>
+
     <div class="home-section-divider"></div>
 
     <div class="card instr-card" style="background:linear-gradient(150deg,#eef5f0 0%,#f2f0e8 100%);border:1.5px solid #b8d4c4">
@@ -643,7 +680,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.2.3</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.3.0</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1001,7 +1038,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.2.3</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.3.0</div>
     </div>
   </div>
 </div>
@@ -1139,7 +1176,7 @@ const TTAP_LABELS=[
 ];
 
 // ═══════════ STORAGE ═══════════
-let appMeta={theme:'light',activeProfileId:null};
+let appMeta={theme:'light',activeProfileId:null,workTags:[]};
 let profiles=[];
 let pdata={selectedQuestions:[],compilations:{}};
 let currentProfileId=null;
@@ -1150,6 +1187,40 @@ let chartInstances={};
 
 function loadMeta(){try{const s=localStorage.getItem('valutaapp_meta');if(s)appMeta={...appMeta,...JSON.parse(s)}}catch(e){}}
 function saveMeta(){localStorage.setItem('valutaapp_meta',JSON.stringify(appMeta))}
+
+// ═══════════ WORK TAGS (global) ═══════════
+function getWorkTags(){return appMeta.workTags||[]}
+function addWorkTag(label){
+  label=label.trim();
+  if(!label)return;
+  if(getWorkTags().some(t=>t.label.toLowerCase()===label.toLowerCase())){notify('⚠️ Tag già esistente.',2000);return;}
+  const id='wt'+Date.now();
+  if(!appMeta.workTags)appMeta.workTags=[];
+  appMeta.workTags.push({id,label});
+  saveMeta();renderWorkTagsPanel();
+}
+function removeWorkTag(id){
+  appMeta.workTags=(appMeta.workTags||[]).filter(t=>t.id!==id);
+  saveMeta();renderWorkTagsPanel();
+}
+function renderWorkTagsPanel(){
+  const el=document.getElementById('work-tags-panel');if(!el)return;
+  const tags=getWorkTags();
+  el.innerHTML=tags.length===0
+    ?'<p style="font-size:.84rem;color:var(--text3);font-style:italic">Nessun tag definito. Aggiungine uno qui sotto.</p>'
+    :tags.map(t=>`<span class="wtag-chip wtag-chip-manage">
+        ${t.label}
+        <button class="wtag-remove" onclick="removeWorkTag('${t.id}')" title="Elimina">✕</button>
+      </span>`).join('');
+}
+function submitNewTag(){
+  const inp=document.getElementById('new-tag-input');
+  if(!inp)return;
+  addWorkTag(inp.value);
+  inp.value='';
+  inp.focus();
+}
+
 function loadProfiles(){try{const s=localStorage.getItem('valutaapp_plist');if(s)profiles=JSON.parse(s)}catch(e){}}
 function saveProfiles(){localStorage.setItem('valutaapp_plist',JSON.stringify(profiles))}
 function loadPdata(id){try{const s=localStorage.getItem('valutaapp_p_'+id);return s?JSON.parse(s):{selectedQuestions:[],compilations:{}}}catch(e){return{selectedQuestions:[],compilations:{}}}}
@@ -1886,6 +1957,13 @@ function openDay(dateKey,day,month,year){
     document.getElementById('compile-day-sub').textContent=hasComp
       ?'✅ Scheda già compilata — clicca per modificare.'
       :'📝 Nessuna compilazione — clicca per iniziare.';
+    // show saved tags for this day
+    const savedTagIds=(pdata.dayTags||{})[dateKey]||[];
+    const allTags=getWorkTags();
+    const savedTagLabels=savedTagIds.map(id=>{const t=allTags.find(x=>x.id===id);return t?t.label:null}).filter(Boolean);
+    let tagSubEl=document.getElementById('compile-day-tags');
+    if(!tagSubEl){tagSubEl=document.createElement('div');tagSubEl.id='compile-day-tags';tagSubEl.style.cssText='margin-top:6px';document.getElementById('compile-day-sub').after(tagSubEl);}
+    tagSubEl.innerHTML=savedTagLabels.length?savedTagLabels.map(l=>`<span class="wtag-badge">${l}</span>`).join(''):'';
   }
   // Also reset day screen state for when user clicks Compila
   document.getElementById('day-cta').style.display='none';
@@ -1900,6 +1978,21 @@ function showDayQuestions(){
   const dateKey=currentDay;
   const existing=(pdata.compilations||{})[dateKey]||{};
   const container=document.getElementById('day-questions-container');container.innerHTML='';
+
+  // ── TAG SELECTOR ──
+  const tags=getWorkTags();
+  const savedTags=(pdata.dayTags||{})[dateKey]||[];
+  if(tags.length>0){
+    const tagCard=document.createElement('div');
+    tagCard.className='wtag-selector-bar';
+    tagCard.id='day-tag-selector';
+    tagCard.innerHTML=`<h4>🏷️ Tipo di lavoro osservato in questa scheda</h4>
+      <div class="wtag-chips-wrap" id="day-tag-chips">
+        ${tags.map(t=>`<span class="wtag-chip${savedTags.includes(t.id)?' selected':''}" data-tagid="${t.id}" onclick="toggleDayTag(this)">${t.label}</span>`).join('')}
+      </div>
+      <p style="font-size:.74rem;color:var(--text3);margin-top:2px">Seleziona tutti i tag che descrivono le attività di oggi (opzionale).</p>`;
+    container.appendChild(tagCard);
+  }
   const customQs=pdata.customQuestions||{};
   QUESTION_BANK.forEach(macro=>{
     const qs=[];
@@ -1941,6 +2034,11 @@ function showDayQuestions(){
   renderABCBlocks(container,dateKey);
   window.scrollTo(0,0);
 }
+function toggleDayTag(chip){
+  chip.classList.toggle('selected');
+  document.getElementById('save-status').textContent='Modifiche non salvate ●';
+}
+
 function toggleNoteArea(cb){
   const area=cb.closest('.q-item').querySelector('.q-note-area');
   area.classList.toggle('open',cb.checked);
@@ -1968,6 +2066,11 @@ function saveDayData(){
   if(!pdata.notes)pdata.notes={};
   if(Object.keys(dayNotes).length>0)pdata.notes[currentDay]=dayNotes;
   else delete pdata.notes[currentDay];
+  // save selected work tags
+  if(!pdata.dayTags)pdata.dayTags={};
+  const tagChips=document.querySelectorAll('#day-tag-chips .wtag-chip.selected');
+  if(tagChips.length>0)pdata.dayTags[currentDay]=[...tagChips].map(c=>c.getAttribute('data-tagid'));
+  else delete pdata.dayTags[currentDay];
   // save ABC data
   const abcData=collectABCData();
   if(!pdata.abcData)pdata.abcData={};
@@ -2094,6 +2197,64 @@ function renderResults(){
     </div>`;
   }).join('');
 
+  // ── Per-tag performance ──
+  const allTags=getWorkTags();
+  const dayTags=pdata.dayTags||{};
+  // For each tag: collect dates that have that tag, compute macro avgs
+  const tagPerfData=[];
+  allTags.forEach(tag=>{
+    const tagDates=dates.filter(d=>(dayTags[d]||[]).includes(tag.id));
+    if(tagDates.length<1)return; // skip tags with no compilations
+    const tagMacroAvgs={};
+    QUESTION_BANK.forEach(macro=>{
+      const ids=macro.micro.flatMap(m=>m.questions.map(q=>q.id)).filter(id=>(pdata.selectedQuestions||[]).includes(id));
+      if(!ids.length)return;
+      const vals=[];
+      tagDates.forEach(d=>{ids.forEach(id=>{const v=compilations[d]?.[id];if(v!==undefined&&v>0)vals.push(v)})});
+      if(vals.length)tagMacroAvgs[macro.macro]={avg:vals.reduce((a,b)=>a+b,0)/vals.length,icon:macro.icon};
+    });
+    const allVals=[];
+    tagDates.forEach(d=>{Object.values(compilations[d]).filter(v=>v>0).forEach(v=>allVals.push(v))});
+    const overallTagAvg=allVals.length?allVals.reduce((a,b)=>a+b,0)/allVals.length:0;
+    tagPerfData.push({tag,dates:tagDates,macroAvgs:tagMacroAvgs,overallAvg:overallTagAvg});
+  });
+  const hasTagData=tagPerfData.length>0;
+
+  let tagPerfHTML='';
+  if(!hasTagData){
+    tagPerfHTML=`<p style="font-size:.85rem;color:var(--text3)">Nessuna compilazione ha ancora tag di lavoro associati. <a href="#" onclick="goTo('screen-home');return false" style="color:var(--accent)">Definisci i tag nella Home</a> e selezionali nelle schede giornaliere.</p>`;
+  } else {
+    // Summary table: rows = macro areas, cols = tags
+    const macrosWithData=QUESTION_BANK.filter(macro=>tagPerfData.some(tp=>tp.macroAvgs[macro.macro]));
+    const tableHeader=`<thead><tr>
+      <th>Area</th>
+      ${tagPerfData.map(tp=>`<th><span class="wtag-badge" style="font-size:.72rem">${tp.tag.label}</span><br><span style="font-size:.66rem;color:var(--text3)">${tp.dates.length} sess.</span></th>`).join('')}
+    </tr></thead>`;
+    const tableRows=macrosWithData.map(macro=>{
+      const cells=tagPerfData.map(tp=>{
+        const v=tp.macroAvgs[macro.macro];
+        if(!v)return`<td style="color:var(--text3);text-align:center">—</td>`;
+        const avg=v.avg;
+        const color=avg>=4?'var(--accent2)':avg>=2.5?'var(--warn)':'var(--danger)';
+        return`<td style="text-align:center"><strong style="color:${color}">${avg.toFixed(1)}</strong>${renderMiniBar(avg)}</td>`;
+      }).join('');
+      return`<tr><td><span style="margin-right:5px">${macro.icon}</span>${macro.macro.replace(/^[A-Z]\.\s*/,'')}</td>${cells}</tr>`;
+    }).join('');
+    const overallRow=`<tr style="background:var(--bg2);font-weight:700">
+      <td>📊 Media generale</td>
+      ${tagPerfData.map(tp=>`<td style="text-align:center;color:var(--accent)"><strong>${tp.overallAvg.toFixed(2)}</strong></td>`).join('')}
+    </tr>`;
+    tagPerfHTML=`
+      <p style="font-size:.82rem;color:var(--text2);margin-bottom:14px">Confronto delle medie per macro area, raggruppate per tipo di lavoro osservato. Solo le aree con almeno una valutazione nel contesto di quel tag vengono mostrate.</p>
+      <div style="overflow-x:auto">
+        <table class="tag-perf-table">
+          ${tableHeader}
+          <tbody>${tableRows}${overallRow}</tbody>
+        </table>
+      </div>
+      <canvas id="chart-tags" height="110" style="margin-top:20px"></canvas>`;
+  }
+
   // ── Build notes section with AI tab ──
   const allNotes=pdata.notes||{};
   const noteDates=Object.keys(allNotes).filter(d=>Object.keys(allNotes[d]).length>0).sort();
@@ -2165,11 +2326,12 @@ function renderResults(){
     rBlock('forza','💪 Punti di Forza (punteggio ≥ 4)',strenghtsHTML)+
     rBlock('critiche','⚠️ Aree Critiche (punteggio &lt; 2.5)',weakHTML)+
     rBlock('dettaglio','📋 Dettaglio per Area',dettaglioHTML)+
+    rBlock('tagperf','🏷️ Performance per Tipo di Lavoro',tagPerfHTML)+
     rBlock('note','📝 Note Qualitative',notesHTML)+
     '<div style="height:56px"></div>';
 
   // store context for AI functions
-  window._aiResultsContext={prof,dates,overallAvg,qScores,qMap,macroAvgs,strengths,weaknesses,allNotes,noteDates};
+  window._aiResultsContext={prof,dates,overallAvg,qScores,qMap,macroAvgs,strengths,weaknesses,allNotes,noteDates,tagPerfData};
   renderUserSidebar('results-sidebar','selectResultsUser','results',null);
   // Add PDF button at bottom of sidebar
   const rSidebar=document.getElementById('results-sidebar');
@@ -2258,10 +2420,8 @@ function renderResults(){
       const mData=Object.values(macroAvgs).map(v=>+v.avg.toFixed(2));
       chartInstances['macro']=new Chart(ctxM,{
         type:'bar',data:{labels:Object.entries(macroAvgs).map(([k,v])=>{
-          // Full label after the letter prefix (e.g. "A. Comprensione delle Istruzioni" → "Comprensione\ndelle Istruzioni")
           const name=k.replace(/^[A-Z]\.\s*/,'');
           const words=name.split(' ');
-          // Split into lines of max ~14 chars each for readability
           const lines=[];let line='';
           words.forEach(w=>{
             if((line+' '+w).trim().length>14&&line){lines.push(line);line=w;}
@@ -2271,6 +2431,33 @@ function renderResults(){
           return [v.icon,...lines];
         }),datasets:[{label:'Media',data:mData,backgroundColor:mData.map(v=>v>=4?(isDark?'rgba(85,200,150,.7)':'rgba(43,96,80,.7)'):v>=2.5?(isDark?'rgba(212,168,80,.7)':'rgba(158,118,30,.7)'):(isDark?'rgba(224,120,120,.7)':'rgba(181,48,48,.7)')),borderRadius:6}]},
         options:{responsive:true,scales:{y:{min:0,max:5,ticks:{color:tc},grid:{color:gc}},x:{ticks:{color:tc,font:{size:10},maxRotation:0,minRotation:0,align:'center'},grid:{color:gc}}},plugins:{legend:{labels:{color:tc}}}}
+      });
+    }
+    // ── Tag performance chart ──
+    const ctxT=document.getElementById('chart-tags');
+    if(ctxT&&tagPerfData.length>0){
+      const macrosForChart=QUESTION_BANK.filter(macro=>tagPerfData.some(tp=>tp.macroAvgs[macro.macro]));
+      const tagColors=tagPerfData.map((_,i)=>{
+        const palette=isDark
+          ?['rgba(85,200,150,.8)','rgba(212,168,80,.8)','rgba(224,120,120,.8)','rgba(120,160,220,.8)','rgba(180,120,220,.8)','rgba(120,200,220,.8)']
+          :['rgba(43,96,80,.8)','rgba(158,118,30,.8)','rgba(181,48,48,.8)','rgba(40,100,180,.8)','rgba(120,50,180,.8)','rgba(20,140,160,.8)'];
+        return palette[i%palette.length];
+      });
+      const datasets=tagPerfData.map((tp,i)=>({
+        label:tp.tag.label+` (${tp.dates.length} sess.)`,
+        data:macrosForChart.map(macro=>{const v=tp.macroAvgs[macro.macro];return v?+v.avg.toFixed(2):null}),
+        backgroundColor:tagColors[i],borderRadius:4
+      }));
+      const xlabels=macrosForChart.map(macro=>{
+        const name=macro.macro.replace(/^[A-Z]\.\s*/,'');
+        const words=name.split(' ');const lines=[];let line='';
+        words.forEach(w=>{if((line+' '+w).trim().length>12&&line){lines.push(line);line=w;}else{line=(line+' '+w).trim();}});
+        if(line)lines.push(line);return[macro.icon,...lines];
+      });
+      chartInstances['tags']=new Chart(ctxT,{
+        type:'bar',
+        data:{labels:xlabels,datasets},
+        options:{responsive:true,scales:{y:{min:0,max:5,ticks:{color:tc},grid:{color:gc}},x:{ticks:{color:tc,font:{size:10},maxRotation:0,minRotation:0,align:'center'},grid:{color:gc}}},plugins:{legend:{labels:{color:tc,font:{size:11}}}}}
       });
     }
   },100);
@@ -2477,7 +2664,7 @@ async function callAnthropicAPI(prompt){
 
 function buildValPrompt(){
   const ctx=window._aiResultsContext;if(!ctx)return'';
-  const {prof,dates,overallAvg,qScores,qMap,macroAvgs,strengths,weaknesses,allNotes,noteDates}=ctx;
+  const {prof,dates,overallAvg,qScores,qMap,macroAvgs,strengths,weaknesses,allNotes,noteDates,tagPerfData}=ctx;
   const macroLines=Object.entries(macroAvgs).map(([k,v])=>`  - ${k}: ${v.avg.toFixed(2)}/5`).join('\n');
   const strLines=strengths.slice(0,5).map(([id,v])=>{
     const q=qMap[id];const score=Math.round(v.avg);
@@ -2491,10 +2678,26 @@ function buildValPrompt(){
   }).join('\n');
   let notesText='';
   noteDates.forEach(d=>{Object.entries(allNotes[d]).forEach(([qId,txt])=>{notesText+=`  - [${d}] "${qMap[qId]?.text||qId}": ${txt}\n`;})});
+  // build tag-based section
+  let tagSection='';
+  if(tagPerfData&&tagPerfData.length>0){
+    tagSection='\nPERFORMANCE PER TIPO DI LAVORO OSSERVATO:\n';
+    tagPerfData.forEach(tp=>{
+      tagSection+=`  Tipo: "${tp.tag.label}" (${tp.dates.length} sessioni, media ${tp.overallAvg.toFixed(2)}/5)\n`;
+      Object.entries(tp.macroAvgs).forEach(([k,v])=>{tagSection+=`    - ${k}: ${v.avg.toFixed(2)}/5\n`});
+    });
+    // compare best/worst tag
+    const sorted=[...tagPerfData].sort((a,b)=>b.overallAvg-a.overallAvg);
+    if(sorted.length>=2){
+      tagSection+=`  → Contesto con prestazione più alta: "${sorted[0].tag.label}" (${sorted[0].overallAvg.toFixed(2)}/5)\n`;
+      tagSection+=`  → Contesto con prestazione più bassa: "${sorted[sorted.length-1].tag.label}" (${sorted[sorted.length-1].overallAvg.toFixed(2)}/5)\n`;
+    }
+    tagSection+='\nNota: i dati per tipo di lavoro sono un dato contestuale. La media generale (sopra) include TUTTE le sessioni indipendentemente dal tipo di lavoro.\n';
+  }
   return`Sei un clinico specializzato in valutazione funzionale ICF e TTAP per persone con disabilità in contesti socio-occupazionali.
 Redigi una valutazione clinico-funzionale di ${prof?.nome||'utente'} (${prof?.eta?prof.eta+' anni, ':''}${prof?.servizio||''}).
-DATI: periodo ${dates[0]}→${dates[dates.length-1]} (${dates.length} sessioni), media TTAP ${overallAvg}/5.
-Macro aree:
+DATI GLOBALI: periodo ${dates[0]}→${dates[dates.length-1]} (${dates.length} sessioni totali), media TTAP complessiva ${overallAvg}/5.
+Macro aree (medie globali su tutte le sessioni):
 ${macroLines}
 Punti di forza (punteggio → descrizione comportamento osservato):
 ${strLines||'  Nessuno'}
@@ -2502,7 +2705,8 @@ Aree critiche (punteggio → descrizione comportamento osservato):
 ${weakLines||'  Nessuna'}
 Note operatori:
 ${notesText||'  Nessuna'}
-Scrivi una valutazione narrativa (max 350 parole) con: profilo funzionale generale, aree di competenza, aree prioritarie di intervento, pattern osservati, raccomandazioni operative. Utilizza le descrizioni comportamentali fornite per rendere la valutazione concreta e clinicamente accurata. Stile relazione clinica professionale.`;
+${tagSection}
+Scrivi una valutazione narrativa (max 400 parole) con: (1) profilo funzionale generale e trend globale, (2) aree di competenza e aree prioritarie di intervento, (3) se disponibili, pattern di variabilità per tipo di lavoro — integra questo dato nella valutazione complessiva (es. "il profilo rimane in crescita pur con differenze tra contesti"), (4) raccomandazioni operative. Utilizza le descrizioni comportamentali per rendere la valutazione concreta. Stile relazione clinica professionale.`;
 }
 
 function buildNotesPrompt(){
@@ -2577,28 +2781,8 @@ async function generateAIValutation(){
   const ctx=window._aiResultsContext;if(!ctx)return;
   const out=document.getElementById('ai-val-output');
   out.className='ai-val-output loading';out.textContent='⏳ Analisi in corso…';
-  const {prof,dates,overallAvg,qScores,qMap,macroAvgs,strengths,weaknesses,allNotes,noteDates}=ctx;
-  const macroLines=Object.entries(macroAvgs).map(([k,v])=>`  - ${k}: ${v.avg.toFixed(2)}/5`).join('\n');
-  const strLines=strengths.slice(0,5).map(([id,v])=>{
-    const q=qMap[id];const score=Math.round(v.avg);
-    const desc=(q?.scores&&q.scores[score])?` → "${q.scores[score]}"`:''
-    return`  - "${q?.text||id}" (${v.avg.toFixed(1)}/5)${desc}`;
-  }).join('\n');
-  const weakLines=weaknesses.slice(0,5).map(([id,v])=>{
-    const q=qMap[id];const score=Math.round(v.avg);
-    const desc=(q?.scores&&q.scores[score])?` → "${q.scores[score]}"`:''
-    return`  - "${q?.text||id}" (${v.avg.toFixed(1)}/5)${desc}`;
-  }).join('\n');
-  let notesText='';
-  noteDates.forEach(d=>{Object.entries(allNotes[d]).forEach(([qId,txt])=>{notesText+=`  - [${d}] "${qMap[qId]?.text||qId}": ${txt}\n`;})});
-  const prompt=`Sei un clinico specializzato in valutazione funzionale ICF e TTAP per persone con disabilità in contesti socio-occupazionali.
-Redigi una valutazione clinico-funzionale di ${prof?.nome||'utente'} (${prof?.eta?prof.eta+' anni, ':''}${prof?.servizio||''}).
-DATI: periodo ${dates[0]}→${dates[dates.length-1]} (${dates.length} sessioni), media TTAP ${overallAvg}/5.
-Macro aree:\n${macroLines}
-Punti di forza (punteggio → descrizione comportamento osservato):\n${strLines||'  Nessuno'}
-Aree critiche (punteggio → descrizione comportamento osservato):\n${weakLines||'  Nessuna'}
-Note operatori:\n${notesText||'  Nessuna'}
-Scrivi una valutazione narrativa (max 350 parole) con: profilo funzionale generale, aree di competenza, aree prioritarie di intervento, pattern osservati, raccomandazioni operative. Utilizza le descrizioni comportamentali fornite per rendere la valutazione concreta e clinicamente accurata. Stile relazione clinica professionale.`;
+  const prompt=buildValPrompt();
+  if(!prompt){out.className='ai-val-output error';out.textContent='⚠️ Impossibile costruire il prompt.';return;}
   try{
     const text=await callAnthropicAPI(prompt);
     out.className='ai-val-output';out.textContent=text;

@@ -507,6 +507,24 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 .tag-perf-table td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
 .tag-perf-table tr:last-child td{border-bottom:none}
 .tag-perf-table tr:hover td{background:var(--bg2)}
+/* ── TAGS SCREEN ── */
+.area-card.tags-card{background:linear-gradient(140deg,#5a2a7a 0%,#8a44b8 100%);border:2px solid #5a2a7a;color:#fff;box-shadow:0 5px 20px rgba(90,42,122,.35)}
+.tags-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:22px}
+.tag-item-card{background:linear-gradient(150deg,#f2eef8 0%,#f8f6f0 100%);border:1.5px solid #c8b8dc;border-left:4px solid #8a44b8;border-radius:var(--r);padding:13px 13px 11px;position:relative;transition:all .2s;box-shadow:0 2px 8px rgba(90,42,122,.10)}
+[data-theme="dark"] .tag-item-card{background:linear-gradient(150deg,#221830 0%,#1e1b14 100%);border-color:#4a3860;border-left-color:#a060d8}
+.tag-item-card:hover{border-color:#8a44b8;transform:translateY(-2px);box-shadow:0 5px 18px rgba(90,42,122,.22)}
+.tag-item-icon{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#8a44b8,#b060e0);display:flex;align-items:center;justify-content:center;font-size:.85rem;margin-bottom:8px;color:#fff}
+.tag-item-name{font-family:var(--fd);font-size:.9rem;color:var(--text);font-weight:700;margin-bottom:10px;word-break:break-word;line-height:1.25}
+.tag-item-actions{display:flex;gap:6px}
+.tag-item-actions button{flex:1;padding:4px 0;font-size:.72rem;border-radius:6px;border:1.5px solid;cursor:pointer;font-weight:600;transition:all .15s}
+.tag-edit-btn{background:var(--bg2);border-color:var(--border2);color:var(--text2)}
+.tag-edit-btn:hover{border-color:#8a44b8;color:#8a44b8;background:var(--bg)}
+.tag-delete-btn{background:var(--dl);border-color:var(--danger);color:var(--danger)}
+.tag-delete-btn:hover{background:var(--danger);color:#fff}
+.tag-new-card{background:var(--bg2);border:2px dashed var(--border2);border-radius:var(--r);padding:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;cursor:pointer;transition:all .2s;min-height:98px}
+.tag-new-card:hover{border-color:#8a44b8;background:rgba(138,68,184,.06)}
+.tag-new-card .tn-icon{font-size:1.3rem;color:var(--text3)}
+.tag-new-card span{font-size:.78rem;color:var(--text3);font-weight:600}
 @media(max-width:600px){.abc-field-row{grid-template-columns:1fr}.abc-read-schema{grid-template-columns:1fr}}
 .last-backup-info{font-size:.73rem;color:var(--text3);margin-top:7px;text-align:center}
 
@@ -619,22 +637,10 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         <h3>Area Progettazione Laboratorio</h3>
         <p>Adatta il laboratorio alle esigenze dell'utenza</p>
       </div>
-    </div>
-
-    <!-- TAG DI LAVORO inline card -->
-    <div class="card instr-card" style="margin-top:16px;background:linear-gradient(150deg,#f0eef8 0%,#f4f2e8 100%);border:1.5px solid #c4b8d8" id="work-tags-home-card">
-      <div class="instr-toggle" onclick="this.nextElementSibling.classList.toggle('open');if(this.nextElementSibling.classList.contains('open'))renderWorkTagsPanel()">
-        <span>🏷️</span><strong style="color:#3a1a6a">Tag di Lavoro</strong>
-        <span style="margin-left:auto;color:#7a5a9a;font-size:.78rem">▾ espandi</span>
-      </div>
-      <div class="instr-body">
-        <p style="font-size:.84rem;color:var(--text2);margin-bottom:14px">Definisci liberamente le tipologie di lavoro del laboratorio (es. <em>ripetitivo, precisione, assemblaggio, conteggio, nuovo…</em>). In fase di compilazione potrai associare uno o più tag a ogni scheda giornaliera.</p>
-        <div class="wtag-chips-wrap" id="work-tags-panel"></div>
-        <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
-          <input id="new-tag-input" type="text" placeholder="Nuovo tag…" style="max-width:220px;flex:1"
-            onkeydown="if(event.key==='Enter')submitNewTag()">
-          <button class="btn btn-primary btn-sm" onclick="submitNewTag()">＋ Aggiungi</button>
-        </div>
+      <div class="area-card tags-card" onclick="goTo('screen-tags')">
+        <div class="ac-icon">🏷️</div>
+        <h3>Area Lavorazioni</h3>
+        <p>Gestisci le tipologie di lavoro del laboratorio</p>
       </div>
     </div>
 
@@ -680,7 +686,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.3.0</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.3.1</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -721,6 +727,29 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
       </div>
       <p style="font-size:.84rem;color:var(--text2);margin-bottom:18px">Clicca su un profilo per modificarlo o eliminarlo.</p>
       <div class="profiles-grid" id="profiles-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ TAGS ══════ -->
+<div id="screen-tags" class="screen">
+  <div class="topbar">
+    <div class="tlogo">
+      <div class="tlogo-mark">🏷️</div>
+      <div class="tlogo-text"><span class="tlogo-name">Area Lavorazioni</span></div><button class="tlogo-home" onclick="goTo('screen-home')">🏠 Home</button><button class="tlogo-nav" id="nav-back" onclick="historyBack()" title="Indietro">‹</button><button class="tlogo-nav" id="nav-fwd" onclick="historyForward()" title="Avanti">›</button>
+    </div>
+    <div class="tbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="toggleTheme()">🌙</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <h2 style="margin:0">🏷️ Tipologie di Lavorazione</h2>
+        <button class="btn btn-primary" onclick="openNewTagModal()">＋ Nuova lavorazione</button>
+      </div>
+      <p style="font-size:.84rem;color:var(--text2);margin-bottom:18px">Definisci le tipologie di lavoro del laboratorio (es. <em>ripetitivo, precisione, assemblaggio, conteggio, nuovo…</em>). In fase di compilazione potrai associare uno o più tag a ogni scheda giornaliera.</p>
+      <div class="tags-grid" id="tags-grid"></div>
     </div>
   </div>
 </div>
@@ -914,6 +943,31 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
   </div>
 </div>
 
+<!-- ══════ MODAL: NUOVA LAVORAZIONE ══════ -->
+<div class="modal-overlay" id="modal-new-tag">
+  <div class="modal">
+    <h3>➕ Nuova Lavorazione</h3>
+    <div class="form-group" style="margin-bottom:13px"><label>Nome della lavorazione *</label><input type="text" id="nt-label" placeholder="Es. Assemblaggio, Conteggio…" onkeydown="if(event.key==='Enter')createTag()"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-new-tag')">Annulla</button>
+      <button class="btn btn-primary" onclick="createTag()">Aggiungi</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ MODAL: MODIFICA LAVORAZIONE ══════ -->
+<div class="modal-overlay" id="modal-edit-tag">
+  <div class="modal">
+    <h3>✏️ Modifica Lavorazione</h3>
+    <input type="hidden" id="et-id">
+    <div class="form-group" style="margin-bottom:13px"><label>Nome della lavorazione *</label><input type="text" id="et-label" onkeydown="if(event.key==='Enter')saveEditTag()"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-tag')">Annulla</button>
+      <button class="btn btn-primary" onclick="saveEditTag()">Salva modifiche</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══════ MODAL: LEGGI ABC ══════ -->
 <div class="modal-overlay" id="modal-abc-read">
   <div class="modal" style="max-width:640px;max-height:85vh;overflow-y:auto">
@@ -1038,7 +1092,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.3.0</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.3.1</div>
     </div>
   </div>
 </div>
@@ -1193,32 +1247,72 @@ function getWorkTags(){return appMeta.workTags||[]}
 function addWorkTag(label){
   label=label.trim();
   if(!label)return;
-  if(getWorkTags().some(t=>t.label.toLowerCase()===label.toLowerCase())){notify('⚠️ Tag già esistente.',2000);return;}
+  if(getWorkTags().some(t=>t.label.toLowerCase()===label.toLowerCase())){notify('⚠️ Lavorazione già esistente.',2000);return;}
   const id='wt'+Date.now();
   if(!appMeta.workTags)appMeta.workTags=[];
   appMeta.workTags.push({id,label});
-  saveMeta();renderWorkTagsPanel();
+  saveMeta();renderTagsGrid();
 }
 function removeWorkTag(id){
   appMeta.workTags=(appMeta.workTags||[]).filter(t=>t.id!==id);
-  saveMeta();renderWorkTagsPanel();
+  saveMeta();renderTagsGrid();
 }
-function renderWorkTagsPanel(){
-  const el=document.getElementById('work-tags-panel');if(!el)return;
+function openNewTagModal(){
+  const inp=document.getElementById('nt-label');if(inp)inp.value='';
+  openModal('modal-new-tag');
+  setTimeout(()=>{const i=document.getElementById('nt-label');if(i)i.focus();},120);
+}
+function createTag(){
+  const label=(document.getElementById('nt-label')?.value||'').trim();
+  if(!label){notify('⚠️ Inserisci un nome.',2000);return;}
+  if(getWorkTags().some(t=>t.label.toLowerCase()===label.toLowerCase())){notify('⚠️ Lavorazione già esistente.',2000);return;}
+  const id='wt'+Date.now();
+  if(!appMeta.workTags)appMeta.workTags=[];
+  appMeta.workTags.push({id,label});
+  saveMeta();closeModal('modal-new-tag');renderTagsGrid();notify('✅ Lavorazione "'+label+'" aggiunta.');
+}
+function openEditTagModal(id){
+  const tag=getWorkTags().find(t=>t.id===id);if(!tag)return;
+  document.getElementById('et-id').value=id;
+  document.getElementById('et-label').value=tag.label;
+  openModal('modal-edit-tag');
+  setTimeout(()=>{const i=document.getElementById('et-label');if(i){i.focus();i.select();}},120);
+}
+function saveEditTag(){
+  const id=document.getElementById('et-id')?.value;
+  const label=(document.getElementById('et-label')?.value||'').trim();
+  if(!label){notify('⚠️ Inserisci un nome.',2000);return;}
+  if(getWorkTags().some(t=>t.id!==id&&t.label.toLowerCase()===label.toLowerCase())){notify('⚠️ Lavorazione già esistente.',2000);return;}
+  const idx=(appMeta.workTags||[]).findIndex(t=>t.id===id);
+  if(idx===-1)return;
+  appMeta.workTags[idx].label=label;
+  saveMeta();closeModal('modal-edit-tag');renderTagsGrid();notify('✅ Lavorazione aggiornata.');
+}
+function renderTagsGrid(){
+  const grid=document.getElementById('tags-grid');if(!grid)return;
   const tags=getWorkTags();
-  el.innerHTML=tags.length===0
-    ?'<p style="font-size:.84rem;color:var(--text3);font-style:italic">Nessun tag definito. Aggiungine uno qui sotto.</p>'
-    :tags.map(t=>`<span class="wtag-chip wtag-chip-manage">
-        ${t.label}
-        <button class="wtag-remove" onclick="removeWorkTag('${t.id}')" title="Elimina">✕</button>
-      </span>`).join('');
+  grid.innerHTML='';
+  tags.forEach(tag=>{
+    const card=document.createElement('div');
+    card.className='tag-item-card';
+    card.innerHTML=`
+      <div class="tag-item-icon">🏷️</div>
+      <div class="tag-item-name">${tag.label}</div>
+      <div class="tag-item-actions">
+        <button class="tag-edit-btn" onclick="openEditTagModal('${tag.id}')">✏️ Modifica</button>
+        <button class="tag-delete-btn" onclick="deleteTagConfirm('${tag.id}','${tag.label.replace(/'/g,"\\'")}')">🗑️</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+  const newCard=document.createElement('div');
+  newCard.className='tag-new-card';
+  newCard.onclick=openNewTagModal;
+  newCard.innerHTML='<div class="tn-icon">＋</div><span>Nuova lavorazione</span>';
+  grid.appendChild(newCard);
 }
-function submitNewTag(){
-  const inp=document.getElementById('new-tag-input');
-  if(!inp)return;
-  addWorkTag(inp.value);
-  inp.value='';
-  inp.focus();
+function deleteTagConfirm(id,label){
+  if(!confirm('Eliminare la lavorazione "'+label+'"?\nLe compilazioni che la usano perderanno questo tag.'))return;
+  removeWorkTag(id);notify('🗑️ Lavorazione eliminata.');
 }
 
 function loadProfiles(){try{const s=localStorage.getItem('valutaapp_plist');if(s)profiles=JSON.parse(s)}catch(e){}}
@@ -1334,6 +1428,7 @@ function goTo(screenId){
   if(screenId==='screen-compile')renderCompile();
   if(screenId==='screen-results')renderResults();
   if(screenId==='screen-users')renderProfilesGrid();
+  if(screenId==='screen-tags')renderTagsGrid();
   updateNavButtons();
 }
 

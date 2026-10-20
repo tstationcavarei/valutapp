@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.4.7</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.4.8</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1206,7 +1206,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.4.7</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.4.8</div>
     </div>
   </div>
 </div>
@@ -3835,15 +3835,18 @@ function renderCoverage(){
   usersData.sort((a,b)=>b.underTotal-a.underTotal);
 
   // AI context
+  const covContextByUser={};
   const covContextLines=usersData.map(u=>{
     const macroLines=Object.entries(u.macroMap).map(([mName,mv])=>{
       const under=mv.questions.filter(q=>q.under);
       if(!under.length)return null;
       return`  ${mv.icon} ${mName}: ${under.map(q=>`"${q.text.slice(0,60)}" (${q.count} comp.)`).join(', ')}`;
     }).filter(Boolean).join('\n');
-    return`Utente: ${u.prof.nome} (media ${u.mean} comp/domanda)\n${macroLines||'  Nessuna lacuna'}`;
+    const line=`Utente: ${u.prof.nome} (media ${u.mean} comp/domanda)\n${macroLines||'  Nessuna lacuna'}`;
+    covContextByUser[u.prof.id]=line;
+    return line;
   }).join('\n\n');
-  window._coverageContext={totalUsers:usersData.length,covContextLines};
+  window._coverageContext={totalUsers:usersData.length,covContextLines,covContextByUser};
 
   const aiEnabled=(appMeta.aiEnabled&&(appMeta.anthropicKey||appMeta.allowAI));
 
@@ -3913,17 +3916,35 @@ function renderCoverage(){
         <div style="display:flex;align-items:center;gap:8px">
           <span class="cov-stat-badge cov-stat-orange">${u.underTotal} domande sotto-media</span>
           <span style="font-size:.72rem;color:var(--text3)">media ${u.mean}</span>
-          <span class="cov-user-chevron-btn" style="font-size:.72rem;font-weight:700;color:var(--accent);background:var(--al);border:1px solid var(--al2);border-radius:6px;padding:2px 8px;white-space:nowrap">▼ Comprimi</span>
+          <span class="cov-user-chevron-btn" style="font-size:.72rem;font-weight:700;color:var(--accent);background:var(--al);border:1px solid var(--al2);border-radius:6px;padding:2px 8px;white-space:nowrap">▶ Espandi</span>
         </div>
       </div>
-      <div id="cov-body-${ui}">${areaBlocks}</div>
+      <div id="cov-body-${ui}" style="display:none">${areaBlocks}</div>
     </div>`;
   }).join('');
 
   // ── AI SECTION ──
+  const userCheckboxes=usersData.map(u=>`
+    <label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .12s" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''">
+      <input type="checkbox" class="cov-user-cb" value="${u.prof.id}" checked onchange="updateCovPickCount()" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer">
+      <span style="font-size:.88rem;font-weight:600;color:var(--text)">${u.prof.nome}</span>
+      <span class="cov-stat-badge cov-stat-orange" style="margin-left:auto;font-size:.7rem">${u.underTotal} sotto-media</span>
+    </label>`).join('');
+
   const aiSection=`<div class="card" style="margin-top:24px">
     <h3 style="font-family:var(--fd);font-size:1.05rem;margin-bottom:6px">🤖 Consigli AI per il Laboratorio</h3>
-    <p style="font-size:.83rem;color:var(--text2);margin-bottom:14px">Genera un resoconto su come organizzare il laboratorio per coprire le domande sotto-media.</p>
+    <p style="font-size:.83rem;color:var(--text2);margin-bottom:12px">Genera suggerimenti su come organizzare il laboratorio in base alle aree sotto-media.</p>
+    <!-- Selettore utenti -->
+    <div style="margin-bottom:14px">
+      <button class="btn btn-ghost btn-sm" onclick="const p=document.getElementById('cov-user-picker');p.style.display=p.style.display==='none'?'block':'none'" style="font-size:.8rem">👥 Seleziona utenti <span id="cov-pick-count">(tutti)</span></button>
+      <div id="cov-user-picker" style="display:none;margin-top:10px;border:1.5px solid var(--border);border-radius:10px;padding:6px 4px;background:var(--bg)">
+        <div style="display:flex;gap:8px;padding:4px 10px 8px;border-bottom:1px solid var(--border);margin-bottom:4px">
+          <button class="btn btn-ghost btn-sm" style="font-size:.75rem" onclick="document.querySelectorAll('.cov-user-cb').forEach(c=>c.checked=true);updateCovPickCount()">Seleziona tutti</button>
+          <button class="btn btn-ghost btn-sm" style="font-size:.75rem" onclick="document.querySelectorAll('.cov-user-cb').forEach(c=>c.checked=false);updateCovPickCount()">Deseleziona tutti</button>
+        </div>
+        ${userCheckboxes}
+      </div>
+    </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
       ${aiEnabled?`<button class="btn btn-primary btn-sm" onclick="generateCoverageAI()">✨ Genera con AI</button>`:''}
       <button class="btn btn-ghost btn-sm" onclick="generateCoveragePrompt()">📋 Genera Prompt</button>
@@ -3947,25 +3968,52 @@ function renderCoverage(){
   content.innerHTML=globalSection+separator+userCards+aiSection;
 }
 
+function updateCovPickCount(){
+  const cbs=document.querySelectorAll('.cov-user-cb');
+  const sel=[...cbs].filter(c=>c.checked);
+  const el=document.getElementById('cov-pick-count');
+  if(el) el.textContent=sel.length===cbs.length?'(tutti)':`(${sel.length} selezionat${sel.length===1?'o':'i'})`;
+}
+
+function getSelectedCovUserIds(){
+  const cbs=document.querySelectorAll('.cov-user-cb');
+  if(!cbs.length) return null; // nessun picker — usa tutti
+  const sel=[...cbs].filter(c=>c.checked).map(c=>c.value);
+  return sel.length?sel:null;
+}
+
 function buildCoveragePromptText(){
   const ctx=window._coverageContext;
   if(!ctx)return'';
+
+  // Filtra per utenti selezionati nelle checkbox
+  const selIds=getSelectedCovUserIds();
+  let lines=ctx.covContextLines;
+  let nUsers=ctx.totalUsers;
+  if(selIds&&ctx.covContextByUser){
+    const filtered=selIds.map(id=>ctx.covContextByUser[id]).filter(Boolean);
+    lines=filtered.join('\n\n');
+    nUsers=filtered.length;
+  }
+  if(!lines.trim())return'';
+
+  const focusTxt=selIds&&selIds.length<ctx.totalUsers
+    ?`Il focus è su ${nUsers} utente${nUsers===1?'':'i'} specificamente selezionat${nUsers===1?'o':'i'}.`
+    :`Il focus è sull'intero gruppo di ${nUsers} utenti — suggerisci come integrarli in attività comuni o suddividerli in sottogruppi funzionali.`;
+
   return`Sei un esperto di progettazione di laboratori socio-occupazionali per persone con disabilità intellettiva e/o dello spettro autistico.
 
-Analizza i seguenti dati di copertura delle compilazioni per ${ctx.totalUsers} utenti di un centro socio-occupazionale.
-In totale, su ${ctx.globalTotal} domande configurate:
-- ${ctx.globalCritical} domande non hanno ancora nessuna compilazione (critiche)
-- ${ctx.globalScarsa} domande hanno compilazioni insufficienti (1–4, scarse)
-- ${ctx.globalOK} domande hanno copertura sufficiente (5+ compilazioni)
+${focusTxt}
 
-DETTAGLIO PER UTENTE E AREA FUNZIONALE:
-${ctx.covContextLines}
+DETTAGLIO PER UTENTE E AREA FUNZIONALE (domande sotto-media):
+${lines}
 
-Sulla base di questi dati, fornisci consigli pratici e professionali su come organizzare le prossime giornate di laboratorio per colmare le lacune di osservazione. In particolare indica:
-1. Quali utenti e aree funzionali richiedono attenzione prioritaria
-2. Come strutturare attività di laboratorio che permettano di osservare e valutare le aree carenti
-3. Suggerimenti pratici per contestualizzare le osservazioni nelle normali attività del laboratorio
-4. Proposte di programmazione settimanale per coprire sistematicamente le lacune
+Sulla base di questi dati, fornisci consigli pratici e professionali su come organizzare le prossime giornate di laboratorio. In particolare:
+1. Quali aree funzionali richiedono attenzione prioritaria e per quali utenti
+2. Come strutturare attività che permettano di osservare e valutare le aree carenti${selIds&&selIds.length<ctx.totalUsers?'':`
+3. Proposta di raggruppamenti o sottogruppi funzionali in base alle aree da colmare`}
+3. Suggerimenti pratici per contestualizzare le osservazioni nelle normali attività
+4. Proposta di programmazione settimanale per coprire sistematicamente le lacune
 
 Rispondi in modo pratico, concreto e professionale, come se stessi consigliando un'équipe di operatori. Massimo 500 parole, forma narrativa con sottotitoli chiari.`;
 }

@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.5.1</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.5.2</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1206,7 +1206,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.5.1</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.5.2</div>
     </div>
   </div>
 </div>
@@ -3701,94 +3701,47 @@ function buildLabPromptText(){
   if(!ctx)return'';
   const hasScores=ctx.userScoreLines&&ctx.userScoreLines.length>0;
 
-  // Costruisci lista aree ordinate per frequenza con le domande associate
+  // Costruisci lista aree ordinate per frequenza — solo testi leggibili, niente codici ID
   const areeDettagliate=ctx.sortedMacro.map(([macroName,mv])=>{
     const domande=mv.ids
-      .map(id=>({id,n:ctx.qFreq[id]||0,text:ctx.qMap[id]?.text||id,users:(ctx.qUsers[id]||[]).join(', ')}))
+      .map(id=>({n:ctx.qFreq[id]||0,text:ctx.qMap[id]?.text||id,users:(ctx.qUsers[id]||[]).join(', ')}))
       .sort((a,b)=>b.n-a.n);
     const utentiArea=(ctx.macroUsers[macroName]||[]).join(', ')||'—';
-    return`${mv.icon} ${macroName} (${mv.count} selezioni totali — utenti: ${utentiArea})
-  Domande da valutare:
-${domande.map(d=>`    • "${d.text}" (${d.n} utenti: ${d.users})`).join('\n')}`;
+    return`${mv.icon} ${macroName} (utenti coinvolti: ${utentiArea})
+${domande.map(d=>`  • ${d.text} [${d.users}]`).join('\n')}`;
   }).join('\n\n');
 
-  return`Sei un esperto di progettazione di laboratori socio-occupazionali per persone con disabilità intellettiva e/o dello spettro autistico.
+  return`Sei un esperto di laboratori socio-occupazionali per persone con disabilità intellettiva e/o dello spettro autistico.
 
-Contesto: UN solo operatore gestisce circa 8 utenti contemporaneamente in un laboratorio socio-occupazionale.
+CONTESTO: 1 operatore, ~8 utenti in contemporanea.
 
-═══ DATI UTENTI (${ctx.totalProfiles} profili) ═══
+${hasScores?`VALUTAZIONI UTENTI (0–5, critiche <2.5, forza ≥4):
+${ctx.userScoreLines.join('\n')}
 
-${hasScores?`── VALUTAZIONI PER UTENTE (punteggi 0–5):
-${ctx.userScoreLines.join('\n\n')}
-
-`:''}── AREE FUNZIONALI ordinate per frequenza (dalla più rilevante):
+`:''}AREE DA VALUTARE (ordinate per rilevanza, con domande e utenti):
 ${areeDettagliate}
 
-═══ STRUTTURA DELLA RISPOSTA RICHIESTA ═══
+═══ COSA PRODURRE ═══
 
-Produci un piano operativo completo e dettagliato, strutturato esattamente così:
+Un piano operativo sintetico, max 5 pagine A4 stampate. Usa titoli chiari, bullet point concisi. Non usare codici o sigle — solo nomi descrittivi. Struttura:
 
----
+## 1. ATTIVITÀ PER AREA
+Per ogni area (dalla più rilevante): 3–4 attività concrete. Per ognuna in forma compatta:
+**Nome** — descrizione in 1 riga — esempio pratico breve — cosa si osserva (indica le competenze specifiche del pool, scritte per esteso) — utenti prioritari.
 
-## 1. SCHEMA ATTIVITÀ PER AREA (una sezione per ogni area, dalla più frequente)
+## 2. GESTIONE DEL LABORATORIO
+Bullet point pratici: struttura giornata tipo, rotazione postazioni, supporti visivi, come alternare osservazione diretta e autonomia.
 
-Per ciascuna area funzionale:
-- Titolo dell'area e numero di selezioni
-- **5 attività concrete** (singole o in piccolo gruppo) che permettano di osservare e valutare le competenze di quell'area, ordinate dalla più semplice alla più complessa
-  Per ogni attività indica:
-  → **Nome attività**: breve titolo descrittivo
-  → **Descrizione**: in 2–3 righe come si svolge praticamente
-  → **Mini esempio**: un caso concreto ("Es: Mario deve...")
-  → **Cosa osservi**: elenca esplicitamente le DOMANDE del pool che questa attività permette di valutare (usa il testo esatto delle domande fornite sopra)
-  → **Utenti prioritari**: chi del gruppo beneficia di più da questa attività
+## 3. ATTIVITÀ RIEMPITIVE
+Lista di 5–6 attività autonome per chi non è sotto osservazione, avviabili con prompt minimo.
 
----
+## 4. PIANO SETTIMANALE
+Tabella o schema semplice: giornata tipo + distribuzione aree durante la settimana.
 
-## 2. ORGANIZZAZIONE GENERALE DEL LABORATORIO
+## 5. STRATEGIE E PUNTI DI FORZA
+In forma di bullet: approcci metodologici consigliati + competenze solide da cui ripartire.
 
-Consigli pratici su:
-- Come strutturare la giornata tipo con un solo operatore e 8 utenti
-- Rotazione delle postazioni o gestione degli spazi
-- Uso di supporti visivi, schede, timer, routine visive
-- Come alternare momenti di osservazione diretta con attività autonome
-
----
-
-## 3. ATTIVITÀ "RIEMPITIVE" (per utenti non in valutazione attiva)
-
-Proponi 6–8 attività autonome o semi-autonome che:
-- Tengano impegnati gli utenti non sotto osservazione diretta
-- Siano facilmente avviabili in autonomia o con prompt minimo
-- Non richiedano supervisione costante dell'operatore
-- Siano adatte a persone con diversi livelli di autonomia
-
----
-
-## 4. PIANO SETTIMANALE ORIENTATIVO
-
-Schema giornata tipo (mattina/pomeriggio) e distribuzione settimanale delle aree da coprire, tenendo conto di tutti gli utenti.
-
----
-
-## 5. STRATEGIE METODOLOGICHE
-
-Approcci consigliati per i profili presenti: prompting, modeling, token economy, supporti visivi, gradualità, ecc.
-
----
-
-## 6. PUNTI DI FORZA DA VALORIZZARE
-
-Competenze già solide su cui costruire nuove attività.
-
----
-
-## 7. ALTRI CONSIGLI UTILI
-
-Qualsiasi altra raccomandazione pratica per ottimizzare il lavoro di osservazione e valutazione nel laboratorio.
-
----
-
-Scrivi in italiano, tono professionale ma diretto, come se stessi consigliando un collega operatore. Sii concreto e specifico, evita generalità. Non limitare la lunghezza: questo documento sarà stampato e usato come guida operativa.`;
+Scrivi in italiano, tono diretto da collega operatore. Sintetico ma completo: ogni parola deve essere utile.`;
 }
 
 async function generateLabAI(){

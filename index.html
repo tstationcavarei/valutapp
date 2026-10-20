@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.4.0</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.4.2</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -867,9 +867,12 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
       <p style="font-size:.83rem;color:var(--text2);margin-bottom:14px">Seleziona le domande rilevanti per questo utente .</p>
       <div id="questions-container"></div>
     </div>
-    <div style="display:flex;gap:11px;justify-content:flex-end;padding-bottom:36px">
-      <div id="design-q-counter" style="margin-right:auto;display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--al);border:1.5px solid var(--al2);border-radius:10px;font-size:.84rem;font-weight:600;color:var(--accent)">
-        <span>📋</span><span id="design-q-count">0</span><span style="font-weight:400;color:var(--text2)">domande selezionate</span>
+    <div style="display:flex;gap:11px;justify-content:flex-end;padding-bottom:36px;flex-wrap:wrap">
+      <div style="margin-right:auto;display:flex;align-items:center;gap:8px">
+        <div id="design-q-counter" style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--al);border:1.5px solid var(--al2);border-radius:10px;font-size:.78rem;font-weight:600;color:var(--accent)">
+          <span>📋</span><span id="design-q-count">0</span><span style="font-weight:400;color:var(--text2)">sel.</span>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="showQuestionList(currentProfileId)" style="font-size:.78rem;padding:6px 12px">📄 Vedi elenco</button>
       </div>
       <button class="btn btn-ghost" onclick="resetDesign()" style="color:var(--danger);border-color:var(--danger);background:var(--dl);font-weight:600">↺ Reimposta domande</button>
       <button class="btn btn-primary btn-lg" onclick="saveDesign()">💾 Salva Configurazione</button>
@@ -1170,7 +1173,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.4.0</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.4.2</div>
     </div>
   </div>
 </div>
@@ -1615,8 +1618,11 @@ function renderDesignSelect(){
       <div class="pc-meta">${[prof.eta?prof.eta+' anni':'',prof.servizio].filter(Boolean).join(' · ')||'—'}<br>
         <span style="color:var(--accent2)">${sel} domande selezionate</span>
       </div>
-      <div style="margin-top:10px">
-        <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();activateAndDesign('${prof.id}')">📐 Configura domande</button>
+      <div style="margin-top:10px;display:flex;gap:7px;flex-wrap:wrap;justify-content:center">
+        ${sel>0
+          ? `<button class="btn btn-primary btn-sm" onclick="event.stopPropagation();activateAndDesign('${prof.id}')">📐 Modifica domande</button>
+             <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();showQuestionList('${prof.id}')" style="font-size:.75rem">📄 Vedi elenco</button>`
+          : `<button class="btn btn-primary btn-sm" onclick="event.stopPropagation();activateAndDesign('${prof.id}')">📐 Configura domande</button>`}
       </div>
     </div>`;
   }
@@ -1828,6 +1834,101 @@ function resetDesign(){
   if(!confirm('Reimpostare tutte le domande selezionate per questo utente?\n(Le domande personalizzate create rimarranno, ma verranno deselezionate.)'))return;
   pdata.selectedQuestions=[];
   savePdata(currentProfileId,pdata);renderDesign();notify('Domande reimpostate.');
+}
+
+// ── QUESTION LIST MODAL ──
+function showQuestionList(profId){
+  const pd=profId===currentProfileId?pdata:loadPdata(profId);
+  const prof=profiles.find(p=>p.id===profId)||{nome:'Utente'};
+  const sel=pd.selectedQuestions||[];
+  const custom=pd.customQuestions||{};
+
+  // Costruisce struttura: per ogni macro, domande selezionate e non
+  const areas=[];
+  QUESTION_BANK.forEach(macro=>{
+    const qs=[];
+    macro.micro.forEach(mg=>mg.questions.forEach(q=>{
+      qs.push({id:q.id,text:q.text,selected:sel.includes(q.id)});
+    }));
+    (custom[macro.macro]||[]).forEach(cq=>{
+      qs.push({id:cq.id,text:cq.text,selected:sel.includes(cq.id)});
+    });
+    if(qs.some(q=>q.selected)||qs.length)areas.push({macro:macro.macro,icon:macro.icon,questions:qs});
+  });
+
+  let showUnselected=false;
+
+  function renderModal(){
+    const selCount=sel.length;
+    const totalCount=areas.reduce((a,ar)=>a+ar.questions.length,0);
+    const areaBlocks=areas.map(ar=>{
+      const visQ=ar.questions.filter(q=>q.selected||(showUnselected&&!q.selected));
+      if(!visQ.length)return'';
+      return`<div style="margin-bottom:14px">
+        <div style="font-family:var(--fd);font-size:.88rem;font-weight:700;color:var(--accent);margin-bottom:6px">${ar.icon} ${ar.macro}</div>
+        ${visQ.map(q=>`<div style="display:flex;align-items:flex-start;gap:8px;padding:4px 0;border-bottom:1px solid var(--border)">
+          <span style="font-size:.7rem;font-weight:700;padding-top:2px;min-width:18px;${q.selected?'color:var(--accent2)':'color:var(--text3)'}">${q.selected?'✓':'○'}</span>
+          <span style="font-size:.8rem;line-height:1.45;color:${q.selected?'var(--text)':'var(--text3)'}">${q.text}</span>
+        </div>`).join('')}
+      </div>`;
+    }).join('');
+
+    const body=document.getElementById('qlist-body');
+    if(body)body.innerHTML=areaBlocks||'<p style="color:var(--text3);font-size:.85rem">Nessuna domanda da mostrare.</p>';
+    const tog=document.getElementById('qlist-toggle');
+    if(tog)tog.textContent=showUnselected?'👁 Nascondi non selezionate':'👁 Mostra non selezionate';
+    const cnt=document.getElementById('qlist-count');
+    if(cnt)cnt.textContent=`${selCount} selezionate · ${totalCount} totali`;
+  }
+
+  // Crea overlay modal
+  let overlay=document.getElementById('modal-qlist');
+  if(overlay)overlay.remove();
+  overlay=document.createElement('div');
+  overlay.id='modal-qlist';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px';
+  overlay.innerHTML=`
+    <div style="background:var(--card);border-radius:var(--r);box-shadow:0 8px 40px rgba(0,0,0,.3);width:100%;max-width:600px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden">
+      <div class="no-print-hide" style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-family:var(--fd);font-size:1rem;font-weight:700;color:var(--text)">📄 Elenco domande — ${prof.nome}</div>
+          <div id="qlist-count" style="font-size:.74rem;color:var(--text3);margin-top:2px"></div>
+        </div>
+        <button onclick="document.getElementById('modal-qlist').remove()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text3);padding:4px">✕</button>
+      </div>
+      <div class="no-print-hide" style="display:flex;gap:8px;padding:10px 20px;border-bottom:1px solid var(--border)">
+        <button id="qlist-toggle" class="btn btn-ghost btn-sm" onclick="window._qlToggle()"></button>
+        <button class="btn btn-ghost btn-sm" onclick="window._qlPrint()">🖨️ Stampa</button>
+      </div>
+      <div id="qlist-body" style="flex:1;overflow-y:auto;padding:16px 20px"></div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()});
+
+  window._qlToggle=()=>{showUnselected=!showUnselected;renderModal()};
+  window._qlPrint=()=>{
+    const prof2=profiles.find(p=>p.id===profId)||{nome:'Utente'};
+    const areaBlocks=areas.map(ar=>{
+      const visQ=showUnselected?ar.questions:ar.questions.filter(q=>q.selected);
+      if(!visQ.length)return'';
+      return`<div style="margin-bottom:16px;page-break-inside:avoid">
+        <div style="font-weight:700;font-size:11pt;margin-bottom:4px;border-bottom:1px solid #ccc;padding-bottom:2px">${ar.icon} ${ar.macro}</div>
+        ${visQ.map(q=>`<div style="display:flex;gap:6px;padding:3px 0;font-size:9.5pt">
+          <span style="min-width:14px;color:${q.selected?'#2a7a2a':'#999'}">${q.selected?'✓':'○'}</span>
+          <span style="color:${q.selected?'#000':'#999'}">${q.text}</span>
+        </div>`).join('')}
+      </div>`;
+    }).join('');
+    const win=window.open('','_blank','width=700,height=900');
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Domande — ${prof2.nome}</title>
+      <style>body{font-family:Arial,sans-serif;margin:24px;color:#000}h2{font-size:13pt;margin-bottom:4px}p{font-size:9pt;color:#555}</style></head>
+      <body><h2>📋 Elenco domande — ${prof2.nome}</h2>
+      <p>${showUnselected?'Tutte le domande':'Solo domande selezionate'} · ${new Date().toLocaleDateString('it-IT')}</p>
+      <hr style="margin:10px 0">${areaBlocks}</body></html>`);
+    win.document.close();win.focus();win.print();
+  };
+
+  renderModal();
 }
 
 // ── ABC CONFIG ──
@@ -3442,12 +3543,14 @@ function renderCoverage(){
   // Una domanda è "sotto-media" se count < (media - 0.5 * stddev) E scarto assoluto >= 1.
   // Se stddev ≈ 0 (tutti uguali) → nessuna lacuna.
   function calcThreshold(counts){
-    if(!counts.length)return{mean:0,threshold:0,flat:true};
+    if(!counts.length)return{mean:0,threshold:0,flat:true,allZero:false};
     const mean=counts.reduce((a,b)=>a+b,0)/counts.length;
+    // Nessuna compilazione su nessuna domanda → tutte sotto
+    if(mean===0)return{mean:0,threshold:1,flat:false,allZero:true};
     const variance=counts.reduce((s,c)=>s+(c-mean)**2,0)/counts.length;
     const std=Math.sqrt(variance);
-    if(std<0.5)return{mean,threshold:mean,flat:true}; // tutti troppo simili
-    return{mean,threshold:mean-0.5*std,flat:false};
+    if(std<0.5)return{mean,threshold:mean,flat:true,allZero:false}; // tutti troppo simili
+    return{mean,threshold:mean-0.5*std,flat:false,allZero:false};
   }
 
   const usersData=[];
@@ -3484,13 +3587,13 @@ function renderCoverage(){
 
     // Calcola soglia globale sull'utente (tutti i suoi count insieme)
     const allCounts=Object.values(qCount);
-    const{mean,threshold,flat}=calcThreshold(allCounts);
+    const{mean,threshold,flat,allZero}=calcThreshold(allCounts);
 
     // Marca ogni domanda come sotto-media
     let underTotal=0;
     Object.entries(macroMap).forEach(([mName,mv])=>{
       mv.questions.forEach(q=>{
-        q.under=!flat&&q.count<threshold&&(mean-q.count)>=1;
+        q.under=allZero||((!flat)&&q.count<threshold&&(mean-q.count)>=1);
         if(q.under)underTotal++;
       });
       // Aggiorna globalMacro
@@ -3501,7 +3604,7 @@ function renderCoverage(){
       });
     });
 
-    usersData.push({prof,macroMap,underTotal,mean:Math.round(mean*10)/10,flat});
+    usersData.push({prof,macroMap,underTotal,mean:Math.round(mean*10)/10,flat,allZero});
   });
 
   if(!usersData.length){
@@ -3550,7 +3653,7 @@ function renderCoverage(){
 
   // ── CARD PER UTENTE ──
   const userCards=usersData.map((u,ui)=>{
-    if(u.flat||!u.underTotal){
+    if(!u.allZero&&(u.flat||!u.underTotal)){
       const msg=u.flat?'Compilazioni omogenee — nessuna lacuna rilevata':'Copertura uniforme';
       return`<div class="cov-user-card" style="padding:13px 18px;display:flex;align-items:center;gap:12px">
         <span style="font-size:1.1rem">🟢</span>

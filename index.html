@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.4.4</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.4.6</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1077,6 +1077,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
       <button class="settings-tab active" onclick="switchSettingsTab('backup',this)">💾 Backup</button>
       <button class="settings-tab" onclick="switchSettingsTab('ai',this)">🤖 AI</button>
       <button class="settings-tab" onclick="switchSettingsTab('sistema',this)">🔄 Sistema</button>
+      <button class="settings-tab" onclick="switchSettingsTab('elimina',this)">🗑️ Elimina</button>
     </div>
 
     <!-- TAB: BACKUP -->
@@ -1178,9 +1179,34 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
       <div id="sw-update-status" style="font-size:.76rem;color:var(--text3);text-align:center;min-height:16px;margin-bottom:14px"></div>
     </div>
 
+    <!-- TAB: ELIMINA -->
+    <div class="settings-tab-panel" id="stab-elimina">
+      <div style="font-size:.8rem;color:var(--text2);margin-bottom:14px;line-height:1.45">
+        Elimina le compilazioni salvate. L'operazione è <strong>irreversibile</strong>.
+      </div>
+      <div style="margin-bottom:10px">
+        <label style="font-size:.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Utente</label>
+        <select id="del-comp-user" style="width:100%;padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg2);color:var(--text);font-size:.85rem">
+          <option value="__all__">— Tutti gli utenti —</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:14px">
+        <div style="flex:1">
+          <label style="font-size:.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Da (opzionale)</label>
+          <input type="date" id="del-comp-from" style="width:100%;padding:7px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg2);color:var(--text);font-size:.82rem">
+        </div>
+        <div style="flex:1">
+          <label style="font-size:.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">A (opzionale)</label>
+          <input type="date" id="del-comp-to" style="width:100%;padding:7px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg2);color:var(--text);font-size:.82rem">
+        </div>
+      </div>
+      <button class="btn btn-sm" onclick="confirmDeleteCompilations()" style="width:100%;justify-content:center;background:var(--dl);border:1.5px solid var(--danger);color:var(--danger);font-weight:700">🗑️ Elimina compilazioni</button>
+      <div id="del-comp-result" style="margin-top:10px;font-size:.78rem;color:var(--text3);min-height:16px;text-align:center"></div>
+    </div>
+
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.4.4</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.4.6</div>
     </div>
   </div>
 </div>
@@ -2188,7 +2214,7 @@ function renderCompile(){
   document.getElementById('compile-empty-state').style.display='';
   document.getElementById('compile-day-card').style.display='none';
   const emptyMsg=document.getElementById('compile-empty-msg');
-  if(emptyMsg)emptyMsg.textContent=p?'Seleziona una data dal calendario':'Seleziona un utente e una data per iniziare';
+  if(emptyMsg)emptyMsg.textContent='Seleziona un utente e una data dal calendario';
   renderUserSidebar('compile-sidebar','selectCompileUser','compile',null);
   renderCalendar();
 }
@@ -3009,11 +3035,95 @@ function switchSettingsTab(tab, btn){
   btn.classList.add('active');
   document.querySelectorAll('.settings-tab-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('stab-'+tab).classList.add('active');
+  if(tab==='elimina') populateDeleteTab();
+}
+
+function populateDeleteTab(){
+  const sel=document.getElementById('del-comp-user');
+  if(!sel)return;
+  // keep first option (tutti), rebuild the rest
+  while(sel.options.length>1) sel.remove(1);
+  profiles.forEach(p=>{
+    const opt=document.createElement('option');
+    opt.value=p.id;
+    opt.textContent=p.name;
+    sel.appendChild(opt);
+  });
+  document.getElementById('del-comp-result').textContent='';
+}
+
+function confirmDeleteCompilations(){
+  const userId=document.getElementById('del-comp-user').value;
+  const from=document.getElementById('del-comp-from').value;
+  const to=document.getElementById('del-comp-to').value;
+  const userName=userId==='__all__'?'tutti gli utenti':
+    (profiles.find(p=>p.id===userId)?.name||userId);
+  let rangeText='';
+  if(from&&to) rangeText=` dal ${from} al ${to}`;
+  else if(from) rangeText=` dal ${from} in poi`;
+  else if(to) rangeText=` fino al ${to}`;
+
+  let overlay=document.getElementById('modal-delete-comps');
+  if(overlay) overlay.remove();
+  overlay=document.createElement('div');
+  overlay.id='modal-delete-comps';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9200;display:flex;align-items:center;justify-content:center;padding:16px';
+  overlay.innerHTML=`
+    <div style="background:var(--card);border-radius:var(--r);box-shadow:0 8px 40px rgba(0,0,0,.3);width:100%;max-width:400px;padding:28px 24px;text-align:center">
+      <div style="font-size:2rem;margin-bottom:12px">🗑️</div>
+      <div style="font-family:var(--fd);font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:10px">Elimina compilazioni</div>
+      <div style="font-size:.88rem;color:var(--text2);margin-bottom:8px">Stai per eliminare le compilazioni di</div>
+      <div style="font-family:var(--fd);font-size:.95rem;font-weight:700;color:var(--danger);margin-bottom:4px">${userName}</div>
+      ${rangeText?`<div style="font-size:.82rem;color:var(--text2);margin-bottom:8px">${rangeText}</div>`:'<div style="font-size:.82rem;color:var(--text2);margin-bottom:8px">— tutte le date —</div>'}
+      <div style="font-size:.8rem;color:var(--text3);background:var(--dl);border-radius:8px;padding:8px 12px;margin:14px 0 22px">⚠️ L'operazione è irreversibile. I dati eliminati non potranno essere recuperati.</div>
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('modal-delete-comps').remove()">Annulla</button>
+        <button class="btn btn-sm" style="flex:1;background:var(--danger);border-color:var(--danger);color:#fff;font-weight:700" onclick="document.getElementById('modal-delete-comps').remove();doDeleteCompilations('${userId}','${from}','${to}')">🗑️ Elimina</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function doDeleteCompilations(userId,from,to){
+  let totalRemoved=0;
+  const targets=userId==='__all__'?profiles.map(p=>p.id):[userId];
+  targets.forEach(pid=>{
+    const pd=loadPdata(pid);
+    const comps=pd.compilations||{};
+    const tags=pd.dayTags||{};
+    const abc=pd.abcData||{};
+    const keys=Object.keys(comps);
+    let removed=0;
+    keys.forEach(dk=>{
+      const inRange=(!from||dk>=from)&&(!to||dk<=to);
+      if(inRange){
+        delete comps[dk];
+        delete tags[dk];
+        delete abc[dk];
+        removed++;
+      }
+    });
+    if(removed>0){
+      pd.compilations=comps;
+      pd.dayTags=tags;
+      pd.abcData=abc;
+      savePdata(pid,pd);
+      totalRemoved+=removed;
+    }
+  });
+  const res=document.getElementById('del-comp-result');
+  if(res) res.textContent=totalRemoved>0
+    ?`✅ Eliminate ${totalRemoved} compilazion${totalRemoved===1?'e':'i'}.`
+    :'Nessuna compilazione trovata nel periodo selezionato.';
+  notify(`🗑️ Eliminate ${totalRemoved} compilazion${totalRemoved===1?'e':'i'}.`,2500);
 }
 
 async function openSettingsModal(){
-  const pwd=await askPassword('🔐 Impostazioni','Inserisci la password per accedere alle impostazioni.');
-  if(pwd!=='ADMINADMIN'){notify('❌ Password errata.',2500);return;}
+  if(!sessionStorage.getItem('valutaapp_settings_unlocked')){
+    const pwd=await askPassword('🔐 Impostazioni','Inserisci la password per accedere alle impostazioni.');
+    if(pwd!=='ADMINADMIN'){notify('❌ Password errata.',2500);return;}
+    sessionStorage.setItem('valutaapp_settings_unlocked','1');
+  }
   // reset to first tab
   document.querySelectorAll('.settings-tab').forEach((t,i)=>t.classList.toggle('active',i===0));
   document.querySelectorAll('.settings-tab-panel').forEach((p,i)=>p.classList.toggle('active',i===0));
@@ -3390,6 +3500,51 @@ function renderLab(){
   const labContext=sortedMacro.map(([k,v])=>`- ${v.icon} ${k}: ${v.count} selezioni`).join('\n');
   const topQContext=topQuestions.map(([id,n])=>`- "${qMap[id]?.text||id}" (${n} utenti)`).join('\n');
 
+  // Raccoglie punteggi medi e tendenza per ogni utente/domanda
+  const userScoreLines=[];
+  profiles.forEach(prof=>{
+    const pd=loadPdata(prof.id);
+    const sel=pd.selectedQuestions||[];
+    if(!sel.length)return;
+    const compilations=pd.compilations||{};
+    const dates=Object.keys(compilations).sort();
+    if(!dates.length)return;
+    // punteggio medio per domanda
+    const qScores={};
+    dates.forEach(dk=>{
+      Object.entries(compilations[dk]).forEach(([qId,score])=>{
+        if(!sel.includes(qId)||!score)return;
+        if(!qScores[qId])qScores[qId]=[];
+        qScores[qId].push(score);
+      });
+    });
+    // Aree critiche: media < 2.5
+    const critiche=[];
+    const buone=[];
+    Object.entries(qScores).forEach(([qId,scores])=>{
+      const avg=scores.reduce((a,b)=>a+b,0)/scores.length;
+      const label=`"${(qMap[qId]?.text||qId).slice(0,55)}" (media ${avg.toFixed(1)})`;
+      if(avg<2.5)critiche.push(label);
+      else if(avg>=4)buone.push(label);
+    });
+    // Tendenza: confronta ultima settimana con precedente
+    const recentDates=dates.slice(-7);
+    const prevDates=dates.slice(-14,-7);
+    let tendenzaLine='';
+    if(recentDates.length&&prevDates.length){
+      const avg=(dts)=>{const vals=[];dts.forEach(dk=>Object.values(compilations[dk]).forEach(v=>{if(v>0)vals.push(v)}));return vals.length?vals.reduce((a,b)=>a+b)/vals.length:0};
+      const r=avg(recentDates);const p=avg(prevDates);
+      if(r>p+0.3)tendenzaLine=`Tendenza recente: in miglioramento (${p.toFixed(1)}→${r.toFixed(1)})`;
+      else if(r<p-0.3)tendenzaLine=`Tendenza recente: in peggioramento (${p.toFixed(1)}→${r.toFixed(1)})`;
+      else tendenzaLine=`Tendenza recente: stabile (media ${r.toFixed(1)})`;
+    }
+    const lines=[`Utente: ${prof.nome} (${dates.length} giornate)`];
+    if(critiche.length)lines.push(`  Aree critiche (<2.5): ${critiche.join('; ')}`);
+    if(buone.length)lines.push(`  Punti di forza (≥4): ${buone.join('; ')}`);
+    if(tendenzaLine)lines.push(`  ${tendenzaLine}`);
+    userScoreLines.push(lines.join('\n'));
+  });
+
   const isDark=document.body.getAttribute('data-theme')==='dark';
   const accentColor=isDark?'rgba(85,200,150,.75)':'rgba(43,96,80,.75)';
   const warnColor=isDark?'rgba(224,152,88,.75)':'rgba(173,95,26,.75)';
@@ -3484,7 +3639,7 @@ function renderLab(){
   <div style="height:40px"></div>`;
 
   // store lab context for AI
-  window._labContext={labContext,topQContext,totalProfiles,sortedMacro,qMap,qFreq,qUsers,macroUsers};
+  window._labContext={labContext,topQContext,totalProfiles,sortedMacro,qMap,qFreq,qUsers,macroUsers,userScoreLines};
 
   // render chart
   setTimeout(()=>{
@@ -3537,23 +3692,28 @@ function switchLabTab(tab,btn){
 function buildLabPromptText(){
   const ctx=window._labContext;
   if(!ctx)return'';
+  const hasScores=ctx.userScoreLines&&ctx.userScoreLines.length>0;
   return`Sei un esperto di progettazione di laboratori socio-occupazionali per persone con disabilità intellettiva e/o dello spettro autistico.
 
-Analizza i seguenti dati raccolti da ${ctx.totalProfiles} utenti di un centro socio-occupazionale.
+Analizza i seguenti dati raccolti da ${ctx.totalProfiles} utenti di un centro socio-occupazionale e fornisci consigli pratici per organizzare le prossime giornate di laboratorio.
 
-AREE FUNZIONALI più selezionate dagli operatori per i propri utenti:
+── AREE FUNZIONALI più selezionate (quante persone le hanno nel loro pool):
 ${ctx.labContext}
 
-DOMANDE/COMPETENZE più rilevanti (numero di utenti per i quali è stata selezionata):
+── COMPETENZE più diffuse nel pool (top 10 per numero di utenti):
 ${ctx.topQContext}
 
-Sulla base di questi dati, fornisci consigli pratici e professionali per migliorare il laboratorio socio-occupazionale. In particolare indica:
-1. Quali tipologie di attività sarebbe opportuno implementare o potenziare
-2. A quali aspetti dell'ambiente e dell'organizzazione prestare attenzione
-3. Strategie e approcci metodologici che si adattano meglio a questi profili
-4. Eventuali aree di bassa priorità su cui si possono allocare meno risorse
+${hasScores?`── DATI DI VALUTAZIONE PER UTENTE (punteggi 0–5; aree critiche <2.5, punti di forza ≥4):
+${ctx.userScoreLines.join('\n\n')}
 
-Rispondi in modo pratico, concreto e professionale, come se stessi consigliando un'équipe di operatori. Massimo 400 parole, forma narrativa con sottotitoli chiari.`;
+`:''}Sulla base di questi dati, rispondi con:
+
+1. **Consigli per le prossime giornate di laboratorio**: proponi 3–5 attività concrete da svolgere in laboratorio che permettano di lavorare sulle aree critiche emerse (punteggi bassi), specificando per ciascuna attività a quale competenza si riferisce e per quali utenti è prioritaria.
+2. **Piano settimanale orientativo**: distribuisci le attività in una giornata tipo o in una settimana tipo, bilanciando le esigenze dei diversi utenti.
+3. **Strategie metodologiche**: indica gli approcci più adatti ai profili presenti (supporti visivi, gradualità, prompting, ecc.).
+4. **Punti di forza da valorizzare**: segnala le competenze già solide su cui costruire.
+
+Rispondi in modo pratico e diretto, come se stessi briefando un'équipe prima della giornata di lavoro. Massimo 500 parole, forma narrativa con sottotitoli chiari.`;
 }
 
 async function generateLabAI(){
@@ -3733,14 +3893,14 @@ function renderCoverage(){
         </div>`).join('');
 
       return`<div style="border:1.5px solid var(--border);border-radius:var(--rs);overflow:hidden;margin-bottom:8px">
-        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;background:var(--bg2);user-select:none"
-             onclick="const b=document.getElementById('${blockId}');b.style.display=b.style.display==='none'?'block':'none';this.querySelector('.cov-chevron').textContent=b.style.display==='none'?'▸':'▾'">
-          <span>${mv.icon}</span>
-          <span style="font-size:.84rem;font-weight:700;color:var(--text);flex:1">${mName}</span>
+        <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;background:var(--bg2);user-select:none"
+             onclick="const b=document.getElementById('${blockId}');const open=b.style.display!=='none';b.style.display=open?'none':'block';this.querySelector('.cov-chevron-btn').textContent=open?'▶ Apri':'▼ Chiudi'">
+          <span style="font-size:1rem">${mv.icon}</span>
+          <span style="font-size:.86rem;font-weight:700;color:var(--text);flex:1">${mName}</span>
           <span class="cov-pill cov-pill-orange" style="font-size:.7rem">${underQs.length} da valutare</span>
-          <span class="cov-chevron" style="font-size:.7rem;color:var(--text3);margin-left:6px">▸</span>
+          <span class="cov-chevron-btn" style="font-size:.72rem;font-weight:700;color:var(--accent);background:var(--al);border:1px solid var(--al2);border-radius:6px;padding:2px 8px;margin-left:8px;white-space:nowrap">▼ Chiudi</span>
         </div>
-        <div id="${blockId}" style="display:none;padding:6px 12px 10px">
+        <div id="${blockId}" style="padding:6px 12px 10px">
           <div style="font-size:.7rem;color:var(--text3);margin-bottom:6px">Media utente: <strong>${u.mean}</strong> compilazioni/domanda</div>
           ${qRows}
         </div>
@@ -3748,12 +3908,12 @@ function renderCoverage(){
     }).join('');
 
     return`<div class="cov-user-card" id="cov-user-${ui}">
-      <div class="cov-user-header" onclick="const b=document.getElementById('cov-body-${ui}');b.style.display=b.style.display==='none'?'block':'none';this.querySelector('.cov-user-chevron').textContent=b.style.display==='none'?'▸':'▾'">
+      <div class="cov-user-header" onclick="const b=document.getElementById('cov-body-${ui}');const open=b.style.display!=='none';b.style.display=open?'none':'block';this.querySelector('.cov-user-chevron-btn').textContent=open?'▶ Espandi':'▼ Comprimi'">
         <div class="cov-user-name">🟡 ${u.prof.nome}</div>
         <div style="display:flex;align-items:center;gap:8px">
           <span class="cov-stat-badge cov-stat-orange">${u.underTotal} domande sotto-media</span>
           <span style="font-size:.72rem;color:var(--text3)">media ${u.mean}</span>
-          <span class="cov-user-chevron" style="font-size:.75rem;color:var(--text3)">▾</span>
+          <span class="cov-user-chevron-btn" style="font-size:.72rem;font-weight:700;color:var(--accent);background:var(--al);border:1px solid var(--al2);border-radius:6px;padding:2px 8px;white-space:nowrap">▼ Comprimi</span>
         </div>
       </div>
       <div id="cov-body-${ui}">${areaBlocks}</div>
@@ -3779,7 +3939,12 @@ function renderCoverage(){
     </div>
   </div>`;
 
-  content.innerHTML=globalSection+userCards+aiSection;
+  const separator=usersData.length?`<div style="display:flex;align-items:center;gap:12px;margin:28px 0 22px">
+    <div style="flex:1;height:1px;background:var(--border)"></div>
+    <span style="font-size:.75rem;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase">Dettaglio per utente</span>
+    <div style="flex:1;height:1px;background:var(--border)"></div>
+  </div>`:'';
+  content.innerHTML=globalSection+separator+userCards+aiSection;
 }
 
 function buildCoveragePromptText(){

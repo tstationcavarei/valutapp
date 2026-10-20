@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.5.2</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.5.4</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1206,7 +1206,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.5.2</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.5.4</div>
     </div>
   </div>
 </div>
@@ -3715,33 +3715,82 @@ ${domande.map(d=>`  • ${d.text} [${d.users}]`).join('\n')}`;
 
 CONTESTO: 1 operatore, ~8 utenti in contemporanea.
 
-${hasScores?`VALUTAZIONI UTENTI (0–5, critiche <2.5, forza ≥4):
+${hasScores?`VALUTAZIONI UTENTI (punteggi 0–5):
 ${ctx.userScoreLines.join('\n')}
 
-`:''}AREE DA VALUTARE (ordinate per rilevanza, con domande e utenti):
+`:''}AREE DA VALUTARE (dalla più rilevante, con domande e utenti coinvolti):
 ${areeDettagliate}
 
-═══ COSA PRODURRE ═══
+═══ DOCUMENTO DA PRODURRE ═══
 
-Un piano operativo sintetico, max 5 pagine A4 stampate. Usa titoli chiari, bullet point concisi. Non usare codici o sigle — solo nomi descrittivi. Struttura:
+Produci un piano operativo in italiano, tono diretto da collega operatore. Max 5 pagine A4. Non usare mai codici o sigle — solo nomi descrittivi completi.
 
-## 1. ATTIVITÀ PER AREA
-Per ogni area (dalla più rilevante): 3–4 attività concrete. Per ognuna in forma compatta:
-**Nome** — descrizione in 1 riga — esempio pratico breve — cosa si osserva (indica le competenze specifiche del pool, scritte per esteso) — utenti prioritari.
+Il documento deve avere ESATTAMENTE questa struttura e anatomia, senza variazioni:
 
-## 2. GESTIONE DEL LABORATORIO
-Bullet point pratici: struttura giornata tipo, rotazione postazioni, supporti visivi, come alternare osservazione diretta e autonomia.
+---
 
-## 3. ATTIVITÀ RIEMPITIVE
-Lista di 5–6 attività autonome per chi non è sotto osservazione, avviabili con prompt minimo.
+# Piano operativo – Laboratorio socio-occupazionale
 
-## 4. PIANO SETTIMANALE
-Tabella o schema semplice: giornata tipo + distribuzione aree durante la settimana.
+[data odierna]
 
-## 5. STRATEGIE E PUNTI DI FORZA
-In forma di bullet: approcci metodologici consigliati + competenze solide da cui ripartire.
+## 1. Attività per area
 
-Scrivi in italiano, tono diretto da collega operatore. Sintetico ma completo: ogni parola deve essere utile.`;
+Ogni attività è pensata per far emergere più competenze insieme dentro un lavoro reale, non come test isolato. Accanto a ogni voce osservata, annotare sempre il livello di aiuto dato: nessuno, verbale, visivo, fisico.
+
+[Per ogni area funzionale, usa questo heading:]
+### [Nome area]
+
+[Per ogni attività dell'area, usa ESATTAMENTE questo formato come voce di lista:]
+- **[Nome attività]** — [descrizione sintetica in una frase]. *Es.:* [esempio pratico concreto].
+*Si osserva:* [elenco delle competenze osservabili, usando il testo esatto delle domande fornite sopra, separate da punto e virgola].
+*Prioritari:* [nomi utenti per cui questa attività è prioritaria, separati da virgola].
+
+Regole per la sezione 1:
+- 3–4 attività per area, dalla più semplice alla più complessa
+- Il nome attività è sempre in grassetto
+- "Es.:" sempre in corsivo
+- "Si osserva:" e "Prioritari:" sempre in corsivo
+- Le competenze in "Si osserva" devono corrispondere alle domande del pool fornito, scritte per esteso
+- Se una competenza riguarda solo alcuni utenti specifici, indicali tra parentesi dopo la competenza
+
+## 2. Gestione del laboratorio
+
+Regola base: per ogni blocco di lavoro solo 2/3 utenti sono in osservazione diretta, gli altri lavorano su compiti consolidati o attività riempitive.
+
+[Lista di bullet con questo formato:]
+- **[Nome strategia]**: [descrizione operativa concreta].
+
+Includi bullet su: supporti visivi da usare, come alternare osservazione diretta e autonomia, come gestire i giri di controllo, come registrare le osservazioni, eventuali note su utenti specifici che richiedono attenzione costante.
+
+## 3. Strategie
+
+**Approcci consigliati**
+
+[Lista di bullet con questo formato:]
+- **[Nome approccio]**: [descrizione operativa in 1–2 frasi].
+
+Includi: lavoro strutturato (sinistra→destra), analisi del compito, aiuto graduato, anticipazione dei cambiamenti, tutoraggio tra pari (se applicabile dai profili), rinforzo immediato.
+
+## 4. Attività riempitive – scatole di lavoro
+
+[Breve intro: 1–2 frasi su cosa sono e perché si usano.]
+
+**Come si spiega da sola una scatola**
+
+[Lista di bullet con formato: **[principio]**: [descrizione].]
+
+Includi almeno: tutto dentro, da sinistra a destra, quantità finita, un posto una risposta, risultato sul coperchio.
+
+**Catalogo delle scatole**
+
+[Tabella con 6 colonne:]
+| N. | Scatola | Dentro (recupero) | Da stampare | Come si spiega da sola | Aree e utenti |
+
+[6–8 righe, basate sulle aree e sugli utenti dei dati forniti. Ogni scatola deve essere realizzabile con materiali di recupero. L'ultima colonna indica area funzionale — utenti prioritari.]
+
+---
+
+Rispetta ESATTAMENTE questa struttura. Non aggiungere sezioni extra, non cambiare i titoli, non usare altri stili di formattazione.`;
 }
 
 async function generateLabAI(){
@@ -3779,17 +3828,62 @@ function exportLabDoc(format){
   }
   const date=new Date().toLocaleDateString('it-IT');
   // Converti markdown-like in HTML leggibile
-  const htmlBody=text
-    .split('\n')
-    .map(line=>{
-      if(line.startsWith('## ')) return`<h2>${line.slice(3)}</h2>`;
-      if(line.startsWith('# ')) return`<h1>${line.slice(2)}</h1>`;
-      if(line.startsWith('---')) return`<hr>`;
-      if(line.startsWith('→ **') || line.startsWith('→')) return`<div class="arrow">${line.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')}</div>`;
-      if(line.startsWith('- ') || line.startsWith('• ')) return`<li>${line.slice(2).replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')}</li>`;
-      const formatted=line.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
-      return formatted.trim()?`<p>${formatted}</p>`:'<br>';
-    }).join('\n');
+  // Parser markdown → HTML fedele agli stili del documento Word originale
+  const lines=text.split('\n');
+  const htmlLines=[];
+  let inList=false,inTable=false,tableRowCount=0;
+  for(let i=0;i<lines.length;i++){
+    const line=lines[i];
+    const fmt=l=>l
+      .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+      .replace(/\*([^*]+)\*/g,'<em>$1</em>')
+      .replace(/_([^_]+)_/g,'<u>$1</u>');
+    if(line.startsWith('### ')){
+      if(inList){htmlLines.push('</ul>');inList=false;}
+      htmlLines.push(`<h3>${fmt(line.slice(4))}</h3>`);
+    } else if(line.startsWith('## ')){
+      if(inList){htmlLines.push('</ul>');inList=false;}
+      htmlLines.push(`<h2>${fmt(line.slice(3))}</h2>`);
+    } else if(line.startsWith('# ')){
+      if(inList){htmlLines.push('</ul>');inList=false;}
+      htmlLines.push(`<h1>${fmt(line.slice(2))}</h1>`);
+    } else if(line.startsWith('---')){
+      if(inList){htmlLines.push('</ul>');inList=false;}
+      htmlLines.push('<hr>');
+    } else if(line.startsWith('- ')||line.startsWith('• ')){
+      if(!inList){htmlLines.push('<ul>');inList=true;}
+      htmlLines.push(`<li>${fmt(line.slice(2))}</li>`);
+    } else if(line.startsWith('→')){
+      if(inList){htmlLines.push('</ul>');inList=false;}
+      htmlLines.push(`<div class="arrow">${fmt(line)}</div>`);
+    } else if(line.startsWith('|')){
+      // Riga di tabella markdown
+      if(inList){htmlLines.push('</ul>');inList=false;}
+      if(!inTable){htmlLines.push('<table>');inTable=true;tableRowCount=0;}
+      // Salta righe separatore (|---|---|)
+      if(/^\|[-| :]+\|$/.test(line.trim())) { tableRowCount++; }
+      else {
+        const cells=line.split('|').slice(1,-1).map(c=>fmt(c.trim()));
+        if(tableRowCount===0){
+          htmlLines.push('<tr>'+cells.map(c=>`<th>${c}</th>`).join('')+'</tr>');
+        } else {
+          htmlLines.push('<tr>'+cells.map(c=>`<td>${c}</td>`).join('')+'</tr>');
+        }
+        tableRowCount++;
+      }
+    } else if(line.trim()===''){
+      if(inList){htmlLines.push('</ul>');inList=false;}
+      if(inTable){htmlLines.push('</table>');inTable=false;tableRowCount=0;}
+      htmlLines.push('<br>');
+    } else {
+      if(inList){htmlLines.push('</ul>');inList=false;}
+      if(inTable){htmlLines.push('</table>');inTable=false;tableRowCount=0;}
+      htmlLines.push(`<p>${fmt(line)}</p>`);
+    }
+  }
+  if(inList) htmlLines.push('</ul>');
+  if(inTable) htmlLines.push('</table>');
+  const htmlBody=htmlLines.join('\n');
 
   const html=`<!DOCTYPE html>
 <html lang="it">
@@ -3797,25 +3891,79 @@ function exportLabDoc(format){
 <meta charset="UTF-8">
 <title>Piano Laboratorio — ValutApp ${date}</title>
 <style>
-  body{font-family:Arial,sans-serif;font-size:11pt;line-height:1.6;color:#222;max-width:800px;margin:30px auto;padding:0 20px}
-  h1{font-size:16pt;color:#1a5c40;border-bottom:2px solid #1a5c40;padding-bottom:6px;margin-top:28px}
-  h2{font-size:13pt;color:#2a6e4f;border-bottom:1px solid #cde;padding-bottom:4px;margin-top:24px}
-  p{margin:4px 0 8px}
-  li{margin:3px 0 3px 20px}
-  .arrow{margin:4px 0 4px 16px;color:#444}
-  hr{border:none;border-top:1px solid #ccc;margin:16px 0}
-  strong{color:#1a3a2a}
-  .header{text-align:center;margin-bottom:30px;padding:16px;background:#f0f7f3;border-radius:8px}
-  .header h1{border:none;margin:0;font-size:18pt}
-  .header p{margin:4px 0;color:#555;font-size:10pt}
-  @media print{body{margin:10mm;max-width:100%}}
+  /* Font stack fedele al documento originale (Calibri/Calibri Light) */
+  @import url('https://fonts.googleapis.com/css2?family=Carlito:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+  body{
+    font-family:'Carlito',Calibri,Candara,'Segoe UI',sans-serif;
+    font-size:11pt;line-height:1.5;color:#1a1a1a;
+    margin:7mm 25mm 7mm 25mm; /* margini fedeli: top/bottom 0.3cm, sx/dx 2.5cm */
+    padding:0;
+  }
+  /* H1: blu scuro #002060, ~20pt, Calibri Light */
+  h1{
+    font-family:'Carlito',Calibri,Candara,'Segoe UI',sans-serif;
+    font-size:20pt;font-weight:700;color:#002060;
+    margin-top:24pt;margin-bottom:6pt;
+    border:none;padding:0;
+  }
+  /* H2: blu #2F5496, ~16pt */
+  h2{
+    font-family:'Carlito',Calibri,Candara,'Segoe UI',sans-serif;
+    font-size:16pt;font-weight:700;color:#2F5496;
+    margin-top:18pt;margin-bottom:5pt;
+    border:none;padding:0;
+  }
+  /* H3: Calibri Light, ~12pt, grassetto */
+  h3{
+    font-family:'Carlito',Calibri,Candara,'Segoe UI',sans-serif;
+    font-size:12pt;font-weight:700;color:#1a1a1a;
+    margin-top:14pt;margin-bottom:4pt;
+  }
+  /* Paragrafo normale */
+  p{margin:0 0 6pt;padding:0}
+  /* Lista bullet (List Paragraph) — rientro 0.75cm */
+  ul{margin:0 0 6pt 19mm;padding:0;list-style-type:disc}
+  li{margin:0 0 3pt;padding:0;line-height:1.5}
+  /* Elementi → tipo "Si osserva", "Prioritari" */
+  .arrow{margin:2pt 0 2pt 12mm;color:#1a1a1a}
+  /* Separatore */
+  hr{border:none;border-top:1px solid #b0b0b0;margin:14pt 0}
+  /* Testo in grassetto */
+  strong{font-weight:700}
+  /* Testo in corsivo */
+  em{font-style:italic}
+  /* Sottolineato */
+  u{text-decoration:underline}
+  /* Tabella — fedele all'originale */
+  table{
+    border-collapse:collapse;width:100%;
+    font-size:10pt;margin:8pt 0 12pt;
+  }
+  th{
+    background:#F2F2F2;font-weight:700;
+    border:1px solid #999;padding:5pt 7pt;
+    text-align:left;vertical-align:top;
+  }
+  td{
+    border:1px solid #bbb;padding:4pt 7pt;
+    vertical-align:top;line-height:1.4;
+  }
+  tr:nth-child(even) td{background:#fafafa}
+  /* Intestazione documento */
+  .header{margin-bottom:18pt}
+  .header-date{font-size:10pt;color:#555;margin:2pt 0 14pt}
+  @media print{
+    body{margin:7mm 25mm}
+    h2{page-break-after:avoid}
+    h3{page-break-after:avoid}
+    tr{page-break-inside:avoid}
+  }
 </style>
 </head>
 <body>
 <div class="header">
-  <h1>📋 Piano Operativo Laboratorio</h1>
-  <p>Generato da ValutApp il ${date}</p>
-  <p>${window._labContext?.totalProfiles||0} utenti — ${(window._labContext?.sortedMacro||[]).length} aree funzionali</p>
+  <h1>Piano operativo – Laboratorio socio-occupazionale</h1>
+  <p class="header-date">${date}</p>
 </div>
 ${htmlBody}
 </body>

@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.4.6</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.4.7</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1206,7 +1206,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.4.6</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.4.7</div>
     </div>
   </div>
 </div>
@@ -3898,9 +3898,9 @@ function renderCoverage(){
           <span style="font-size:1rem">${mv.icon}</span>
           <span style="font-size:.86rem;font-weight:700;color:var(--text);flex:1">${mName}</span>
           <span class="cov-pill cov-pill-orange" style="font-size:.7rem">${underQs.length} da valutare</span>
-          <span class="cov-chevron-btn" style="font-size:.72rem;font-weight:700;color:var(--accent);background:var(--al);border:1px solid var(--al2);border-radius:6px;padding:2px 8px;margin-left:8px;white-space:nowrap">▼ Chiudi</span>
+          <span class="cov-chevron-btn" style="font-size:.72rem;font-weight:700;color:var(--accent);background:var(--al);border:1px solid var(--al2);border-radius:6px;padding:2px 8px;margin-left:8px;white-space:nowrap">▶ Apri</span>
         </div>
-        <div id="${blockId}" style="padding:6px 12px 10px">
+        <div id="${blockId}" style="padding:6px 12px 10px;display:none">
           <div style="font-size:.7rem;color:var(--text3);margin-bottom:6px">Media utente: <strong>${u.mean}</strong> compilazioni/domanda</div>
           ${qRows}
         </div>

@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.5.6</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.5.7</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1206,7 +1206,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.5.6</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.5.7</div>
     </div>
   </div>
 </div>
@@ -1692,8 +1692,8 @@ function activateAndDesign(profileId){
 function openMultiPrintModal(){
   // Raccoglie tutti gli utenti già progettati
   const designed=profiles.filter(p=>{
-    const pd=getPdata(p.id);
-    return pd&&pd.selectedQuestions&&Object.values(pd.selectedQuestions).some(v=>v);
+    const pd=loadPdata(p.id);
+    return pd&&pd.selectedQuestions&&pd.selectedQuestions.length>0;
   });
   if(!designed.length){notify('Nessun utente con domande configurate.');return;}
 
@@ -1754,29 +1754,24 @@ function multiPrintQuestions(profileIds){
   const sections=profileIds.map(pid=>{
     const prof=profiles.find(p=>p.id===pid);
     if(!prof)return'';
-    const pd=getPdata(pid);
-    const sel=pd?.selectedQuestions||{};
+    const pd=loadPdata(pid);
+    const sel=pd?.selectedQuestions||[];
     // Raggruppa per macro
     const byMacro={};
     QUESTION_BANK.forEach(macro=>{
       const qs=[];
       macro.micro.forEach(mg=>{
         mg.questions.forEach(q=>{
-          if(sel[q.id])qs.push(q.text);
+          if(sel.includes(q.id))qs.push(q.text);
         });
-        // domande personalizzate di questo mg se esistono
       });
-      // domande custom senza macro (id custom_*)
-      if(pd.customQuestions){
-        pd.customQuestions.forEach(cq=>{
-          if(sel[cq.id]){
-            if(!byMacro['⭐ Domande personalizzate'])byMacro['⭐ Domande personalizzate']=[];
-            byMacro['⭐ Domande personalizzate'].push(cq.text);
-          }
-        });
-      }
       if(qs.length)byMacro[`${macro.icon} ${macro.name}`]=qs;
     });
+    // domande personalizzate
+    if(pd.customQuestions){
+      const cqs=pd.customQuestions.filter(cq=>sel.includes(cq.id)).map(cq=>cq.text);
+      if(cqs.length)byMacro['⭐ Domande personalizzate']=cqs;
+    }
 
     const areaHtml=Object.entries(byMacro).map(([areaName,qs])=>`
       <div style="margin-bottom:14px;page-break-inside:avoid">

@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.5.0</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.5.1</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1206,7 +1206,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.5.0</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.5.1</div>
     </div>
   </div>
 </div>
@@ -3627,6 +3627,13 @@ function renderLab(){
       <button class="btn btn-ghost btn-sm" onclick="generateLabPrompt()">📋 Genera Prompt</button>
     </div>
     <div class="ai-val-output loading" id="lab-ai-output">Scegli un'opzione sopra.</div>
+    <div id="lab-export-bar" style="display:none;margin-top:12px;display:none">
+      <div style="font-size:.75rem;font-weight:600;color:var(--text2);margin-bottom:8px">📤 Esporta piano operativo:</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="exportLabDoc('pdf')">🖨️ Esporta PDF</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportLabDoc('word')">📄 Esporta Word</button>
+      </div>
+    </div>
     <div id="lab-prompt-box" style="display:none;margin-top:12px">
       <div style="font-size:.75rem;font-weight:600;color:var(--text2);margin-bottom:6px">📋 Prompt pronto — copialo e incollalo su Claude:</div>
       <textarea id="lab-prompt-text" style="width:100%;height:140px;font-size:.75rem;padding:9px;border:1.5px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-family:monospace;resize:vertical" readonly></textarea>
@@ -3693,38 +3700,109 @@ function buildLabPromptText(){
   const ctx=window._labContext;
   if(!ctx)return'';
   const hasScores=ctx.userScoreLines&&ctx.userScoreLines.length>0;
+
+  // Costruisci lista aree ordinate per frequenza con le domande associate
+  const areeDettagliate=ctx.sortedMacro.map(([macroName,mv])=>{
+    const domande=mv.ids
+      .map(id=>({id,n:ctx.qFreq[id]||0,text:ctx.qMap[id]?.text||id,users:(ctx.qUsers[id]||[]).join(', ')}))
+      .sort((a,b)=>b.n-a.n);
+    const utentiArea=(ctx.macroUsers[macroName]||[]).join(', ')||'—';
+    return`${mv.icon} ${macroName} (${mv.count} selezioni totali — utenti: ${utentiArea})
+  Domande da valutare:
+${domande.map(d=>`    • "${d.text}" (${d.n} utenti: ${d.users})`).join('\n')}`;
+  }).join('\n\n');
+
   return`Sei un esperto di progettazione di laboratori socio-occupazionali per persone con disabilità intellettiva e/o dello spettro autistico.
 
-Analizza i seguenti dati raccolti da ${ctx.totalProfiles} utenti di un centro socio-occupazionale e fornisci consigli pratici per organizzare le prossime giornate di laboratorio.
+Contesto: UN solo operatore gestisce circa 8 utenti contemporaneamente in un laboratorio socio-occupazionale.
 
-── AREE FUNZIONALI più selezionate (quante persone le hanno nel loro pool):
-${ctx.labContext}
+═══ DATI UTENTI (${ctx.totalProfiles} profili) ═══
 
-── COMPETENZE più diffuse nel pool (top 10 per numero di utenti):
-${ctx.topQContext}
-
-${hasScores?`── DATI DI VALUTAZIONE PER UTENTE (punteggi 0–5; aree critiche <2.5, punti di forza ≥4):
+${hasScores?`── VALUTAZIONI PER UTENTE (punteggi 0–5):
 ${ctx.userScoreLines.join('\n\n')}
 
-`:''}Sulla base di questi dati, rispondi con:
+`:''}── AREE FUNZIONALI ordinate per frequenza (dalla più rilevante):
+${areeDettagliate}
 
-1. **Consigli per le prossime giornate di laboratorio**: proponi 3–5 attività concrete da svolgere in laboratorio che permettano di lavorare sulle aree critiche emerse (punteggi bassi), specificando per ciascuna attività a quale competenza si riferisce e per quali utenti è prioritaria.
-2. **Piano settimanale orientativo**: distribuisci le attività in una giornata tipo o in una settimana tipo, bilanciando le esigenze dei diversi utenti.
-3. **Strategie metodologiche**: indica gli approcci più adatti ai profili presenti (supporti visivi, gradualità, prompting, ecc.).
-4. **Punti di forza da valorizzare**: segnala le competenze già solide su cui costruire.
+═══ STRUTTURA DELLA RISPOSTA RICHIESTA ═══
 
-Rispondi in modo pratico e diretto, come se stessi briefando un'équipe prima della giornata di lavoro. Massimo 500 parole, forma narrativa con sottotitoli chiari.`;
+Produci un piano operativo completo e dettagliato, strutturato esattamente così:
+
+---
+
+## 1. SCHEMA ATTIVITÀ PER AREA (una sezione per ogni area, dalla più frequente)
+
+Per ciascuna area funzionale:
+- Titolo dell'area e numero di selezioni
+- **5 attività concrete** (singole o in piccolo gruppo) che permettano di osservare e valutare le competenze di quell'area, ordinate dalla più semplice alla più complessa
+  Per ogni attività indica:
+  → **Nome attività**: breve titolo descrittivo
+  → **Descrizione**: in 2–3 righe come si svolge praticamente
+  → **Mini esempio**: un caso concreto ("Es: Mario deve...")
+  → **Cosa osservi**: elenca esplicitamente le DOMANDE del pool che questa attività permette di valutare (usa il testo esatto delle domande fornite sopra)
+  → **Utenti prioritari**: chi del gruppo beneficia di più da questa attività
+
+---
+
+## 2. ORGANIZZAZIONE GENERALE DEL LABORATORIO
+
+Consigli pratici su:
+- Come strutturare la giornata tipo con un solo operatore e 8 utenti
+- Rotazione delle postazioni o gestione degli spazi
+- Uso di supporti visivi, schede, timer, routine visive
+- Come alternare momenti di osservazione diretta con attività autonome
+
+---
+
+## 3. ATTIVITÀ "RIEMPITIVE" (per utenti non in valutazione attiva)
+
+Proponi 6–8 attività autonome o semi-autonome che:
+- Tengano impegnati gli utenti non sotto osservazione diretta
+- Siano facilmente avviabili in autonomia o con prompt minimo
+- Non richiedano supervisione costante dell'operatore
+- Siano adatte a persone con diversi livelli di autonomia
+
+---
+
+## 4. PIANO SETTIMANALE ORIENTATIVO
+
+Schema giornata tipo (mattina/pomeriggio) e distribuzione settimanale delle aree da coprire, tenendo conto di tutti gli utenti.
+
+---
+
+## 5. STRATEGIE METODOLOGICHE
+
+Approcci consigliati per i profili presenti: prompting, modeling, token economy, supporti visivi, gradualità, ecc.
+
+---
+
+## 6. PUNTI DI FORZA DA VALORIZZARE
+
+Competenze già solide su cui costruire nuove attività.
+
+---
+
+## 7. ALTRI CONSIGLI UTILI
+
+Qualsiasi altra raccomandazione pratica per ottimizzare il lavoro di osservazione e valutazione nel laboratorio.
+
+---
+
+Scrivi in italiano, tono professionale ma diretto, come se stessi consigliando un collega operatore. Sii concreto e specifico, evita generalità. Non limitare la lunghezza: questo documento sarà stampato e usato come guida operativa.`;
 }
 
 async function generateLabAI(){
   const out=document.getElementById('lab-ai-output');
   if(!out)return;
   out.className='ai-val-output loading';out.textContent='⏳ Analisi in corso…';
+  const bar=document.getElementById('lab-export-bar');
+  if(bar)bar.style.display='none';
   const prompt=buildLabPromptText();
   if(!prompt){out.className='ai-val-output error';out.textContent='⚠️ Nessun dato disponibile.';return;}
   try{
     const text=await callAnthropicAPI(prompt);
     out.className='ai-val-output';out.textContent=text;
+    if(bar)bar.style.display='block';
   }catch(e){out.className='ai-val-output error';out.textContent='⚠️ '+e.message;}
 }
 
@@ -3738,6 +3816,90 @@ function generateLabPrompt(){
   box.style.display='block';
   ta.scrollIntoView({behavior:'smooth',block:'nearest'});
   notify('📋 Prompt generato!');
+}
+
+function exportLabDoc(format){
+  const out=document.getElementById('lab-ai-output');
+  const text=out?out.textContent:'';
+  if(!text||text==='Scegli un\'opzione sopra.'||out.classList.contains('loading')){
+    notify('⚠️ Genera prima il piano con AI.',3000);return;
+  }
+  const date=new Date().toLocaleDateString('it-IT');
+  // Converti markdown-like in HTML leggibile
+  const htmlBody=text
+    .split('\n')
+    .map(line=>{
+      if(line.startsWith('## ')) return`<h2>${line.slice(3)}</h2>`;
+      if(line.startsWith('# ')) return`<h1>${line.slice(2)}</h1>`;
+      if(line.startsWith('---')) return`<hr>`;
+      if(line.startsWith('→ **') || line.startsWith('→')) return`<div class="arrow">${line.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')}</div>`;
+      if(line.startsWith('- ') || line.startsWith('• ')) return`<li>${line.slice(2).replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')}</li>`;
+      const formatted=line.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+      return formatted.trim()?`<p>${formatted}</p>`:'<br>';
+    }).join('\n');
+
+  const html=`<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Piano Laboratorio — ValutApp ${date}</title>
+<style>
+  body{font-family:Arial,sans-serif;font-size:11pt;line-height:1.6;color:#222;max-width:800px;margin:30px auto;padding:0 20px}
+  h1{font-size:16pt;color:#1a5c40;border-bottom:2px solid #1a5c40;padding-bottom:6px;margin-top:28px}
+  h2{font-size:13pt;color:#2a6e4f;border-bottom:1px solid #cde;padding-bottom:4px;margin-top:24px}
+  p{margin:4px 0 8px}
+  li{margin:3px 0 3px 20px}
+  .arrow{margin:4px 0 4px 16px;color:#444}
+  hr{border:none;border-top:1px solid #ccc;margin:16px 0}
+  strong{color:#1a3a2a}
+  .header{text-align:center;margin-bottom:30px;padding:16px;background:#f0f7f3;border-radius:8px}
+  .header h1{border:none;margin:0;font-size:18pt}
+  .header p{margin:4px 0;color:#555;font-size:10pt}
+  @media print{body{margin:10mm;max-width:100%}}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>📋 Piano Operativo Laboratorio</h1>
+  <p>Generato da ValutApp il ${date}</p>
+  <p>${window._labContext?.totalProfiles||0} utenti — ${(window._labContext?.sortedMacro||[]).length} aree funzionali</p>
+</div>
+${htmlBody}
+</body>
+</html>`;
+
+  if(format==='pdf'){
+    const win=window.open('','_blank','width=900,height=700');
+    if(!win){notify('⚠️ Popup bloccato. Abilita i popup per questo sito.',4000);return;}
+    win.document.write(html);
+    win.document.close();
+    win.onload=()=>{win.focus();win.print()};
+    notify('🖨️ Finestra di stampa aperta — salva come PDF.');
+    return;
+  }
+  // Word: .doc via HTML blob (aperto da Word/LibreOffice)
+  const blob=new Blob([html],{type:'application/msword'});
+  const filename=`piano_laboratorio_${new Date().toISOString().slice(0,10)}.doc`;
+  if(window.showSaveFilePicker){
+    window.showSaveFilePicker({
+      suggestedName:filename,
+      types:[{description:'Documento Word',accept:{'application/msword':['.doc'],'text/html':['.html']}}]
+    }).then(async fh=>{
+      const w=await fh.createWritable();
+      await w.write(blob);await w.close();
+      notify('📄 File Word salvato!');
+    }).catch(e=>{if(e.name!=='AbortError')fallbackDownload(blob,filename);});
+  } else {
+    fallbackDownload(blob,filename);
+  }
+}
+
+function fallbackDownload(blob,filename){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  notify('📄 Download avviato!');
 }
 
 // ══════ COVERAGE / LACUNE ══════

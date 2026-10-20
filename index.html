@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.5.5</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.5.6</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1206,7 +1206,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.5.5</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.5.6</div>
     </div>
   </div>
 </div>
@@ -1675,6 +1675,9 @@ function renderDesignSelect(){
       <h2 style="margin-bottom:4px;color:var(--accent2)">✅ Già progettati <span style="font-size:.75rem;font-weight:400;color:var(--text3)">(${designed.length} utent${designed.length===1?'e':'i'})</span></h2>
       <p style="font-size:.82rem;color:var(--text2);margin-bottom:16px">Clicca su un utente per modificare le sue domande.</p>
       <div class="profiles-grid">${designed.map(({prof,pd})=>profileCard(prof,pd)).join('')}</div>
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+        <button class="btn btn-ghost btn-sm" onclick="openMultiPrintModal()" style="gap:6px">🖨️ Stampa domande per più utenti…</button>
+      </div>
     </div>`:''}
   `;
 }
@@ -1683,6 +1686,122 @@ function activateAndDesign(profileId){
   activateProfile(profileId);
   renderHomeBanner();
   goTo('screen-design');
+}
+
+// ═══════════ MULTI-USER PRINT ═══════════
+function openMultiPrintModal(){
+  // Raccoglie tutti gli utenti già progettati
+  const designed=profiles.filter(p=>{
+    const pd=getPdata(p.id);
+    return pd&&pd.selectedQuestions&&Object.values(pd.selectedQuestions).some(v=>v);
+  });
+  if(!designed.length){notify('Nessun utente con domande configurate.');return;}
+
+  let existing=document.getElementById('modal-multiprint');
+  if(existing)existing.remove();
+  const overlay=document.createElement('div');
+  overlay.id='modal-multiprint';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px';
+
+  overlay.innerHTML=`
+    <div style="background:var(--card);border-radius:var(--r);box-shadow:0 8px 40px rgba(0,0,0,.3);width:100%;max-width:500px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)">
+        <div style="font-family:var(--fd);font-size:1rem;font-weight:700;color:var(--text)">🖨️ Stampa domande — più utenti</div>
+        <button onclick="document.getElementById('modal-multiprint').remove()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text3);padding:4px">✕</button>
+      </div>
+      <div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="window._mpToggleAll(true)">Seleziona tutti</button>
+        <button class="btn btn-ghost btn-sm" onclick="window._mpToggleAll(false)">Deseleziona tutti</button>
+      </div>
+      <div id="mp-user-list" style="flex:1;overflow-y:auto;padding:14px 20px;display:flex;flex-direction:column;gap:8px">
+        ${designed.map(p=>`
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 10px;border-radius:8px;border:1px solid var(--border);transition:background .15s"
+                 onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+            <input type="checkbox" data-pid="${p.id}" style="width:16px;height:16px;cursor:pointer" checked>
+            <span style="font-size:.9rem;color:var(--text);font-weight:500">${p.nome}</span>
+          </label>`).join('')}
+      </div>
+      <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('modal-multiprint').remove()">Annulla</button>
+        <button class="btn btn-primary btn-sm" onclick="window._mpDoPrint()">🖨️ Stampa selezionati</button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()});
+
+  window._mpToggleAll=(val)=>{
+    overlay.querySelectorAll('input[data-pid]').forEach(cb=>cb.checked=val);
+  };
+
+  window._mpDoPrint=()=>{
+    const selected=[...overlay.querySelectorAll('input[data-pid]:checked')].map(cb=>cb.dataset.pid);
+    if(!selected.length){notify('Seleziona almeno un utente.');return;}
+    overlay.remove();
+    multiPrintQuestions(selected);
+  };
+}
+
+function multiPrintQuestions(profileIds){
+  // Costruisce QUESTION_BANK con struttura piatta per lookup rapido
+  const allQ={};
+  QUESTION_BANK.forEach(macro=>{
+    macro.micro.forEach(mg=>{
+      mg.questions.forEach(q=>{allQ[q.id]={text:q.text,macro:macro.name,icon:macro.icon,group:mg.label};});
+    });
+  });
+
+  const sections=profileIds.map(pid=>{
+    const prof=profiles.find(p=>p.id===pid);
+    if(!prof)return'';
+    const pd=getPdata(pid);
+    const sel=pd?.selectedQuestions||{};
+    // Raggruppa per macro
+    const byMacro={};
+    QUESTION_BANK.forEach(macro=>{
+      const qs=[];
+      macro.micro.forEach(mg=>{
+        mg.questions.forEach(q=>{
+          if(sel[q.id])qs.push(q.text);
+        });
+        // domande personalizzate di questo mg se esistono
+      });
+      // domande custom senza macro (id custom_*)
+      if(pd.customQuestions){
+        pd.customQuestions.forEach(cq=>{
+          if(sel[cq.id]){
+            if(!byMacro['⭐ Domande personalizzate'])byMacro['⭐ Domande personalizzate']=[];
+            byMacro['⭐ Domande personalizzate'].push(cq.text);
+          }
+        });
+      }
+      if(qs.length)byMacro[`${macro.icon} ${macro.name}`]=qs;
+    });
+
+    const areaHtml=Object.entries(byMacro).map(([areaName,qs])=>`
+      <div style="margin-bottom:14px;page-break-inside:avoid">
+        <div style="font-weight:700;font-size:10.5pt;border-bottom:1px solid #ccc;padding-bottom:3px;margin-bottom:5px">${areaName}</div>
+        ${qs.map(t=>`<div style="display:flex;gap:6px;padding:2px 0;font-size:9.5pt"><span style="color:#2a7a2a;min-width:14px">✓</span><span>${t}</span></div>`).join('')}
+      </div>`).join('');
+
+    const total=Object.values(byMacro).reduce((s,a)=>s+a.length,0);
+    return`<div style="page-break-after:always;padding-bottom:20px">
+      <h2 style="font-size:13pt;margin:0 0 2px">${prof.nome}</h2>
+      <p style="font-size:9pt;color:#555;margin:0 0 12px">${total} domanda${total!==1?'e':''} selezionat${total!==1?'e':'a'} · ${new Date().toLocaleDateString('it-IT')}</p>
+      <hr style="margin:0 0 12px">
+      ${areaHtml||'<p style="color:#999;font-size:9pt">Nessuna domanda selezionata.</p>'}
+    </div>`;
+  }).join('');
+
+  const win=window.open('','_blank','width=750,height=950');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8">
+    <title>Domande — più utenti</title>
+    <style>
+      body{font-family:Arial,sans-serif;margin:20px 28px;color:#000;font-size:10pt}
+      @media print{body{margin:12mm 18mm}}
+    </style>
+  </head><body>${sections}</body></html>`);
+  win.document.close();win.focus();win.print();
 }
 
 // ═══════════ DESIGN ═══════════

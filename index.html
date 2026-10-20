@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.4.9</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.5.0</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1206,7 +1206,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.4.9</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.5.0</div>
     </div>
   </div>
 </div>
@@ -4147,8 +4147,26 @@ function buildBackupPayload(profileList){
   profileList.forEach(p=>{data.profileData[p.id]=loadPdata(p.id)});
   return data;
 }
-function downloadJSON(payload,filename){
-  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+async function downloadJSON(payload,filename){
+  const json=JSON.stringify(payload,null,2);
+  const blob=new Blob([json],{type:'application/json'});
+  if(window.showSaveFilePicker){
+    try{
+      const fh=await window.showSaveFilePicker({
+        suggestedName:filename,
+        types:[{description:'File JSON',accept:{'application/json':['.json']}}]
+      });
+      const writable=await fh.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      appMeta.lastBackup=new Date().toISOString();saveMeta();updateExportPanel();
+      return;
+    }catch(e){
+      if(e.name==='AbortError')return; // utente ha annullato
+      // fallback se errore inatteso
+    }
+  }
+  // Fallback: download classico
   const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;
   document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
   appMeta.lastBackup=new Date().toISOString();saveMeta();updateExportPanel();

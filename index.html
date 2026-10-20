@@ -78,8 +78,8 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);min-height:100
 .btn{display:inline-flex;align-items:center;gap:5px;padding:7px 15px;border-radius:var(--rs);font-family:var(--fb);font-size:.83rem;font-weight:500;cursor:pointer;border:none;transition:all var(--t);letter-spacing:.01em}
 .btn-primary{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(43,96,80,.22)}
 .btn-primary:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 4px 14px rgba(43,96,80,.32)}
-.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
-.btn-ghost:hover{background:var(--bg2);color:var(--text);border-color:var(--border2)}
+.btn-ghost{background:var(--bg2);color:var(--text2);border:1.5px solid var(--border2)}
+.btn-ghost:hover{background:var(--bg);color:var(--text);border-color:var(--text3)}
 .btn-danger{background:var(--danger);color:#fff}
 .btn-danger:hover{opacity:.85}
 .btn-gold{background:var(--gold);color:#fff;box-shadow:0 2px 8px rgba(158,118,30,.22)}
@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.4.8</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.4.9</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1206,7 +1206,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.4.8</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.4.9</div>
     </div>
   </div>
 </div>
@@ -3867,10 +3867,17 @@ function renderCoverage(){
     </div>`;
   }).join('');
 
-  const globalSection=`<div class="card" style="margin-bottom:20px">
-    <h2 style="font-family:var(--fd);font-size:1.15rem;margin-bottom:4px">📊 Panoramica Globale per Area</h2>
-    <p style="font-size:.8rem;color:var(--text2);margin-bottom:14px">Domande sotto-media rispetto alle altre domande dello stesso utente — aggregate per area funzionale. Solo aree con lacune.</p>
-    ${sortedGlobal.length?globalRows:`<p style="font-size:.84rem;color:var(--accent2);padding:6px 0">✅ Nessuna lacuna rilevata: tutte le domande hanno una copertura omogenea.</p>`}
+  const globalSection=`<div class="card" style="margin-bottom:20px;padding:0;overflow:hidden">
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 18px;cursor:pointer;user-select:none;background:var(--bg2);border-radius:var(--r)"
+         onclick="const b=document.getElementById('cov-global-body');const open=b.style.display!=='none';b.style.display=open?'none':'block';this.querySelector('.cov-global-chevron').textContent=open?'▶ Espandi':'▼ Comprimi'">
+      <span style="font-family:var(--fd);font-size:1.05rem;font-weight:700;color:var(--text);flex:1">📊 Panoramica Globale per Area</span>
+      ${sortedGlobal.length?`<span style="font-size:.75rem;color:var(--warn);font-weight:700">${sortedGlobal.length} aree con lacune</span>`:'<span style="font-size:.75rem;color:var(--accent2);font-weight:700">✅ Nessuna lacuna</span>'}
+      <span class="cov-global-chevron" style="font-size:.72rem;font-weight:700;color:var(--accent);background:var(--al);border:1px solid var(--al2);border-radius:6px;padding:2px 8px;white-space:nowrap">▶ Espandi</span>
+    </div>
+    <div id="cov-global-body" style="display:none;padding:14px 18px">
+      <p style="font-size:.8rem;color:var(--text2);margin-bottom:14px">Domande sotto-media rispetto alle altre domande dello stesso utente — aggregate per area funzionale. Solo aree con lacune.</p>
+      ${sortedGlobal.length?globalRows:`<p style="font-size:.84rem;color:var(--accent2);padding:6px 0">✅ Nessuna lacuna rilevata: tutte le domande hanno una copertura omogenea.</p>`}
+    </div>
   </div>`;
 
   // ── CARD PER UTENTE ──

@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.5.9</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.6.1</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1184,8 +1184,19 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <!-- TAB: ELIMINA -->
     <div class="settings-tab-panel" id="stab-elimina">
-      <div style="font-size:.8rem;color:var(--text2);margin-bottom:14px;line-height:1.45">
-        Elimina le compilazioni salvate. L'operazione è <strong>irreversibile</strong>.
+      <!-- SEZIONE: Elimina utenti -->
+      <div style="margin-bottom:18px;padding:14px;border:1.5px solid var(--danger);border-radius:10px;background:var(--dl)">
+        <div style="font-weight:700;font-size:.88rem;color:var(--danger);margin-bottom:8px">👤 Elimina utenti</div>
+        <div style="font-size:.78rem;color:var(--text2);margin-bottom:10px">Seleziona gli utenti da eliminare definitivamente. L'operazione è <strong>irreversibile</strong>. Considera di archiviarli se vuoi conservare i dati.</div>
+        <div id="del-users-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;max-height:160px;overflow-y:auto"></div>
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <button class="btn btn-ghost btn-sm" onclick="delUsersToggleAll(true)">Seleziona tutti</button>
+          <button class="btn btn-ghost btn-sm" onclick="delUsersToggleAll(false)">Deseleziona tutti</button>
+        </div>
+        <button class="btn btn-sm" onclick="confirmDeleteUsers()" style="width:100%;justify-content:center;background:var(--danger);border-color:var(--danger);color:#fff;font-weight:700">🗑️ Elimina selezionati</button>
+      </div>
+      <div style="font-size:.8rem;color:var(--text2);margin-bottom:14px;line-height:1.45;font-weight:600">
+        🗂️ Elimina compilazioni
       </div>
       <div style="margin-bottom:10px">
         <label style="font-size:.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Utente</label>
@@ -1209,7 +1220,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.5.9</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.6.1</div>
     </div>
   </div>
 </div>
@@ -3244,17 +3255,83 @@ function switchSettingsTab(tab, btn){
 }
 
 function populateDeleteTab(){
+  // Popola select compilazioni
   const sel=document.getElementById('del-comp-user');
-  if(!sel)return;
-  // keep first option (tutti), rebuild the rest
-  while(sel.options.length>1) sel.remove(1);
-  profiles.forEach(p=>{
-    const opt=document.createElement('option');
-    opt.value=p.id;
-    opt.textContent=p.name;
-    sel.appendChild(opt);
+  if(sel){
+    while(sel.options.length>1) sel.remove(1);
+    profiles.forEach(p=>{
+      const opt=document.createElement('option');
+      opt.value=p.id;opt.textContent=p.nome;sel.appendChild(opt);
+    });
+    document.getElementById('del-comp-result').textContent='';
+  }
+  // Popola lista utenti da eliminare
+  const list=document.getElementById('del-users-list');
+  if(!list)return;
+  if(!profiles.length){
+    list.innerHTML='<div style="font-size:.78rem;color:var(--text3);text-align:center;padding:8px">Nessun utente presente.</div>';
+    return;
+  }
+  list.innerHTML=[...profiles].sort((a,b)=>a.nome.localeCompare(b.nome,'it')).map(p=>{
+    const pd=loadPdata(p.id);
+    const compilCount=Object.keys(pd.compilations||{}).filter(d=>Object.keys(pd.compilations[d]).length>0).length;
+    const qCount=(pd.selectedQuestions||[]).length;
+    return`<label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 8px;border-radius:7px;border:1px solid var(--border);background:var(--card)">
+      <input type="checkbox" data-del-uid="${p.id}" style="width:15px;height:15px;accent-color:var(--danger);cursor:pointer;flex-shrink:0">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.84rem;font-weight:600;color:var(--text)">${p.nome}</div>
+        <div style="font-size:.72rem;color:var(--text3)">${qCount} domande · ${compilCount} sessioni</div>
+      </div>
+    </label>`;
+  }).join('');
+}
+
+function delUsersToggleAll(val){
+  document.querySelectorAll('input[data-del-uid]').forEach(cb=>cb.checked=val);
+}
+
+function confirmDeleteUsers(){
+  const selected=[...document.querySelectorAll('input[data-del-uid]:checked')].map(cb=>cb.dataset.delUid);
+  if(!selected.length){notify('Seleziona almeno un utente.');return;}
+  const names=selected.map(id=>profiles.find(p=>p.id===id)?.nome||id);
+
+  let overlay=document.getElementById('modal-delete-users');
+  if(overlay)overlay.remove();
+  overlay=document.createElement('div');
+  overlay.id='modal-delete-users';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9200;display:flex;align-items:center;justify-content:center;padding:16px';
+  overlay.innerHTML=`
+    <div style="background:var(--card);border-radius:var(--r);box-shadow:0 8px 40px rgba(0,0,0,.3);width:100%;max-width:420px;padding:28px 24px;text-align:center">
+      <div style="font-size:2rem;margin-bottom:12px">🗑️</div>
+      <div style="font-family:var(--fd);font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:10px">Elimina utenti</div>
+      <div style="font-size:.85rem;color:var(--text2);margin-bottom:12px">Stai per eliminare definitivamente:</div>
+      <div style="text-align:left;background:var(--bg2);border-radius:8px;padding:10px 14px;margin-bottom:14px;max-height:140px;overflow-y:auto">
+        ${names.map(n=>`<div style="font-size:.84rem;color:var(--danger);font-weight:600;padding:2px 0">• ${n}</div>`).join('')}
+      </div>
+      <div style="font-size:.78rem;color:var(--text3);background:var(--dl);border-radius:8px;padding:8px 12px;margin-bottom:20px">⚠️ Tutti i dati, le domande e le compilazioni saranno cancellati senza possibilità di recupero.</div>
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button class="btn btn-ghost btn-sm" style="flex:1" onclick="document.getElementById('modal-delete-users').remove()">Annulla</button>
+        <button class="btn btn-sm" style="flex:1;background:var(--danger);border-color:var(--danger);color:#fff;font-weight:700" onclick="doDeleteUsers(${JSON.stringify(selected)})">🗑️ Elimina</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function doDeleteUsers(ids){
+  document.getElementById('modal-delete-users')?.remove();
+  let count=0;
+  ids.forEach(id=>{
+    profiles=profiles.filter(p=>p.id!==id);
+    deletePdata(id);
+    if(currentProfileId===id)clearActiveProfile();
+    count++;
   });
-  document.getElementById('del-comp-result').textContent='';
+  saveProfiles();
+  renderProfilesGrid();renderHomeBanner();
+  renderUserSidebar('results-sidebar','selectResultsUser','results',null);
+  renderUserSidebar('compile-sidebar','selectCompileUser','compile',null);
+  populateDeleteTab();
+  notify(`🗑️ ${count} utente/i eliminato/i definitivamente.`);
 }
 
 function confirmDeleteCompilations(){
@@ -4723,7 +4800,9 @@ function processImport(jsonText){
     // Processa conflitti uno alla volta con modale
     const processQueue=async()=>{
       for(const c of conflicts){
-        const action=await showImportConflictModal(c,data.profileData||{});
+        let action=null;
+        try{action=await showImportConflictModal(c,data.profileData||{});}
+        catch(err){console.error('Import conflict modal error:',err);skipped++;continue;}
         if(action==='overwrite'){
           const idx=profiles.findIndex(p=>p.id===c.existing.id);
           if(idx>=0)profiles[idx]=c.incoming;
@@ -4732,16 +4811,11 @@ function processImport(jsonText){
           savePdata(c.existing.id,pd);
           overwritten++;
         } else if(action&&action.type==='merge'){
-          const merged_pd=action.merged;
-          // Se matchType era 'name' (ID diverso), aggiorniamo anche l'ID nel profilo esistente
           const idx=profiles.findIndex(p=>p.id===c.existing.id);
-          if(idx>=0){
-            // Mantieni l'ID esistente, aggiorna solo i campi anagrafici scelti
-            if(action.useIncomingMeta){
-              profiles[idx]={...c.incoming,id:c.existing.id};
-            }
+          if(idx>=0&&action.useIncomingMeta){
+            profiles[idx]={...c.incoming,id:c.existing.id};
           }
-          savePdata(c.existing.id,merged_pd);
+          savePdata(c.existing.id,action.merged);
           merged++;
         } else {
           skipped++;
@@ -4749,7 +4823,7 @@ function processImport(jsonText){
       }
       finalize();
     };
-    processQueue();
+    processQueue().catch(e=>{console.error('processQueue error:',e);finalize();});
 
   }catch(e){
     const result=document.getElementById('import-result');
@@ -4850,7 +4924,11 @@ function showImportConflictModal(conflict,profileData){
         </div>
       </div>`;
 
-    document.body.appendChild(overlay);
+    // Appendi all'interno del settings modal se aperto, altrimenti al body
+    // (evita problemi di stacking context con backdrop-filter)
+    const settingsModal=document.getElementById('modal-settings');
+    const mountTarget=(settingsModal&&settingsModal.classList.contains('open'))?settingsModal:document.body;
+    mountTarget.appendChild(overlay);
 
     const done=(val)=>{overlay.remove();resolve(val);};
 

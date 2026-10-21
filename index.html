@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.5.7</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.5.8</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -798,9 +798,12 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
         <h2 style="margin:0">👥 Gestione Utenti</h2>
-        <button class="btn btn-primary" onclick="openNewProfileModal()">＋ Nuovo utente</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" onclick="openArchiveModal()">📦 Archivio</button>
+          <button class="btn btn-primary" onclick="openNewProfileModal()">＋ Nuovo utente</button>
+        </div>
       </div>
-      <p style="font-size:.84rem;color:var(--text2);margin-bottom:18px">Clicca su un profilo per modificarlo o eliminarlo.</p>
+      <p style="font-size:.84rem;color:var(--text2);margin-bottom:18px">Clicca su un profilo per modificarlo. Usa 📦 per archiviare un utente (dati conservati, non visibile nell'app).</p>
       <div class="profiles-grid" id="profiles-grid"></div>
     </div>
   </div>
@@ -1206,7 +1209,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.5.7</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.5.8</div>
     </div>
   </div>
 </div>
@@ -1435,6 +1438,9 @@ function deleteTagConfirm(id,label){
 
 function loadProfiles(){try{const s=localStorage.getItem('valutaapp_plist');if(s)profiles=JSON.parse(s)}catch(e){}}
 function saveProfiles(){localStorage.setItem('valutaapp_plist',JSON.stringify(profiles))}
+let archivedProfiles=[];
+function loadArchived(){try{const s=localStorage.getItem('valutaapp_archived');if(s)archivedProfiles=JSON.parse(s)}catch(e){archivedProfiles=[]}}
+function saveArchived(){localStorage.setItem('valutaapp_archived',JSON.stringify(archivedProfiles))}
 function loadPdata(id){try{const s=localStorage.getItem('valutaapp_p_'+id);return s?JSON.parse(s):{selectedQuestions:[],compilations:{}}}catch(e){return{selectedQuestions:[],compilations:{}}}}
 function savePdata(id,data){localStorage.setItem('valutaapp_p_'+id,JSON.stringify(data))}
 function deletePdata(id){localStorage.removeItem('valutaapp_p_'+id)}
@@ -1483,6 +1489,86 @@ function deleteProfile(id,e){
   renderUserSidebar('results-sidebar','selectResultsUser','results',null);
   renderUserSidebar('compile-sidebar','selectCompileUser','compile',null);
   notify('Profilo eliminato.');
+}
+
+// ═══════════ ARCHIVE ═══════════
+function archiveProfile(id,e){
+  if(e)e.stopPropagation();
+  const prof=profiles.find(p=>p.id===id);if(!prof)return;
+  if(!confirm(`Archiviare "${prof.nome}"?\n\nL'utente non sarà più visibile nell'app, ma tutti i suoi dati saranno conservati e inclusi nei backup. Puoi ripristinarlo in qualsiasi momento dall'Archivio.`))return;
+  archivedProfiles.push(prof);saveArchived();
+  profiles=profiles.filter(p=>p.id!==id);saveProfiles();
+  if(currentProfileId===id)clearActiveProfile();
+  renderProfilesGrid();renderHomeBanner();
+  renderUserSidebar('results-sidebar','selectResultsUser','results',null);
+  renderUserSidebar('compile-sidebar','selectCompileUser','compile',null);
+  notify(`📦 "${prof.nome}" archiviato.`);
+}
+
+function unarchiveProfile(id){
+  const prof=archivedProfiles.find(p=>p.id===id);if(!prof)return;
+  archivedProfiles=archivedProfiles.filter(p=>p.id!==id);saveArchived();
+  profiles.push(prof);saveProfiles();
+  renderProfilesGrid();renderHomeBanner();
+  renderUserSidebar('results-sidebar','selectResultsUser','results',null);
+  renderUserSidebar('compile-sidebar','selectCompileUser','compile',null);
+  notify(`✅ "${prof.nome}" ripristinato dall'archivio.`);
+  const modal=document.getElementById('modal-archive');if(modal)renderArchiveModal();
+}
+
+function deleteArchivedProfile(id){
+  const prof=archivedProfiles.find(p=>p.id===id);if(!prof)return;
+  if(!confirm(`Eliminare definitivamente "${prof.nome}"?\nTutti i dati andranno persi e non sarà possibile recuperarli.`))return;
+  archivedProfiles=archivedProfiles.filter(p=>p.id!==id);saveArchived();
+  deletePdata(id);
+  notify(`🗑️ "${prof.nome}" eliminato definitivamente.`);
+  const modal=document.getElementById('modal-archive');if(modal)renderArchiveModal();
+}
+
+function openArchiveModal(){
+  let overlay=document.getElementById('modal-archive');
+  if(!overlay){
+    overlay=document.createElement('div');
+    overlay.id='modal-archive';
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px';
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()});
+  }
+  renderArchiveModal();
+}
+
+function renderArchiveModal(){
+  const overlay=document.getElementById('modal-archive');if(!overlay)return;
+  const rows=archivedProfiles.length
+    ? [...archivedProfiles].sort((a,b)=>a.nome.localeCompare(b.nome,'it')).map(prof=>{
+        const pd=loadPdata(prof.id);
+        const compilCount=Object.keys(pd.compilations||{}).filter(d=>Object.keys(pd.compilations[d]).length>0).length;
+        const qCount=(pd.selectedQuestions||[]).length;
+        return`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:600;color:var(--text)">${prof.nome}</div>
+            <div style="font-size:.76rem;color:var(--text3)">${[prof.eta?prof.eta+' anni':'',prof.servizio].filter(Boolean).join(' · ')||'—'} · ${qCount} domande · ${compilCount} sessioni</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="unarchiveProfile('${prof.id}')" title="Ripristina">↩️ Ripristina</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--danger);border-color:var(--danger)" onclick="deleteArchivedProfile('${prof.id}')" title="Elimina definitivamente">🗑️</button>
+        </div>`;
+      }).join('')
+    : '<div style="text-align:center;padding:28px;color:var(--text2);font-size:.88rem"><div style="font-size:2rem;margin-bottom:8px">📦</div>Nessun utente archiviato.</div>';
+
+  overlay.innerHTML=`
+    <div style="background:var(--card);border-radius:var(--r);box-shadow:0 8px 40px rgba(0,0,0,.3);width:100%;max-width:520px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-family:var(--fd);font-size:1rem;font-weight:700;color:var(--text)">📦 Archivio utenti</div>
+          <div style="font-size:.74rem;color:var(--text3);margin-top:2px">${archivedProfiles.length} utent${archivedProfiles.length===1?'e':'i'} archiviato/i</div>
+        </div>
+        <button onclick="document.getElementById('modal-archive').remove()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text3);padding:4px">✕</button>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:4px 20px 16px">${rows}</div>
+      <div style="padding:12px 20px;border-top:1px solid var(--border);text-align:right">
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('modal-archive').remove()">Chiudi</button>
+      </div>
+    </div>`;
 }
 
 // ═══════════ HISTORY NAV ═══════════
@@ -1607,7 +1693,8 @@ function renderProfilesGrid(){
         <span style="color:var(--accent2)">${qCount} domande · ${compilCount} sessioni</span></div>
       <div class="pc-actions">
         <button class="btn btn-ghost btn-sm" onclick="openEditProfile('${prof.id}',event)">✏️ Modifica</button>
-        <button class="btn btn-ghost btn-sm" style="color:var(--danger);border-color:var(--danger)" onclick="deleteProfile('${prof.id}',event)">🗑️</button>
+        <button class="btn btn-ghost btn-sm" onclick="archiveProfile('${prof.id}',event)" title="Archivia utente">📦</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--danger);border-color:var(--danger)" onclick="deleteProfile('${prof.id}',event)" title="Elimina definitivamente">🗑️</button>
       </div>`;
     grid.appendChild(card);
   });
@@ -4508,7 +4595,7 @@ function updateBackupDescriptions(){
     :(prof?'Solo i dati di '+prof.nome+' (senza impostazioni).':'Solo i dati utente (senza impostazioni).');
 }
 
-function buildBackupPayload(profileList){
+function buildBackupPayload(profileList,includeArchived=true){
   const withSettings=includeSettings();
   const data={
     _app:'ValutaApp',
@@ -4517,6 +4604,10 @@ function buildBackupPayload(profileList){
     profiles:profileList,
     profileData:{}
   };
+  if(includeArchived&&archivedProfiles.length){
+    data.archivedProfiles=archivedProfiles;
+    archivedProfiles.forEach(p=>{data.profileData[p.id]=loadPdata(p.id)});
+  }
   if(withSettings){
     data.settings={
       theme:appMeta.theme||'light',
@@ -4591,6 +4682,18 @@ function processImport(jsonText){
     });
     saveProfiles();renderProfilesGrid();renderHomeBanner();
 
+    // Ripristina archiviati se presenti nel backup
+    if(Array.isArray(data.archivedProfiles)&&data.archivedProfiles.length){
+      data.archivedProfiles.forEach(prof=>{
+        const existingIdx=archivedProfiles.findIndex(p=>p.id===prof.id);
+        if(existingIdx>=0){archivedProfiles[existingIdx]=prof;}
+        else{archivedProfiles.push(prof);}
+        const pd=(data.profileData||{})[prof.id]||{selectedQuestions:[],compilations:{}};
+        savePdata(prof.id,pd);
+      });
+      saveArchived();
+    }
+
     // Restore settings if present
     const s=data.settings||{};
     let settingsRestored=[];
@@ -4653,7 +4756,7 @@ function notify(msg,duration=2800){
 }
 
 // ═══════════ INIT ═══════════
-loadMeta();loadProfiles();
+loadMeta();loadProfiles();loadArchived();
 document.body.setAttribute('data-theme',appMeta.theme);
 if(appMeta.activeProfileId&&profiles.find(p=>p.id===appMeta.activeProfileId)){activateProfile(appMeta.activeProfileId)}
 renderHomeBanner();

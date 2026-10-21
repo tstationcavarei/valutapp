@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.6.2</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.6.3</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1220,7 +1220,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.6.2</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.6.3</div>
     </div>
   </div>
 </div>
@@ -4553,21 +4553,25 @@ function buildCoveragePromptText(){
     ?`Il focus è su ${nUsers} utente${nUsers===1?'':'i'} specificamente selezionat${nUsers===1?'o':'i'}.`
     :`Il focus è sull'intero gruppo di ${nUsers} utenti — suggerisci come integrarli in attività comuni o suddividerli in sottogruppi funzionali.`;
 
-  return`Sei un esperto di progettazione di laboratori socio-occupazionali per persone con disabilità intellettiva e/o dello spettro autistico.
+  return`Sei un operatore esperto di laboratori socio-occupazionali per persone con disabilità intellettiva e/o dello spettro autistico. Devi aiutare il tuo collega a organizzare rapidamente una giornata di lavoro senza doverci pensare troppo.
 
-${focusTxt}
-
-DETTAGLIO PER UTENTE E AREA FUNZIONALE (domande sotto-media):
+LACUNE RILEVATE PER UTENTE:
 ${lines}
 
-Sulla base di questi dati, fornisci consigli pratici e professionali su come organizzare le prossime giornate di laboratorio. In particolare:
-1. Quali aree funzionali richiedono attenzione prioritaria e per quali utenti
-2. Come strutturare attività che permettano di osservare e valutare le aree carenti${selIds&&selIds.length<ctx.totalUsers?'':`
-3. Proposta di raggruppamenti o sottogruppi funzionali in base alle aree da colmare`}
-3. Suggerimenti pratici per contestualizzare le osservazioni nelle normali attività
-4. Proposta di programmazione settimanale per coprire sistematicamente le lacune
+Scrivi una proposta di giornata. Il formato deve essere snello e di rapida lettura — l'operatore deve poterlo scorrere in 2 minuti e capire subito cosa fare.
 
-Rispondi in modo pratico, concreto e professionale, come se stessi consigliando un'équipe di operatori. Massimo 500 parole, forma narrativa con sottotitoli chiari.`;
+Struttura la risposta così:
+
+**Gruppi di lavoro**
+Forma 1-2 gruppi di 2-3 utenti con lacune simili. Per ogni gruppo indica: chi c'è, perché stanno insieme (area da osservare), e 4-5 attività concrete adatte (non generiche — attività reali di laboratorio che permettono di osservare le competenze mancanti).
+
+**Gestione del gruppo in scarico**
+Indica 2-3 attività autonome o semi-autonome adatte a tenere occupati gli altri utenti mentre lavori con il gruppo prioritario.
+
+**Nota rapida**
+Una sola riga con la cosa più importante da tenere a mente oggi.
+
+Scrivi in modo diretto, come se parlassi a un collega. Niente introduzioni, niente conclusioni. Solo la proposta operativa.`;
 }
 
 async function generateCoverageAI(){

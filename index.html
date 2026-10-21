@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.6.1</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.6.2</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1220,7 +1220,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.6.1</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.6.2</div>
     </div>
   </div>
 </div>
@@ -4747,7 +4747,8 @@ function processImport(jsonText){
     const toAdd=[];const conflicts=[];
     data.profiles.forEach(prof=>{
       const byId=profiles.find(p=>p.id===prof.id);
-      const byName=!byId&&profiles.find(p=>p.nome.trim().toLowerCase()===prof.nome.trim().toLowerCase());
+      const normName=s=>s.trim().toLowerCase().split(/\s+/).sort().join(' ');
+      const byName=!byId&&profiles.find(p=>normName(p.nome)===normName(prof.nome));
       if(byId||byName) conflicts.push({incoming:prof,existing:byId||byName,matchType:byId?'id':'name'});
       else toAdd.push(prof);
     });

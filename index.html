@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.5.8</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.5.9</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1209,7 +1209,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.5.8</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.5.9</div>
     </div>
   </div>
 </div>
@@ -4666,23 +4666,24 @@ function processImport(jsonText){
     if(data._app!=='ValutaApp'||!Array.isArray(data.profiles)){
       result.className='import-result err';result.textContent='❌ File non riconosciuto. Assicurati di usare un backup esportato da ValutaApp.';return;
     }
-    let added=0,skipped=0,overwritten=0;
+    // Separa profili con conflitto (stesso ID o stesso nome) da quelli nuovi
+    const toAdd=[];const conflicts=[];
     data.profiles.forEach(prof=>{
-      const existing=profiles.find(p=>p.id===prof.id);
-      if(existing){
-        const choice=confirm(`L'utente "${prof.nome}" è già presente.\n\nPremi OK per sovrascrivere i dati esistenti, oppure Annulla per tenerli invariati.`);
-        if(choice){
-          const idx=profiles.indexOf(existing);profiles[idx]=prof;
-          const pd=(data.profileData||{})[prof.id]||{selectedQuestions:[],compilations:{}};savePdata(prof.id,pd);
-          overwritten++;
-        } else {skipped++;}
-        return;
-      }
-      profiles.push(prof);const pd=(data.profileData||{})[prof.id]||{selectedQuestions:[],compilations:{}};savePdata(prof.id,pd);added++;
+      const byId=profiles.find(p=>p.id===prof.id);
+      const byName=!byId&&profiles.find(p=>p.nome.trim().toLowerCase()===prof.nome.trim().toLowerCase());
+      if(byId||byName) conflicts.push({incoming:prof,existing:byId||byName,matchType:byId?'id':'name'});
+      else toAdd.push(prof);
+    });
+    // Aggiungi subito quelli senza conflitto
+    let added=toAdd.length,overwritten=0,merged=0,skipped=0;
+    toAdd.forEach(prof=>{
+      profiles.push(prof);
+      const pd=(data.profileData||{})[prof.id]||{selectedQuestions:[],compilations:{}};
+      savePdata(prof.id,pd);
     });
     saveProfiles();renderProfilesGrid();renderHomeBanner();
 
-    // Ripristina archiviati se presenti nel backup
+    // Ripristina archiviati senza conflitti
     if(Array.isArray(data.archivedProfiles)&&data.archivedProfiles.length){
       data.archivedProfiles.forEach(prof=>{
         const existingIdx=archivedProfiles.findIndex(p=>p.id===prof.id);
@@ -4694,36 +4695,186 @@ function processImport(jsonText){
       saveArchived();
     }
 
-    // Restore settings if present
+    // Restore settings
     const s=data.settings||{};
     let settingsRestored=[];
-    if(s.theme&&['light','dark'].includes(s.theme)){
-      appMeta.theme=s.theme;saveMeta();
-      document.body.setAttribute('data-theme',s.theme);
-      settingsRestored.push('tema');
-    }
-    if(s.aiEnabled==='1'){
-      localStorage.setItem('valutaapp_ai_enabled','1');
-      settingsRestored.push('funzioni AI');
-    }
-    if(s.apiKey){
-      localStorage.setItem('valutaapp_apikey',s.apiKey);
-      settingsRestored.push('chiave API');
-    }
-    if(s.usage){
-      localStorage.setItem('valutaapp_usage',s.usage);
-      settingsRestored.push('statistiche AI');
-    }
+    if(s.theme&&['light','dark'].includes(s.theme)){appMeta.theme=s.theme;saveMeta();document.body.setAttribute('data-theme',s.theme);settingsRestored.push('tema');}
+    if(s.aiEnabled==='1'){localStorage.setItem('valutaapp_ai_enabled','1');settingsRestored.push('funzioni AI');}
+    if(s.apiKey){localStorage.setItem('valutaapp_apikey',s.apiKey);settingsRestored.push('chiave API');}
+    if(s.usage){localStorage.setItem('valutaapp_usage',s.usage);settingsRestored.push('statistiche AI');}
     applyAIState();
 
-    result.className='import-result ok';
-    const exportDate=data._exportedAt?' (backup del '+new Date(data._exportedAt).toLocaleDateString('it-IT')+')':'';
-    const settingsNote=settingsRestored.length?`<br><span style="font-size:.78rem">⚙️ Impostazioni ripristinate: ${settingsRestored.join(', ')}.</span>`:'';
-    const overwrittenNote=overwritten?`, <strong>${overwritten}</strong> sovrascritto/i`:'';
-    const skippedNote=skipped?`, <strong>${skipped}</strong> ignorato/i`:'';
-    result.innerHTML=`✅ Importazione completata${exportDate}:<br><strong>${added}</strong> aggiunto/i${overwrittenNote}${skippedNote}${settingsNote}.`;
-    notify('✅ Importati: '+added+' nuovi'+(overwritten?', '+overwritten+' sovrascritti':'')+'!');
-  }catch(e){result.className='import-result err';result.textContent='❌ Errore nella lettura del file. Il file potrebbe essere corrotto.'}
+    const finalize=()=>{
+      saveProfiles();renderProfilesGrid();renderHomeBanner();
+      result.className='import-result ok';
+      const exportDate=data._exportedAt?' (backup del '+new Date(data._exportedAt).toLocaleDateString('it-IT')+')':'';
+      const settingsNote=settingsRestored.length?`<br><span style="font-size:.78rem">⚙️ Impostazioni ripristinate: ${settingsRestored.join(', ')}.</span>`:'';
+      result.innerHTML=`✅ Importazione completata${exportDate}:<br>`
+        +(added?`<strong>${added}</strong> aggiunto/i`:'')
+        +(overwritten?`, <strong>${overwritten}</strong> sovrascritto/i`:'')
+        +(merged?`, <strong>${merged}</strong> unito/i`:'')
+        +(skipped?`, <strong>${skipped}</strong> ignorato/i`:'')
+        +settingsNote+'.';
+      notify('✅ Import: '+[added?added+' nuovi':'',overwritten?overwritten+' sovrascritti':'',merged?merged+' uniti':'',skipped?skipped+' ignorati':''].filter(Boolean).join(', ')+'.');
+    };
+
+    if(!conflicts.length){finalize();return;}
+
+    // Processa conflitti uno alla volta con modale
+    const processQueue=async()=>{
+      for(const c of conflicts){
+        const action=await showImportConflictModal(c,data.profileData||{});
+        if(action==='overwrite'){
+          const idx=profiles.findIndex(p=>p.id===c.existing.id);
+          if(idx>=0)profiles[idx]=c.incoming;
+          else profiles.push(c.incoming);
+          const pd=(data.profileData||{})[c.incoming.id]||{selectedQuestions:[],compilations:{}};
+          savePdata(c.existing.id,pd);
+          overwritten++;
+        } else if(action&&action.type==='merge'){
+          const merged_pd=action.merged;
+          // Se matchType era 'name' (ID diverso), aggiorniamo anche l'ID nel profilo esistente
+          const idx=profiles.findIndex(p=>p.id===c.existing.id);
+          if(idx>=0){
+            // Mantieni l'ID esistente, aggiorna solo i campi anagrafici scelti
+            if(action.useIncomingMeta){
+              profiles[idx]={...c.incoming,id:c.existing.id};
+            }
+          }
+          savePdata(c.existing.id,merged_pd);
+          merged++;
+        } else {
+          skipped++;
+        }
+      }
+      finalize();
+    };
+    processQueue();
+
+  }catch(e){
+    const result=document.getElementById('import-result');
+    result.className='import-result err';result.textContent='❌ Errore nella lettura del file. Il file potrebbe essere corrotto.';
+  }
+}
+
+// ── Modale conflitto import ──
+function showImportConflictModal(conflict,profileData){
+  return new Promise(resolve=>{
+    const {incoming,existing,matchType}=conflict;
+    const pdIncoming=profileData[incoming.id]||{selectedQuestions:[],compilations:{}};
+    const pdExisting=loadPdata(existing.id);
+
+    // Calcola diff
+    const selIn=new Set(pdIncoming.selectedQuestions||[]);
+    const selEx=new Set(pdExisting.selectedQuestions||[]);
+    const onlyInIncoming=[...selIn].filter(id=>!selEx.has(id));
+    const onlyInExisting=[...selEx].filter(id=>!selIn.has(id));
+
+    const compIn=pdIncoming.compilations||{};
+    const compEx=pdExisting.compilations||{};
+    const conflictDays=Object.keys(compIn).filter(d=>compEx[d]&&JSON.stringify(compEx[d])!==JSON.stringify(compIn[d]));
+    const onlyIncomingDays=Object.keys(compIn).filter(d=>!compEx[d]);
+    const onlyExistingDays=Object.keys(compEx).filter(d=>!compIn[d]);
+
+    const metaDiff=[];
+    if(incoming.nome!==existing.nome)metaDiff.push({campo:'Nome',val_in:incoming.nome,val_ex:existing.nome});
+    if((incoming.eta||'')!==(existing.eta||''))metaDiff.push({campo:'Età',val_in:incoming.eta||'—',val_ex:existing.eta||'—'});
+    if((incoming.servizio||'')!==(existing.servizio||''))metaDiff.push({campo:'Servizio',val_in:incoming.servizio||'—',val_ex:existing.servizio||'—'});
+
+    const matchNote=matchType==='name'
+      ? `<div style="font-size:.76rem;color:var(--warn);background:var(--al);padding:6px 10px;border-radius:6px;margin-bottom:10px">⚠️ Rilevato per nome uguale (ID diverso) — potrebbero essere la stessa persona.</div>`
+      : '';
+
+    // Sezione diff domande
+    const diffQhtml=onlyInIncoming.length||onlyInExisting.length ? `
+      <div class="imp-diff-section">
+        <div class="imp-diff-title">📋 Domande selezionate</div>
+        ${onlyInIncoming.length?`<div class="imp-diff-row"><span class="imp-tag imp-tag-new">Solo nel backup</span> ${onlyInIncoming.length} domanda/e aggiuntiva/e</div>`:''}
+        ${onlyInExisting.length?`<div class="imp-diff-row"><span class="imp-tag imp-tag-old">Solo nell'app</span> ${onlyInExisting.length} domanda/e aggiuntiva/e</div>`:''}
+        <div class="imp-diff-hint">L'unione includerà tutte le domande da entrambe le versioni.</div>
+      </div>` : `<div class="imp-diff-section"><div class="imp-diff-title">📋 Domande selezionate</div><div class="imp-diff-hint">✓ Identiche in entrambe le versioni.</div></div>`;
+
+    // Sezione diff compilazioni
+    const diffChtml=`
+      <div class="imp-diff-section">
+        <div class="imp-diff-title">📅 Sessioni di compilazione</div>
+        ${conflictDays.length?`<div class="imp-diff-row"><span class="imp-tag imp-tag-conflict">⚡ Conflitto</span> ${conflictDays.length} giorno/i con dati diversi — verrà mantenuta la versione del <strong>backup</strong></div>`:''}
+        ${onlyIncomingDays.length?`<div class="imp-diff-row"><span class="imp-tag imp-tag-new">Solo nel backup</span> ${onlyIncomingDays.length} giorno/i verranno aggiunti</div>`:''}
+        ${onlyExistingDays.length?`<div class="imp-diff-row"><span class="imp-tag imp-tag-old">Solo nell'app</span> ${onlyExistingDays.length} giorno/i già presenti, non toccati</div>`:''}
+        ${!conflictDays.length&&!onlyIncomingDays.length?'<div class="imp-diff-hint">✓ Nessuna nuova sessione nel backup.</div>':''}
+      </div>`;
+
+    // Sezione diff anagrafica
+    const diffMhtml=metaDiff.length?`
+      <div class="imp-diff-section">
+        <div class="imp-diff-title">👤 Dati anagrafici divergenti</div>
+        ${metaDiff.map(d=>`<div class="imp-diff-row" style="display:grid;grid-template-columns:80px 1fr 1fr;gap:6px;align-items:center">
+          <span style="font-weight:600;font-size:.78rem">${d.campo}</span>
+          <span><span class="imp-tag imp-tag-old">App</span> ${d.val_ex}</span>
+          <span><span class="imp-tag imp-tag-new">Backup</span> ${d.val_in}</span>
+        </div>`).join('')}
+        <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:.8rem;cursor:pointer">
+          <input type="checkbox" id="imp-use-incoming-meta" style="width:14px;height:14px;accent-color:var(--accent)">
+          Usa i dati anagrafici del backup (sovrascrive nome/età/servizio)
+        </label>
+      </div>` : '';
+
+    const overlay=document.createElement('div');
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9500;display:flex;align-items:center;justify-content:center;padding:16px';
+    overlay.innerHTML=`
+      <style>
+        .imp-diff-section{margin-bottom:12px;padding:10px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)}
+        .imp-diff-title{font-weight:700;font-size:.8rem;color:var(--text);margin-bottom:6px}
+        .imp-diff-row{font-size:.78rem;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+        .imp-diff-hint{font-size:.75rem;color:var(--text3);font-style:italic}
+        .imp-tag{font-size:.68rem;font-weight:700;padding:1px 6px;border-radius:4px;white-space:nowrap}
+        .imp-tag-new{background:#d4edda;color:#155724}
+        .imp-tag-old{background:#e8e8e8;color:#444}
+        .imp-tag-conflict{background:#fff3cd;color:#856404}
+      </style>
+      <div style="background:var(--card);border-radius:var(--r);box-shadow:0 8px 40px rgba(0,0,0,.35);width:100%;max-width:560px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden">
+        <div style="padding:16px 20px;border-bottom:1px solid var(--border)">
+          <div style="font-family:var(--fd);font-size:1rem;font-weight:700;color:var(--text)">⚡ Conflitto: ${existing.nome}</div>
+          <div style="font-size:.75rem;color:var(--text3);margin-top:2px">Utente già presente nell'app</div>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:16px 20px">
+          ${matchNote}
+          ${diffQhtml}
+          ${diffChtml}
+          ${diffMhtml}
+        </div>
+        <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+          <button class="btn btn-ghost btn-sm" id="imp-btn-skip">Ignora</button>
+          <button class="btn btn-ghost btn-sm" id="imp-btn-overwrite" style="color:var(--danger);border-color:var(--danger)">Sovrascrivi tutto</button>
+          <button class="btn btn-primary btn-sm" id="imp-btn-merge">🔀 Unisci</button>
+        </div>
+      </div>`;
+
+    document.body.appendChild(overlay);
+
+    const done=(val)=>{overlay.remove();resolve(val);};
+
+    overlay.querySelector('#imp-btn-skip').onclick=()=>done(null);
+    overlay.querySelector('#imp-btn-overwrite').onclick=()=>done('overwrite');
+    overlay.querySelector('#imp-btn-merge').onclick=()=>{
+      // Costruisci pdata unito
+      const mergedQ=[...new Set([...(pdExisting.selectedQuestions||[]),...(pdIncoming.selectedQuestions||[])])];
+      const mergedComp={...( pdExisting.compilations||{})};
+      // Aggiungi giorni del backup: conflitti → backup vince; solo-backup → aggiunge
+      Object.entries(compIn).forEach(([d,v])=>{mergedComp[d]=v;});
+      // Domande personalizzate: unisci, preferenza al backup in caso di id duplicato
+      const cqEx=(pdExisting.customQuestions||[]);
+      const cqIn=(pdIncoming.customQuestions||[]);
+      const cqMerged=[...cqEx];
+      cqIn.forEach(cq=>{if(!cqMerged.find(e=>e.id===cq.id))cqMerged.push(cq);});
+      const useIncomingMeta=!!overlay.querySelector('#imp-use-incoming-meta')?.checked;
+      done({
+        type:'merge',
+        merged:{...pdExisting,selectedQuestions:mergedQ,compilations:mergedComp,customQuestions:cqMerged},
+        useIncomingMeta
+      });
+    };
+  });
 }
 function dzDragOver(e){e.preventDefault();document.getElementById('drop-zone').classList.add('drag-over')}
 function dzDragLeave(e){document.getElementById('drop-zone').classList.remove('drag-over')}

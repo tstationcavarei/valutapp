@@ -665,8 +665,8 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
       </div>
       <div class="area-card coverage-card" onclick="goTo('screen-coverage')" style="padding:22px 16px">
         <div class="ac-icon">🔍</div>
-        <h3>Area Lacune</h3>
-        <p>Copertura compilazioni per utente</p>
+        <h3>Area Priorità di Lavoro</h3>
+        <p>Aree prioritarie da osservare per utente</p>
       </div>
     </div>
 
@@ -710,7 +710,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         <div class="instr-step"><div class="instr-num">2</div><div><strong>Configura le domande per ogni utente</strong> — Clicca <em>Area Progettazione Utente</em>. Appare la lista di tutti gli utenti divisi in <em>Da progettare</em> e <em>Già progettati</em>. Clicca su un utente per accedere alla sua configurazione: spunta le domande tra le 8 macro aree funzionali, aggiungi domande personalizzate se necessario. Tieni il cursore su una domanda per 1–2 secondi per vedere un esempio pratico. Salva con <strong>💾 Salva Configurazione</strong>. I dati anagrafici si modificano solo dall'Area Utenti.</div></div>
         <div class="instr-step"><div class="instr-num">3</div><div><strong>Attiva gli schemi ABC (opzionale)</strong> — In Area Progettazione Utente, nell'area D <em>Regolazione Emotiva</em>, spunta <strong>Aggiungi schemi ABC</strong> e scegli quanti schemi per giorno (1–5). Gli schemi ABC documentano episodi con Antecedente, Comportamento e Conseguenza, inclusi nel PDF finale.</div></div>
         <div class="instr-step"><div class="instr-num">4</div><div><strong>Compila ogni giorno</strong> — Clicca <em>Area Compilazione Utente</em>. Sulla sinistra appare la barra con tutti gli utenti: quelli senza domande configurate sono grigi. Seleziona un utente e clicca un giorno nel calendario (🟢 = compilato, 🔴 = con ABC). Sopra il calendario appare una card con la data selezionata e il pulsante <strong>✏️ Compila questa scheda</strong>: cliccalo per aprire le domande. Assegna punteggi 0–5, aggiungi note con <strong>📝 Note</strong>, compila gli ABC se attivi. Quando apri una scheda, la barra laterale mostra una ✓ verde accanto agli utenti già compilati in quel giorno. Salva con il pulsante in basso.</div></div>
-        <div class="instr-step"><div class="instr-num">5</div><div><strong>Monitora le lacune di copertura</strong> — Clicca <em>Area Lacune</em> (il nuovo quadratone blu nella sezione Lavoro quotidiano). Mostra per ogni utente quante domande hanno zero compilazioni (critiche 🔴), poche compilazioni (scarse 🟡) o copertura sufficiente (🟢). Un riepilogo globale in cima indica i totali. Se le funzioni AI sono attive, usa <em>Consigli AI</em> per ricevere suggerimenti su come organizzare il laboratorio per coprire le aree mancanti.</div></div>
+        <div class="instr-step"><div class="instr-num">5</div><div><strong>Individua le priorità di osservazione</strong> — Clicca <em>Area Priorità di Lavoro</em>. Mostra per ogni utente le aree con meno osservazioni valide (punteggio 1–5 — il punteggio 0 non conta come osservazione). Gli utenti con meno osservazioni totali appaiono in testa (🔴/🟠 = più urgenti). Ogni utente ha sempre aree prioritarie indicate: anche chi ha tutto osservato almeno una volta vedrà le aree meno osservate come priorità. Se le funzioni AI sono attive, usa <em>Consigli AI</em> per ricevere suggerimenti su come organizzare il laboratorio.</div></div>
         <div class="instr-step"><div class="instr-num">6</div><div><strong>Leggi i risultati</strong> — Clicca <em>Area Risultati Utente</em>. La barra laterale mostra tutti gli utenti: quelli senza compilazioni sono grigi. Clicca un utente per vederne i risultati: riepilogo statistico, grafico di andamento, medie per macro area, punti di forza (≥4), aree critiche (&lt;2.5), dettaglio per domanda, note qualitative. Usa <strong>🚫 Nascondi</strong> per escludere sezioni dalla stampa, poi esporta con <strong>🖨️ Salva PDF</strong>. La barra laterale non viene inclusa nel PDF.</div></div>
         <div class="instr-step"><div class="instr-num">7</div><div><strong>Analisi del laboratorio</strong> — Clicca <em>Area Progettazione Laboratorio</em>. Non richiede utente selezionato: aggrega le domande configurate per tutti gli utenti. Mostra grafico per area funzionale, top 10 domande con utenti interessati (passa il cursore su "x/x utenti" per vedere i nomi), dettaglio per area con badge Alta/Media/Bassa priorità. Se le funzioni AI sono attive, è disponibile la sezione <em>Consigli AI</em>.</div></div>
         <div class="instr-step"><div class="instr-num">8</div><div><strong>Funzioni AI (opzionali)</strong> — Apri <strong>⚙️ Impostazioni</strong> (richiede password) e spunta <em>Implementa funzioni AI</em>. Nei Risultati appaiono <em>Valutazione Qualitativa AI</em> e <em>Sintesi Note AI</em>; nel Laboratorio compare <em>Consigli AI</em>. Scegli <strong>Genera con AI</strong> (chiave API Anthropic, ~$0.01–0.03 a generazione) oppure <strong>Genera Prompt</strong> per usare claude.ai gratuitamente.</div></div>
@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.6.3</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.6.5</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -768,7 +768,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
   <div class="topbar">
     <div class="tlogo">
       <div class="tlogo-mark">🔍</div>
-      <div class="tlogo-text"><span class="tlogo-name">Area Lacune</span></div>
+      <div class="tlogo-text"><span class="tlogo-name">Area Priorità di Lavoro</span></div>
       <button class="tlogo-home" onclick="goTo('screen-home')">🏠 Home</button><button class="tlogo-nav" id="nav-back" onclick="historyBack()" title="Indietro">‹</button><button class="tlogo-nav" id="nav-fwd" onclick="historyForward()" title="Avanti">›</button>
     </div>
     <div class="tbar-actions">
@@ -1220,7 +1220,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.6.3</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.6.5</div>
     </div>
   </div>
 </div>
@@ -2724,6 +2724,46 @@ function saveDayData(){
   renderUserSidebar('compile-sidebar','selectCompileUser','compile',currentDay);
 }
 function saveDayDataAndExit(){
+  // Controlla domande non compilate (nessun punteggio selezionato)
+  const items=document.querySelectorAll('.q-item');
+  const missing=[];
+  items.forEach(item=>{
+    const sel=item.querySelector('.ttap-btn[class*="selected-"]');
+    if(!sel) missing.push(item.getAttribute('data-qid'));
+  });
+  if(missing.length>0){
+    const overlay=document.createElement('div');
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9800;display:flex;align-items:center;justify-content:center;padding:16px';
+    overlay.innerHTML=`
+      <div style="background:var(--card);border-radius:var(--r);box-shadow:0 8px 40px rgba(0,0,0,.3);width:100%;max-width:420px;padding:24px">
+        <div style="font-family:var(--fd);font-size:1rem;font-weight:700;margin-bottom:8px">⚠️ Domande non compilate</div>
+        <p style="font-size:.85rem;color:var(--text2);margin-bottom:18px"><strong>${missing.length}</strong> domanda${missing.length===1?'':'e'} senza punteggio.<br>Vuoi impostarle tutte a <strong>0 — Non valutabile</strong> prima di salvare?</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+          <button class="btn btn-ghost btn-sm" id="inc-cancel">Torna alla scheda</button>
+          <button class="btn btn-ghost btn-sm" id="inc-saveas0" style="color:var(--warn);border-color:var(--warn)">Imposta a 0 e salva</button>
+          <button class="btn btn-primary btn-sm" id="inc-saveany">Salva com'è ed esci</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#inc-cancel').onclick=()=>overlay.remove();
+    overlay.querySelector('#inc-saveas0').onclick=()=>{
+      // Imposta a 0 tutte le non compilate
+      missing.forEach(qId=>{
+        const item=document.querySelector(`.q-item[data-qid="${qId}"]`);
+        if(!item)return;
+        const btn0=item.querySelector('.ttap-btn[data-score="0"]');
+        if(btn0){
+          item.querySelectorAll('.ttap-btn').forEach(b=>{b.className=b.className.replace(/\s*selected-\d/,'');});
+          btn0.className+=' selected-0';
+        }
+      });
+      overlay.remove();
+      saveDayData();
+      goTo('screen-compile');
+    };
+    overlay.querySelector('#inc-saveany').onclick=()=>{overlay.remove();saveDayData();goTo('screen-compile');};
+    return;
+  }
   saveDayData();
   goTo('screen-compile');
 }
@@ -4302,24 +4342,7 @@ function renderCoverage(){
     qMap[q.id]={...q,macro:macro.macro,icon:macro.icon};
   })));
 
-  // Helper: dato array di counts, restituisce soglia sotto-media
-  // Regola: media dell'utente su tutte le sue domande.
-  // Una domanda è "sotto-media" se count < (media - 0.5 * stddev) E scarto assoluto >= 1.
-  // Se stddev ≈ 0 (tutti uguali) → nessuna lacuna.
-  function calcThreshold(counts){
-    if(!counts.length)return{mean:0,threshold:0,flat:true,allZero:false};
-    const mean=counts.reduce((a,b)=>a+b,0)/counts.length;
-    // Nessuna compilazione su nessuna domanda → tutte sotto
-    if(mean===0)return{mean:0,threshold:1,flat:false,allZero:true};
-    const variance=counts.reduce((s,c)=>s+(c-mean)**2,0)/counts.length;
-    const std=Math.sqrt(variance);
-    if(std<0.5)return{mean,threshold:mean,flat:true,allZero:false}; // tutti troppo simili
-    return{mean,threshold:mean-0.5*std,flat:false,allZero:false};
-  }
-
   const usersData=[];
-  // globalMacro per panoramica: macroName → {icon, underCount, totalQuestions (aggregato utenti)}
-  const globalMacro={};
 
   profiles.forEach(prof=>{
     const pd=loadPdata(prof.id);
@@ -4327,16 +4350,19 @@ function renderCoverage(){
     if(!sel.length)return;
 
     const compilations=pd.compilations||{};
-    // Conta compilazioni con score>0 per ogni qId
+    // Conta solo osservazioni valide: score 1-5 (score 0 = non compilato/non valutabile)
     const qCount={};
     sel.forEach(id=>{ qCount[id]=0; });
     Object.values(compilations).forEach(dayScores=>{
       Object.entries(dayScores).forEach(([id,score])=>{
-        if(sel.includes(id)&&score>0) qCount[id]=(qCount[id]||0)+1;
+        if(sel.includes(id)&&score>=1) qCount[id]=(qCount[id]||0)+1;
       });
     });
 
-    // Costruisci macroMap con testo domanda
+    // Totale osservazioni valide sull'utente (per ordinamento)
+    const totalValidObs=Object.values(qCount).reduce((a,b)=>a+b,0);
+
+    // Costruisci macroMap con conteggio per ogni domanda
     const macroMap={};
     QUESTION_BANK.forEach(macro=>{
       const ids=macro.micro.flatMap(m=>m.questions.map(q=>q.id)).filter(id=>sel.includes(id));
@@ -4349,26 +4375,41 @@ function renderCoverage(){
       });
     });
 
-    // Calcola soglia globale sull'utente (tutti i suoi count insieme)
-    const allCounts=Object.values(qCount);
-    const{mean,threshold,flat,allZero}=calcThreshold(allCounts);
+    // Calcola count per macro area (min delle domande nell'area)
+    // Un'area è prioritaria se ha il conteggio più basso
+    const macroEntries=Object.entries(macroMap);
+    // Minimo count per ciascuna macro
+    macroEntries.forEach(([,mv])=>{
+      mv.minCount=Math.min(...mv.questions.map(q=>q.count));
+    });
 
-    // Marca ogni domanda come sotto-media
-    let underTotal=0;
-    Object.entries(macroMap).forEach(([mName,mv])=>{
+    // Ordina le macro per minCount ascendente
+    const sortedMacros=[...macroEntries].sort((a,b)=>a[1].minCount-b[1].minCount);
+
+    // Determina il minCount globale (la soglia prioritaria)
+    const globalMinCount=sortedMacros.length?sortedMacros[0][1].minCount:0;
+
+    // Aree prioritarie = quelle col minCount più basso
+    // Se tutte le aree hanno lo stesso minCount → tutte prioritarie
+    // Normalmente prendiamo le aree a parità col min oppure entro +1 rispetto al min
+    // (così "prioritaria" vuol dire: area meno osservata)
+    const priorityThreshold=globalMinCount; // aree con minCount === globalMinCount
+    // Se tutte le macro hanno lo stesso minCount, tutte sono prioritarie (uniformemente osservate)
+    const allSameCount=sortedMacros.every(([,mv])=>mv.minCount===globalMinCount);
+
+    // Marca le domande prioritarie per ogni macro:
+    // in un'area prioritaria, le domande con count === min dell'area sono prioritarie
+    let priorityCount=0;
+    macroEntries.forEach(([,mv])=>{
+      const isPriorityMacro=allSameCount||mv.minCount<=priorityThreshold;
+      mv.isPriority=isPriorityMacro;
       mv.questions.forEach(q=>{
-        q.under=allZero||((!flat)&&q.count<threshold&&(mean-q.count)>=1);
-        if(q.under)underTotal++;
-      });
-      // Aggiorna globalMacro
-      if(!globalMacro[mName])globalMacro[mName]={icon:mv.icon,under:0,total:0};
-      mv.questions.forEach(q=>{
-        globalMacro[mName].total++;
-        if(q.under)globalMacro[mName].under++;
+        q.priority=isPriorityMacro&&(q.count===mv.minCount);
+        if(q.priority)priorityCount++;
       });
     });
 
-    usersData.push({prof,macroMap,underTotal,mean:Math.round(mean*10)/10,flat,allZero});
+    usersData.push({prof,macroMap,sortedMacros,totalValidObs,priorityCount,globalMinCount,allSameCount});
   });
 
   if(!usersData.length){
@@ -4376,18 +4417,18 @@ function renderCoverage(){
     return;
   }
 
-  // Sort: più lacune prima
-  usersData.sort((a,b)=>b.underTotal-a.underTotal);
+  // Sort: meno osservazioni totali → in testa (più urgente)
+  usersData.sort((a,b)=>a.totalValidObs-b.totalValidObs);
 
   // AI context
   const covContextByUser={};
   const covContextLines=usersData.map(u=>{
-    const macroLines=Object.entries(u.macroMap).map(([mName,mv])=>{
-      const under=mv.questions.filter(q=>q.under);
-      if(!under.length)return null;
-      return`  ${mv.icon} ${mName}: ${under.map(q=>`"${q.text.slice(0,60)}" (${q.count} comp.)`).join(', ')}`;
-    }).filter(Boolean).join('\n');
-    const line=`Utente: ${u.prof.nome} (media ${u.mean} comp/domanda)\n${macroLines||'  Nessuna lacuna'}`;
+    const priorityMacros=Object.entries(u.macroMap).filter(([,mv])=>mv.isPriority);
+    const macroLines=priorityMacros.map(([mName,mv])=>{
+      const pqs=mv.questions.filter(q=>q.priority);
+      return`  ${mv.icon} ${mName}: ${pqs.map(q=>`"${q.text.slice(0,60)}" (${q.count} oss.)`).join(', ')}`;
+    }).join('\n');
+    const line=`Utente: ${u.prof.nome} (${u.totalValidObs} osservazioni totali)\n${macroLines||'  Nessuna area prioritaria'}`;
     covContextByUser[u.prof.id]=line;
     return line;
   }).join('\n\n');
@@ -4396,19 +4437,30 @@ function renderCoverage(){
   const aiEnabled=(appMeta.aiEnabled&&(appMeta.anthropicKey||appMeta.allowAI));
 
   // ── PANORAMICA GLOBALE PER AREA ──
+  // Aggrega per macro: totale domande e totale osservazioni valide
+  const globalMacro={};
+  usersData.forEach(u=>{
+    Object.entries(u.macroMap).forEach(([mName,mv])=>{
+      if(!globalMacro[mName])globalMacro[mName]={icon:mv.icon,priority:0,total:0};
+      mv.questions.forEach(q=>{
+        globalMacro[mName].total++;
+        if(q.priority)globalMacro[mName].priority++;
+      });
+    });
+  });
   const sortedGlobal=Object.entries(globalMacro)
-    .filter(([,v])=>v.under>0)
-    .sort((a,b)=>b[1].under-a[1].under);
+    .filter(([,v])=>v.priority>0)
+    .sort((a,b)=>b[1].priority-a[1].priority);
 
   const globalRows=sortedGlobal.map(([mName,mv])=>{
-    const pct=mv.total?Math.round(((mv.total-mv.under)/mv.total)*100):100;
+    const pct=mv.total?Math.round(((mv.total-mv.priority)/mv.total)*100):100;
     const barColor=pct>=80?'var(--accent2)':pct>=50?'var(--warn)':'var(--danger)';
     return`<div class="cov-macro-row" style="padding:9px 0">
       <span class="cov-macro-icon">${mv.icon}</span>
       <span class="cov-macro-name" style="font-size:.88rem">${mName}</span>
-      <span class="cov-pill cov-pill-orange" style="font-size:.7rem">${mv.under} sotto-media</span>
+      <span class="cov-pill cov-pill-orange" style="font-size:.7rem">${mv.priority} prioritarie</span>
       <div class="cov-bar-wrap" style="width:70px"><div class="cov-bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
-      <span style="font-size:.7rem;color:var(--text3);min-width:32px;text-align:right">${mv.total-mv.under}/${mv.total} OK</span>
+      <span style="font-size:.7rem;color:var(--text3);min-width:32px;text-align:right">${mv.total-mv.priority}/${mv.total} OK</span>
     </div>`;
   }).join('');
 
@@ -4416,62 +4468,64 @@ function renderCoverage(){
     <div style="display:flex;align-items:center;gap:10px;padding:14px 18px;cursor:pointer;user-select:none;background:var(--bg2);border-radius:var(--r)"
          onclick="const b=document.getElementById('cov-global-body');const open=b.style.display!=='none';b.style.display=open?'none':'block';this.querySelector('.cov-global-chevron').textContent=open?'▶ Espandi':'▼ Comprimi'">
       <span style="font-family:var(--fd);font-size:1.05rem;font-weight:700;color:var(--text);flex:1">📊 Panoramica Globale per Area</span>
-      ${sortedGlobal.length?`<span style="font-size:.75rem;color:var(--warn);font-weight:700">${sortedGlobal.length} aree con lacune</span>`:'<span style="font-size:.75rem;color:var(--accent2);font-weight:700">✅ Nessuna lacuna</span>'}
+      ${sortedGlobal.length?`<span style="font-size:.75rem;color:var(--warn);font-weight:700">${sortedGlobal.length} aree prioritarie</span>`:'<span style="font-size:.75rem;color:var(--accent2);font-weight:700">✅ Tutto osservato</span>'}
       <span class="cov-global-chevron" style="font-size:.72rem;font-weight:700;color:var(--accent);background:var(--al);border:1px solid var(--al2);border-radius:6px;padding:2px 8px;white-space:nowrap">▶ Espandi</span>
     </div>
     <div id="cov-global-body" style="display:none;padding:14px 18px">
-      <p style="font-size:.8rem;color:var(--text2);margin-bottom:14px">Domande sotto-media rispetto alle altre domande dello stesso utente — aggregate per area funzionale. Solo aree con lacune.</p>
-      ${sortedGlobal.length?globalRows:`<p style="font-size:.84rem;color:var(--accent2);padding:6px 0">✅ Nessuna lacuna rilevata: tutte le domande hanno una copertura omogenea.</p>`}
+      <p style="font-size:.8rem;color:var(--text2);margin-bottom:14px">Aree con meno osservazioni valide (punteggio 1–5) aggregate su tutti gli utenti. Solo punteggio 0 = non ancora osservato.</p>
+      ${sortedGlobal.length?globalRows:`<p style="font-size:.84rem;color:var(--accent2);padding:6px 0">✅ Tutte le aree hanno almeno un'osservazione valida.</p>`}
     </div>
   </div>`;
 
   // ── CARD PER UTENTE ──
   const userCards=usersData.map((u,ui)=>{
-    if(!u.allZero&&(u.flat||!u.underTotal)){
-      const msg=u.flat?'Compilazioni omogenee — nessuna lacuna rilevata':'Copertura uniforme';
-      return`<div class="cov-user-card" style="padding:13px 18px;display:flex;align-items:center;gap:12px">
-        <span style="font-size:1.1rem">🟢</span>
-        <span class="cov-user-name" style="font-size:.95rem">${u.prof.nome}</span>
-        <span class="cov-stat-badge cov-stat-green" style="margin-left:auto">${msg}</span>
-        <span style="font-size:.72rem;color:var(--text3)">media ${u.mean}</span>
-      </div>`;
-    }
+    // Badge urgenza in base al totale osservazioni
+    const urgencyIcon=u.totalValidObs===0?'🔴':u.totalValidObs<5?'🟠':'🟡';
+    const urgencyLabel=u.totalValidObs===0?'Nessuna osservazione':`${u.totalValidObs} oss. totali`;
 
-    const problematicAreas=Object.entries(u.macroMap).filter(([,mv])=>mv.questions.some(q=>q.under));
+    // Aree prioritarie = quelle marcate isPriority, ordinate per minCount asc
+    const priorityAreas=u.sortedMacros.filter(([,mv])=>mv.isPriority);
 
-    const areaBlocks=problematicAreas.map(([mName,mv],ai)=>{
-      const underQs=mv.questions.filter(q=>q.under).sort((a,b)=>a.count-b.count);
+    const areaBlocks=priorityAreas.map(([mName,mv],ai)=>{
+      const priorityQs=mv.questions.filter(q=>q.priority).sort((a,b)=>a.count-b.count);
+      const otherQs=mv.questions.filter(q=>!q.priority).sort((a,b)=>a.count-b.count);
       const blockId=`cov-${ui}-${ai}`;
-      const qRows=underQs.map(q=>`<div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
-          <span style="font-size:.72rem;font-weight:700;color:var(--warn);white-space:nowrap;padding-top:2px">${q.count} comp.</span>
+
+      const qRows=[...priorityQs,...otherQs].map(q=>`<div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
+          <span style="font-size:.72rem;font-weight:700;color:${q.priority?'var(--danger)':'var(--text3)'};white-space:nowrap;padding-top:2px">${q.count} oss.</span>
+          ${q.priority?`<span style="font-size:.65rem;background:var(--danger);color:#fff;border-radius:4px;padding:1px 5px;white-space:nowrap;align-self:center">priorità</span>`:''}
           <span style="font-size:.8rem;color:var(--text);line-height:1.45;flex:1">${q.text}</span>
         </div>`).join('');
 
-      return`<div style="border:1.5px solid var(--border);border-radius:var(--rs);overflow:hidden;margin-bottom:8px">
+      return`<div style="border:1.5px solid ${mv.isPriority?'var(--danger)':'var(--border)'};border-radius:var(--rs);overflow:hidden;margin-bottom:8px">
         <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;background:var(--bg2);user-select:none"
              onclick="const b=document.getElementById('${blockId}');const open=b.style.display!=='none';b.style.display=open?'none':'block';this.querySelector('.cov-chevron-btn').textContent=open?'▶ Apri':'▼ Chiudi'">
           <span style="font-size:1rem">${mv.icon}</span>
           <span style="font-size:.86rem;font-weight:700;color:var(--text);flex:1">${mName}</span>
-          <span class="cov-pill cov-pill-orange" style="font-size:.7rem">${underQs.length} da valutare</span>
+          <span class="cov-pill cov-pill-orange" style="font-size:.7rem">${priorityQs.length} da valutare</span>
+          <span style="font-size:.7rem;color:var(--text3)">min ${mv.minCount} oss.</span>
           <span class="cov-chevron-btn" style="font-size:.72rem;font-weight:700;color:var(--accent);background:var(--al);border:1px solid var(--al2);border-radius:6px;padding:2px 8px;margin-left:8px;white-space:nowrap">▶ Apri</span>
         </div>
         <div id="${blockId}" style="padding:6px 12px 10px;display:none">
-          <div style="font-size:.7rem;color:var(--text3);margin-bottom:6px">Media utente: <strong>${u.mean}</strong> compilazioni/domanda</div>
           ${qRows}
         </div>
       </div>`;
     }).join('');
 
+    const allObsNote=u.allSameCount&&u.globalMinCount>0
+      ?`<div style="font-size:.76rem;color:var(--accent2);padding:4px 0 8px">✅ Tutte le aree hanno almeno ${u.globalMinCount} osservazione/i — mostrate comunque le meno osservate come priorità.</div>`
+      :'';
+
     return`<div class="cov-user-card" id="cov-user-${ui}">
       <div class="cov-user-header" onclick="const b=document.getElementById('cov-body-${ui}');const open=b.style.display!=='none';b.style.display=open?'none':'block';this.querySelector('.cov-user-chevron-btn').textContent=open?'▶ Espandi':'▼ Comprimi'">
-        <div class="cov-user-name">🟡 ${u.prof.nome}</div>
+        <div class="cov-user-name">${urgencyIcon} ${u.prof.nome}</div>
         <div style="display:flex;align-items:center;gap:8px">
-          <span class="cov-stat-badge cov-stat-orange">${u.underTotal} domande sotto-media</span>
-          <span style="font-size:.72rem;color:var(--text3)">media ${u.mean}</span>
+          <span class="cov-stat-badge cov-stat-orange">${u.priorityCount} dom. prioritarie</span>
+          <span style="font-size:.72rem;color:var(--text3)">${urgencyLabel}</span>
           <span class="cov-user-chevron-btn" style="font-size:.72rem;font-weight:700;color:var(--accent);background:var(--al);border:1px solid var(--al2);border-radius:6px;padding:2px 8px;white-space:nowrap">▶ Espandi</span>
         </div>
       </div>
-      <div id="cov-body-${ui}" style="display:none">${areaBlocks}</div>
+      <div id="cov-body-${ui}" style="display:none;padding:4px 0 4px">${allObsNote}${areaBlocks}</div>
     </div>`;
   }).join('');
 
@@ -4480,12 +4534,12 @@ function renderCoverage(){
     <label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .12s" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''">
       <input type="checkbox" class="cov-user-cb" value="${u.prof.id}" checked onchange="updateCovPickCount()" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer">
       <span style="font-size:.88rem;font-weight:600;color:var(--text)">${u.prof.nome}</span>
-      <span class="cov-stat-badge cov-stat-orange" style="margin-left:auto;font-size:.7rem">${u.underTotal} sotto-media</span>
+      <span class="cov-stat-badge cov-stat-orange" style="margin-left:auto;font-size:.7rem">${u.totalValidObs} oss.</span>
     </label>`).join('');
 
   const aiSection=`<div class="card" style="margin-top:24px">
     <h3 style="font-family:var(--fd);font-size:1.05rem;margin-bottom:6px">🤖 Consigli AI per il Laboratorio</h3>
-    <p style="font-size:.83rem;color:var(--text2);margin-bottom:12px">Genera suggerimenti su come organizzare il laboratorio in base alle aree sotto-media.</p>
+    <p style="font-size:.83rem;color:var(--text2);margin-bottom:12px">Genera suggerimenti su come organizzare il laboratorio in base alle aree prioritarie.</p>
     <!-- Selettore utenti -->
     <div style="margin-bottom:14px">
       <button class="btn btn-ghost btn-sm" onclick="const p=document.getElementById('cov-user-picker');p.style.display=p.style.display==='none'?'block':'none'" style="font-size:.8rem">👥 Seleziona utenti <span id="cov-pick-count">(tutti)</span></button>
@@ -4555,7 +4609,7 @@ function buildCoveragePromptText(){
 
   return`Sei un operatore esperto di laboratori socio-occupazionali per persone con disabilità intellettiva e/o dello spettro autistico. Devi aiutare il tuo collega a organizzare rapidamente una giornata di lavoro senza doverci pensare troppo.
 
-LACUNE RILEVATE PER UTENTE:
+AREE PRIORITARIE PER UTENTE (ordinate per urgenza — chi ha meno osservazioni è in cima):
 ${lines}
 
 Scrivi una proposta di giornata. Il formato deve essere snello e di rapida lettura — l'operatore deve poterlo scorrere in 2 minuti e capire subito cosa fare.
@@ -4563,7 +4617,7 @@ Scrivi una proposta di giornata. Il formato deve essere snello e di rapida lettu
 Struttura la risposta così:
 
 **Gruppi di lavoro**
-Forma 1-2 gruppi di 2-3 utenti con lacune simili. Per ogni gruppo indica: chi c'è, perché stanno insieme (area da osservare), e 4-5 attività concrete adatte (non generiche — attività reali di laboratorio che permettono di osservare le competenze mancanti).
+Forma 1-2 gruppi di 2-3 utenti con aree prioritarie simili. Per ogni gruppo indica: chi c'è, perché stanno insieme (area da osservare), e 4-5 attività concrete adatte (non generiche — attività reali di laboratorio che permettono di osservare le competenze prioritarie).
 
 **Gestione del gruppo in scarico**
 Indica 2-3 attività autonome o semi-autonome adatte a tenere occupati gli altri utenti mentre lavori con il gruppo prioritario.
@@ -4694,7 +4748,8 @@ function buildBackupPayload(profileList,includeArchived=true){
       theme:appMeta.theme||'light',
       aiEnabled:localStorage.getItem('valutaapp_ai_enabled')||'',
       apiKey:localStorage.getItem('valutaapp_apikey')||'',
-      usage:localStorage.getItem('valutaapp_usage')||''
+      usage:localStorage.getItem('valutaapp_usage')||'',
+      workTags:appMeta.workTags||[]
     };
   }
   profileList.forEach(p=>{data.profileData[p.id]=loadPdata(p.id)});
@@ -4784,6 +4839,13 @@ function processImport(jsonText){
     if(s.aiEnabled==='1'){localStorage.setItem('valutaapp_ai_enabled','1');settingsRestored.push('funzioni AI');}
     if(s.apiKey){localStorage.setItem('valutaapp_apikey',s.apiKey);settingsRestored.push('chiave API');}
     if(s.usage){localStorage.setItem('valutaapp_usage',s.usage);settingsRestored.push('statistiche AI');}
+    if(Array.isArray(s.workTags)&&s.workTags.length){
+      const existing=appMeta.workTags||[];
+      const merged=[...existing];
+      s.workTags.forEach(t=>{if(!merged.find(e=>e.id===t.id))merged.push(t);});
+      appMeta.workTags=merged;saveMeta();
+      settingsRestored.push('lavorazioni');
+    }
     applyAIState();
 
     const finalize=()=>{

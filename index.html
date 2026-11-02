@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.6.7</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.6.8</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1220,7 +1220,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.6.7</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.6.8</div>
     </div>
   </div>
 </div>
@@ -4426,16 +4426,16 @@ function renderCoverage(){
   const maxObs=obsCounts.length?Math.max(...obsCounts):0;
   const minObs=obsCounts.length?Math.min(...obsCounts):0;
   const range=maxObs-minObs;
+  const dot=(color)=>`<span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${color};flex-shrink:0;margin-right:2px"></span>`;
   usersData.forEach(u=>{
-    if(u.totalValidObs===0){u.urgencyIcon='🔴';u.urgencyColor='var(--danger)';}
+    if(u.totalValidObs===0){u.urgencyDot=dot('#e53935');u.urgencyColor='var(--danger)';}
     else if(maxObs===minObs){
-      // Tutti uguali → tutti arancioni
-      u.urgencyIcon='🟠';u.urgencyColor='var(--warn)';
+      u.urgencyDot=dot('#f57c00');u.urgencyColor='var(--warn)';
     } else {
       const pos=(u.totalValidObs-minObs)/range; // 0..1
-      if(pos<0.33){u.urgencyIcon='🔴';u.urgencyColor='var(--danger)';}
-      else if(pos<0.67){u.urgencyIcon='🟠';u.urgencyColor='var(--warn)';}
-      else{u.urgencyIcon='🟢';u.urgencyColor='var(--accent2)';}
+      if(pos<0.33){u.urgencyDot=dot('#e53935');u.urgencyColor='var(--danger)';}
+      else if(pos<0.67){u.urgencyDot=dot('#f57c00');u.urgencyColor='var(--warn)';}
+      else{u.urgencyDot=dot('#2e7d32');u.urgencyColor='var(--accent2)';}
     }
   });
 
@@ -4498,7 +4498,6 @@ function renderCoverage(){
 
   // ── CARD PER UTENTE ──
   const userCards=usersData.map((u,ui)=>{
-    const urgencyIcon=u.urgencyIcon;
     const urgencyLabel=u.totalValidObs===0?'Nessuna osservazione':`${u.totalValidObs} oss. totali`;
 
     // Aree prioritarie = quelle marcate isPriority, ordinate per minCount asc
@@ -4536,7 +4535,7 @@ function renderCoverage(){
 
     return`<div class="cov-user-card" id="cov-user-${ui}">
       <div class="cov-user-header" onclick="const b=document.getElementById('cov-body-${ui}');const open=b.style.display!=='none';b.style.display=open?'none':'block';this.querySelector('.cov-user-chevron-btn').textContent=open?'▶ Espandi':'▼ Comprimi'">
-        <div class="cov-user-name">${urgencyIcon} ${u.prof.nome}</div>
+        <div class="cov-user-name" style="display:flex;align-items:center;gap:6px">${u.urgencyDot}${u.prof.nome}</div>
         <div style="display:flex;align-items:center;gap:8px">
           <span class="cov-stat-badge cov-stat-orange">${u.priorityCount} dom. prioritarie</span>
           <span style="font-size:.72rem;color:var(--text3)">${urgencyLabel}</span>

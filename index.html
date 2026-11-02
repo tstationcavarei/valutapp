@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.6.5</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.6.7</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1220,7 +1220,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.6.5</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.6.7</div>
     </div>
   </div>
 </div>
@@ -2736,17 +2736,16 @@ function saveDayDataAndExit(){
     overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9800;display:flex;align-items:center;justify-content:center;padding:16px';
     overlay.innerHTML=`
       <div style="background:var(--card);border-radius:var(--r);box-shadow:0 8px 40px rgba(0,0,0,.3);width:100%;max-width:420px;padding:24px">
-        <div style="font-family:var(--fd);font-size:1rem;font-weight:700;margin-bottom:8px">⚠️ Domande non compilate</div>
-        <p style="font-size:.85rem;color:var(--text2);margin-bottom:18px"><strong>${missing.length}</strong> domanda${missing.length===1?'':'e'} senza punteggio.<br>Vuoi impostarle tutte a <strong>0 — Non valutabile</strong> prima di salvare?</p>
+        <div style="font-family:var(--fd);font-size:1rem;font-weight:700;margin-bottom:8px">⚠️ Scheda incompleta</div>
+        <p style="font-size:.85rem;color:var(--text2);margin-bottom:18px"><strong>${missing.length}</strong> domanda${missing.length===1?'':'e'} senza punteggio.<br>Proseguendo verr${missing.length===1?'à':'anno'} impostate automaticamente a <strong>0 — Non valutabile</strong> e la scheda verrà salvata.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-          <button class="btn btn-ghost btn-sm" id="inc-cancel">Torna alla scheda</button>
-          <button class="btn btn-ghost btn-sm" id="inc-saveas0" style="color:var(--warn);border-color:var(--warn)">Imposta a 0 e salva</button>
-          <button class="btn btn-primary btn-sm" id="inc-saveany">Salva com'è ed esci</button>
+          <button class="btn btn-ghost btn-sm" id="inc-cancel">Annulla — torna alla scheda</button>
+          <button class="btn btn-primary btn-sm" id="inc-confirm">Imposta a 0 e salva</button>
         </div>
       </div>`;
     document.body.appendChild(overlay);
     overlay.querySelector('#inc-cancel').onclick=()=>overlay.remove();
-    overlay.querySelector('#inc-saveas0').onclick=()=>{
+    overlay.querySelector('#inc-confirm').onclick=()=>{
       // Imposta a 0 tutte le non compilate
       missing.forEach(qId=>{
         const item=document.querySelector(`.q-item[data-qid="${qId}"]`);
@@ -2761,7 +2760,6 @@ function saveDayDataAndExit(){
       saveDayData();
       goTo('screen-compile');
     };
-    overlay.querySelector('#inc-saveany').onclick=()=>{overlay.remove();saveDayData();goTo('screen-compile');};
     return;
   }
   saveDayData();
@@ -4420,6 +4418,27 @@ function renderCoverage(){
   // Sort: meno osservazioni totali → in testa (più urgente)
   usersData.sort((a,b)=>a.totalValidObs-b.totalValidObs);
 
+  // Calcola colore pallino in base alla posizione relativa (terzili)
+  // 🔴 = nessuna osservazione OPPURE nel terzo inferiore
+  // 🟠 = terzo medio
+  // 🟢 = terzo superiore (più osservato del gruppo)
+  const obsCounts=usersData.map(u=>u.totalValidObs);
+  const maxObs=obsCounts.length?Math.max(...obsCounts):0;
+  const minObs=obsCounts.length?Math.min(...obsCounts):0;
+  const range=maxObs-minObs;
+  usersData.forEach(u=>{
+    if(u.totalValidObs===0){u.urgencyIcon='🔴';u.urgencyColor='var(--danger)';}
+    else if(maxObs===minObs){
+      // Tutti uguali → tutti arancioni
+      u.urgencyIcon='🟠';u.urgencyColor='var(--warn)';
+    } else {
+      const pos=(u.totalValidObs-minObs)/range; // 0..1
+      if(pos<0.33){u.urgencyIcon='🔴';u.urgencyColor='var(--danger)';}
+      else if(pos<0.67){u.urgencyIcon='🟠';u.urgencyColor='var(--warn)';}
+      else{u.urgencyIcon='🟢';u.urgencyColor='var(--accent2)';}
+    }
+  });
+
   // AI context
   const covContextByUser={};
   const covContextLines=usersData.map(u=>{
@@ -4479,8 +4498,7 @@ function renderCoverage(){
 
   // ── CARD PER UTENTE ──
   const userCards=usersData.map((u,ui)=>{
-    // Badge urgenza in base al totale osservazioni
-    const urgencyIcon=u.totalValidObs===0?'🔴':u.totalValidObs<5?'🟠':'🟡';
+    const urgencyIcon=u.urgencyIcon;
     const urgencyLabel=u.totalValidObs===0?'Nessuna osservazione':`${u.totalValidObs} oss. totali`;
 
     // Aree prioritarie = quelle marcate isPriority, ordinate per minCount asc

@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.7.0</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.7.1</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1234,7 +1234,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.7.0</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.7.1</div>
     </div>
   </div>
 </div>
@@ -4151,21 +4151,29 @@ CONTESTO: 1 operatore, ~8 utenti in contemporanea.
 ${hasScores?`VALUTAZIONI UTENTI (punteggi 0–5):
 ${ctx.userScoreLines.join('\n')}
 
-`:''}DOMANDE SELEZIONATE PER AREA (ordine fisso — rispetta questo ordine nella sezione 1):
+`:''}════════════════════════════════════════
+DATI DI INPUT — DOMANDE SELEZIONATE PER AREA
+(ordine fisso: rispettalo nella sezione 1 del documento)
+════════════════════════════════════════
 ${areeDettagliate}
 
-ELENCO COMPLETO DOMANDE DA COPRIRE (${tutteLedomande.length} totali — ogni domanda deve comparire in almeno un "Si osserva"):
-${tutteLedomande.map((d,i)=>`${i+1}. ${d}`).join('\n')}
+════════════════════════════════════════
+CHECKLIST OBBLIGATORIA — ${tutteLedomande.length} DOMANDE DA COPRIRE
+Prima di scrivere il documento, tieni questa lista davanti.
+Ogni domanda DEVE comparire testualmente in almeno un "Si osserva:".
+Spunta mentalmente ogni voce man mano che la inserisci.
+════════════════════════════════════════
+${tutteLedomande.map((d,i)=>`[${i+1}] ${d}`).join('\n')}
 
-═══ DOCUMENTO DA PRODURRE ═══
+════════════════════════════════════════
+DOCUMENTO DA PRODURRE
+════════════════════════════════════════
 
-Produci un piano operativo in italiano, tono diretto da collega operatore. Max 6 pagine A4. Non usare mai codici o sigle — solo nomi descrittivi completi.
+Produci il documento in italiano, tono diretto da collega operatore.
+Non usare mai codici o sigle — solo nomi descrittivi completi.
+Non aggiungere sezioni extra, non cambiare i titoli.
 
-REGOLA FONDAMENTALE: ogni domanda dell'elenco completo deve comparire in almeno un campo "Si osserva:" nelle attività. Una singola attività può coprire più domande. Al termine mentalmente verifica che nessuna domanda sia rimasta scoperta.
-
-Il documento deve avere ESATTAMENTE questa struttura e anatomia, senza variazioni:
-
----
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 # Piano operativo – Laboratorio socio-occupazionale
 
@@ -4175,58 +4183,63 @@ Il documento deve avere ESATTAMENTE questa struttura e anatomia, senza variazion
 
 Ogni attività è pensata per far emergere più competenze insieme dentro un lavoro reale, non come test isolato. Accanto a ogni voce osservata, annotare sempre il livello di aiuto dato: nessuno, verbale, visivo, fisico.
 
-[Le aree devono seguire ESATTAMENTE l'ordine in cui sono elencate sopra nella sezione "DOMANDE SELEZIONATE PER AREA".]
+ISTRUZIONI SEZIONE 1:
+→ Segui l'ordine delle aree ESATTAMENTE come nell'elenco sopra.
+→ Per ogni area: scrivi tante attività quante ne servono per coprire TUTTE le domande di quell'area. Minimo 2, massimo 5.
+→ Ogni domanda della checklist deve comparire in almeno un "Si osserva:" — scritte per esteso, con le parole esatte della domanda fornita.
+→ Una singola attività può e deve coprire più domande quando è naturale farlo.
+→ Formato obbligatorio per ogni attività:
 
-[Per ogni area funzionale, usa questo heading:]
-### [Nome area]
+- **[Nome attività]** — [descrizione sintetica]. *Es.:* [esempio concreto].
+<u>Si osserva:</u> [testo esatto domanda 1]; [testo esatto domanda 2]; … (se la competenza riguarda solo alcuni utenti, aggiungili tra parentesi dopo).
+<u>Prioritari:</u> [nomi utenti].
 
-[Per ogni attività dell'area, usa ESATTAMENTE questo formato come voce di lista:]
-- **[Nome attività]** — [descrizione sintetica in una frase]. *Es.:* [esempio pratico concreto].
-<u>Si osserva:</u> [elenco delle competenze osservabili, usando il testo esatto delle domande fornite sopra, separate da punto e virgola].
-<u>Prioritari:</u> [nomi utenti per cui questa attività è prioritaria, separati da virgola].
-
-Regole per la sezione 1:
-- Numero di attività per area: sufficiente a coprire TUTTE le domande di quell'area (minimo 2, massimo 5)
-- Il nome attività è sempre in grassetto
-- "Es.:" sempre in corsivo
-- "Si osserva:" e "Prioritari:" sempre sottolineati (usa il tag <u>…</u>)
-- Le competenze in "Si osserva" devono corrispondere alle domande del pool fornito, scritte per esteso
-- Se una competenza riguarda solo alcuni utenti specifici, indicali tra parentesi dopo la competenza
-- Ogni domanda dell'elenco completo deve comparire almeno una volta in un "Si osserva:"
+[ripeti ### [Nome area] e le sue attività per ogni area dell'elenco, nello stesso ordine]
 
 ## 2. Gestione del laboratorio
 
 Regola base: per ogni blocco di lavoro solo 2/3 utenti sono in osservazione diretta, gli altri lavorano su compiti consolidati o attività riempitive.
 
-[Lista di bullet con questo formato:]
 - **[Nome strategia]**: [descrizione operativa concreta].
 
-Includi bullet su: supporti visivi da usare, come alternare osservazione diretta e autonomia, come gestire i giri di controllo, come registrare le osservazioni, eventuali note su utenti specifici che richiedono attenzione costante.
+Includi: rotazione blocchi, supporti visivi, giri di controllo, registrazione osservazioni, note su utenti con bisogno di attenzione costante.
 
 ## 3. Strategie
 
 **Approcci consigliati**
 
-[Lista di bullet con questo formato:]
 - **[Nome approccio]**: [descrizione operativa in 1–2 frasi].
 
-Includi: lavoro strutturato (sinistra→destra), analisi del compito, aiuto graduato, anticipazione dei cambiamenti, tutoraggio tra pari (se applicabile dai profili), rinforzo immediato.
+Includi: lavoro strutturato sinistra→destra, analisi del compito, aiuto graduato, anticipazione dei cambiamenti, tutoraggio tra pari, rinforzo immediato.
 
-## 4. Kit materiali
+## 4. Attività riempitive – scatole di lavoro
 
-[Intro: 1–2 frasi che spiegano che i kit raccolgono i materiali necessari per le attività proposte nella sezione 1.]
+Le scatole di lavoro sono compiti brevi e autosufficienti che l'utente svolge senza l'operatore. Servono a tenere attivi gli utenti non in osservazione e a coprire i tempi morti.
 
-[Per ogni attività della sezione 1 che richiede materiali, crea un kit con questo formato:]
-- **Kit [Nome attività]**: [elenco materiali necessari, privilegiando materiali di recupero o a basso costo]. *Attività coperte:* [nome/i attività della sezione 1 che usano questo kit].
+**Come si spiega da sola una scatola**
 
-Regole per la sezione 4:
-- I kit devono rispecchiare SOLO le attività proposte nella sezione 1, non introdurre nuove attività
-- Accorpa i materiali comuni tra più attività in un unico kit quando ha senso
-- Indica per ogni materiale se è di recupero, da stampare o da acquistare
+- **Tutto dentro**: nella scatola c'è tutto il necessario.
+- **Da sinistra a destra**: materiali da lavorare a sinistra, prodotto finito a destra.
+- **Quantità finita**: quando la parte sinistra è vuota, il lavoro è finito.
+- **Un posto, una risposta**: ogni pezzo ha un solo posto giusto.
+- **Risultato sul coperchio**: foto della scatola completata incollata sul coperchio.
 
----
+**Catalogo delle scatole**
 
-Rispetta ESATTAMENTE questa struttura. Non aggiungere sezioni extra, non cambiare i titoli, non usare altri stili di formattazione.`;
+ISTRUZIONI: crea 6–8 scatole. Ogni scatola deve essere riconducibile a una o più attività della sezione 1 (colonna "Aree e utenti" indica quale area e quali utenti prioritari). Non introdurre competenze nuove che non siano già nelle attività della sezione 1.
+
+| N. | Scatola | Dentro (recupero) | Da stampare | Come si spiega da sola | Attività sez. 1 collegata — utenti |
+
+[compila le righe: ogni scatola nell'ultima colonna cita esplicitamente il nome dell'attività della sezione 1 a cui si collega, e gli utenti prioritari per quella scatola]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+VERIFICA FINALE PRIMA DI INVIARE:
+- Hai rispettato l'ordine delle aree?
+- Tutte le ${tutteLedomande.length} domande della checklist compaiono in almeno un "Si osserva:"?
+- "Si osserva:" e "Prioritari:" sono sottolineati con <u>…</u> in ogni attività?
+- Le scatole di lavoro citano solo attività già presenti nella sezione 1?
+Se qualcosa manca, aggiungila prima di rispondere.`;
 }
 
 async function generateLabAI(){

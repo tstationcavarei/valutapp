@@ -1,4 +1,4 @@
-const CACHE_VERSION = '1.7.0';
+const CACHE_VERSION = '1.7.1';
 const CACHE_NAME = `valutapp-v${CACHE_VERSION}`;
 
 // ── Install: cache the app shell ──

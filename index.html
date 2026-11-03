@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.6.9</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.7.0</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1234,7 +1234,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.6.9</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.7.0</div>
     </div>
   </div>
 </div>
@@ -4117,8 +4117,20 @@ function buildLabPromptText(){
   if(!ctx)return'';
   const hasScores=ctx.userScoreLines&&ctx.userScoreLines.length>0;
 
-  // Costruisci lista aree ordinate per frequenza — solo testi leggibili, niente codici ID
-  const areeDettagliate=ctx.sortedMacro.map(([macroName,mv])=>{
+  // Aree ordinate come nel QUESTION_BANK (non per frequenza)
+  // ctx.sortedMacro è ordinato per frequenza; ricostruiamo rispettando l'ordine originale
+  const macroDataMap=Object.fromEntries(ctx.sortedMacro);
+  const areeOrdinateBank=QUESTION_BANK
+    .filter(macro=>macroDataMap[macro.macro])
+    .map(macro=>([macro.macro,macroDataMap[macro.macro]]));
+
+  // Aree custom (non in QUESTION_BANK) aggiunte in fondo
+  const bankNames=new Set(QUESTION_BANK.map(m=>m.macro));
+  const areeCustom=ctx.sortedMacro.filter(([k])=>!bankNames.has(k));
+  const areeOrdinate=[...areeOrdinateBank,...areeCustom];
+
+  // Per ogni area: tutte le domande selezionate da almeno 1 utente
+  const areeDettagliate=areeOrdinate.map(([macroName,mv])=>{
     const domande=mv.ids
       .map(id=>({n:ctx.qFreq[id]||0,text:ctx.qMap[id]?.text||id,users:(ctx.qUsers[id]||[]).join(', ')}))
       .sort((a,b)=>b.n-a.n);
@@ -4127,6 +4139,11 @@ function buildLabPromptText(){
 ${domande.map(d=>`  • ${d.text} [${d.users}]`).join('\n')}`;
   }).join('\n\n');
 
+  // Elenco piatto di tutte le domande selezionate (per controllo copertura)
+  const tutteLedomande=areeOrdinate.flatMap(([macroName,mv])=>
+    mv.ids.map(id=>`"${ctx.qMap[id]?.text||id}" (area: ${macroName})`)
+  );
+
   return`Sei un esperto di laboratori socio-occupazionali per persone con disabilità intellettiva e/o dello spettro autistico.
 
 CONTESTO: 1 operatore, ~8 utenti in contemporanea.
@@ -4134,12 +4151,17 @@ CONTESTO: 1 operatore, ~8 utenti in contemporanea.
 ${hasScores?`VALUTAZIONI UTENTI (punteggi 0–5):
 ${ctx.userScoreLines.join('\n')}
 
-`:''}AREE DA VALUTARE (dalla più rilevante, con domande e utenti coinvolti):
+`:''}DOMANDE SELEZIONATE PER AREA (ordine fisso — rispetta questo ordine nella sezione 1):
 ${areeDettagliate}
+
+ELENCO COMPLETO DOMANDE DA COPRIRE (${tutteLedomande.length} totali — ogni domanda deve comparire in almeno un "Si osserva"):
+${tutteLedomande.map((d,i)=>`${i+1}. ${d}`).join('\n')}
 
 ═══ DOCUMENTO DA PRODURRE ═══
 
-Produci un piano operativo in italiano, tono diretto da collega operatore. Max 5 pagine A4. Non usare mai codici o sigle — solo nomi descrittivi completi.
+Produci un piano operativo in italiano, tono diretto da collega operatore. Max 6 pagine A4. Non usare mai codici o sigle — solo nomi descrittivi completi.
+
+REGOLA FONDAMENTALE: ogni domanda dell'elenco completo deve comparire in almeno un campo "Si osserva:" nelle attività. Una singola attività può coprire più domande. Al termine mentalmente verifica che nessuna domanda sia rimasta scoperta.
 
 Il documento deve avere ESATTAMENTE questa struttura e anatomia, senza variazioni:
 
@@ -4153,21 +4175,24 @@ Il documento deve avere ESATTAMENTE questa struttura e anatomia, senza variazion
 
 Ogni attività è pensata per far emergere più competenze insieme dentro un lavoro reale, non come test isolato. Accanto a ogni voce osservata, annotare sempre il livello di aiuto dato: nessuno, verbale, visivo, fisico.
 
+[Le aree devono seguire ESATTAMENTE l'ordine in cui sono elencate sopra nella sezione "DOMANDE SELEZIONATE PER AREA".]
+
 [Per ogni area funzionale, usa questo heading:]
 ### [Nome area]
 
 [Per ogni attività dell'area, usa ESATTAMENTE questo formato come voce di lista:]
 - **[Nome attività]** — [descrizione sintetica in una frase]. *Es.:* [esempio pratico concreto].
-*Si osserva:* [elenco delle competenze osservabili, usando il testo esatto delle domande fornite sopra, separate da punto e virgola].
-*Prioritari:* [nomi utenti per cui questa attività è prioritaria, separati da virgola].
+<u>Si osserva:</u> [elenco delle competenze osservabili, usando il testo esatto delle domande fornite sopra, separate da punto e virgola].
+<u>Prioritari:</u> [nomi utenti per cui questa attività è prioritaria, separati da virgola].
 
 Regole per la sezione 1:
-- 3–4 attività per area, dalla più semplice alla più complessa
+- Numero di attività per area: sufficiente a coprire TUTTE le domande di quell'area (minimo 2, massimo 5)
 - Il nome attività è sempre in grassetto
 - "Es.:" sempre in corsivo
-- "Si osserva:" e "Prioritari:" sempre in corsivo
+- "Si osserva:" e "Prioritari:" sempre sottolineati (usa il tag <u>…</u>)
 - Le competenze in "Si osserva" devono corrispondere alle domande del pool fornito, scritte per esteso
 - Se una competenza riguarda solo alcuni utenti specifici, indicali tra parentesi dopo la competenza
+- Ogni domanda dell'elenco completo deve comparire almeno una volta in un "Si osserva:"
 
 ## 2. Gestione del laboratorio
 
@@ -4187,22 +4212,17 @@ Includi bullet su: supporti visivi da usare, come alternare osservazione diretta
 
 Includi: lavoro strutturato (sinistra→destra), analisi del compito, aiuto graduato, anticipazione dei cambiamenti, tutoraggio tra pari (se applicabile dai profili), rinforzo immediato.
 
-## 4. Attività riempitive – scatole di lavoro
+## 4. Kit materiali
 
-[Breve intro: 1–2 frasi su cosa sono e perché si usano.]
+[Intro: 1–2 frasi che spiegano che i kit raccolgono i materiali necessari per le attività proposte nella sezione 1.]
 
-**Come si spiega da sola una scatola**
+[Per ogni attività della sezione 1 che richiede materiali, crea un kit con questo formato:]
+- **Kit [Nome attività]**: [elenco materiali necessari, privilegiando materiali di recupero o a basso costo]. *Attività coperte:* [nome/i attività della sezione 1 che usano questo kit].
 
-[Lista di bullet con formato: **[principio]**: [descrizione].]
-
-Includi almeno: tutto dentro, da sinistra a destra, quantità finita, un posto una risposta, risultato sul coperchio.
-
-**Catalogo delle scatole**
-
-[Tabella con 6 colonne:]
-| N. | Scatola | Dentro (recupero) | Da stampare | Come si spiega da sola | Aree e utenti |
-
-[6–8 righe, basate sulle aree e sugli utenti dei dati forniti. Ogni scatola deve essere realizzabile con materiali di recupero. L'ultima colonna indica area funzionale — utenti prioritari.]
+Regole per la sezione 4:
+- I kit devono rispecchiare SOLO le attività proposte nella sezione 1, non introdurre nuove attività
+- Accorpa i materiali comuni tra più attività in un unico kit quando ha senso
+- Indica per ogni materiale se è di recupero, da stampare o da acquistare
 
 ---
 

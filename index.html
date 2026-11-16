@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.7.3</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.7.4</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1234,7 +1234,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.7.3</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.7.4</div>
     </div>
   </div>
 </div>
@@ -2735,11 +2735,23 @@ function filterDayQuestions(q){
     card.style.display=anyVisible?'':'none';
   });
 }
+// Applica highlight giallo al termine cercato dentro un elemento testo
+function _covHighlight(el,term){
+  if(!el)return;
+  // Salva testo originale la prima volta
+  if(!el.dataset.orig)el.dataset.orig=el.textContent;
+  const orig=el.dataset.orig;
+  if(!term){el.innerHTML=orig;return;}
+  const re=new RegExp('('+term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+  el.innerHTML=orig.replace(re,'<mark style="background:#ffe082;color:#000;border-radius:2px;padding:0 1px">$1</mark>');
+}
+function _covClearHighlight(container){
+  container.querySelectorAll('[data-orig]').forEach(el=>{el.innerHTML=el.dataset.orig;delete el.dataset.orig;});
+}
 function filterCovUser(ui,q){
   const term=q.trim().toLowerCase();
   const body=document.getElementById('cov-body-'+ui);
   if(!body)return;
-  // Espandi la scheda se si sta cercando
   if(term&&body.style.display==='none'){
     body.style.display='block';
     const card=document.getElementById('cov-user-'+ui);
@@ -2747,27 +2759,28 @@ function filterCovUser(ui,q){
   }
   const areaBlocks=body.querySelectorAll('[id^="cov-'+ui+'-"]');
   areaBlocks.forEach(block=>{
+    const areaLabel=block.closest('[style*="border:1.5px solid"]')?.querySelector('.cov-area-label');
     const rows=block.querySelectorAll('.cov-q-row');
     let anyVisible=false;
     rows.forEach(row=>{
       const txt=row.dataset.qtext||'';
       const match=!term||txt.includes(term);
       row.style.display=match?'':'none';
-      if(match)anyVisible=true;
+      if(match){anyVisible=true;_covHighlight(row.querySelector('.cov-q-label'),term);}
+      else if(!term)_covHighlight(row.querySelector('.cov-q-label'),'');
     });
-    // Se ci sono risultati, apri il blocco area
     if(term&&anyVisible){block.style.display='block';}
     else if(!term){block.style.display='';}
-    // Nascondi l'intero blocco area se nessuna domanda corrisponde
     const parentArea=block.closest('[style*="border:1.5px solid"]');
-    if(parentArea)parentArea.style.display=anyVisible?'':'none';
+    if(parentArea)parentArea.style.display=anyVisible||!term?'':'none';
+    _covHighlight(areaLabel,anyVisible?term:'');
   });
+  if(!term)_covClearHighlight(body);
 }
 function filterCovGlobal(q){
   const term=q.trim().toLowerCase();
   const info=document.getElementById('cov-global-search-info');
   if(!term){
-    // Ripristina tutto
     document.querySelectorAll('.cov-user-card').forEach((card,ui)=>{
       card.style.display='';
       const body=document.getElementById('cov-body-'+ui);
@@ -2775,15 +2788,14 @@ function filterCovGlobal(q){
         body.style.display='none';
         const btn=card.querySelector('.cov-user-chevron-btn');
         if(btn)btn.textContent='▶ Espandi';
+        _covClearHighlight(body);
       }
-      // Ripristina aree e righe
       card.querySelectorAll('[id^="cov-'+ui+'-"]').forEach(block=>{
         block.style.display='none';
         block.querySelectorAll('.cov-q-row').forEach(r=>r.style.display='');
         const parentArea=block.closest('[style*="border:1.5px solid"]');
         if(parentArea)parentArea.style.display='';
       });
-      // Svuota barra ricerca per-utente
       const inp=body?body.querySelector('input[type="text"]'):null;
       if(inp)inp.value='';
     });
@@ -2798,21 +2810,24 @@ function filterCovGlobal(q){
     const areaBlocks=body.querySelectorAll('[id^="cov-'+ui+'-"]');
     let userHasMatch=false;
     areaBlocks.forEach(block=>{
+      const areaLabel=block.closest('[style*="border:1.5px solid"]')?.querySelector('.cov-area-label');
       const rows=block.querySelectorAll('.cov-q-row');
       let areaHasMatch=false;
       rows.forEach(row=>{
         const txt=row.dataset.qtext||'';
         const match=txt.includes(term);
         row.style.display=match?'':'none';
-        if(match){areaHasMatch=true;userHasMatch=true;totalMatches++;}
+        if(match){areaHasMatch=true;userHasMatch=true;totalMatches++;_covHighlight(row.querySelector('.cov-q-label'),term);}
       });
       const parentArea=block.closest('[style*="border:1.5px solid"]');
       if(areaHasMatch){
         block.style.display='block';
         if(parentArea)parentArea.style.display='';
+        _covHighlight(areaLabel,term);
       } else {
         block.style.display='none';
         if(parentArea)parentArea.style.display='none';
+        _covHighlight(areaLabel,'');
       }
     });
     if(userHasMatch){
@@ -4748,19 +4763,20 @@ function renderCoverage(){
       const blockId=`cov-${ui}-${ai}`;
       const borderColor=areaColor(mv);
 
+      const totalAreaObs=mv.questions.reduce((s,q)=>s+q.count,0);
       const qRows=[...priorityQs,...otherQs].map(q=>`<div class="cov-q-row" data-qtext="${q.text.toLowerCase().replace(/"/g,'&quot;')}" style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:.72rem;font-weight:700;color:${q.priority?'var(--danger)':'var(--text3)'};white-space:nowrap;padding-top:2px">${q.count} oss.</span>
           ${q.priority?`<span style="font-size:.65rem;background:var(--danger);color:#fff;border-radius:4px;padding:1px 5px;white-space:nowrap;align-self:center">priorità</span>`:''}
-          <span style="font-size:.8rem;color:var(--text);line-height:1.45;flex:1">${q.text}</span>
+          <span class="cov-q-label" style="font-size:.8rem;color:var(--text);line-height:1.45;flex:1">${q.text}</span>
         </div>`).join('');
 
       return`<div style="border:1.5px solid ${borderColor};border-radius:var(--rs);overflow:hidden;margin-bottom:8px">
         <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;background:var(--bg2);user-select:none"
              onclick="const b=document.getElementById('${blockId}');const open=b.style.display!=='none';b.style.display=open?'none':'block';this.querySelector('.cov-chevron-btn').textContent=open?'▶ Apri':'▼ Chiudi'">
           <span style="font-size:1rem">${mv.icon}</span>
-          <span style="font-size:.86rem;font-weight:700;color:var(--text);flex:1">${mName}</span>
+          <span class="cov-area-label" style="font-size:.86rem;font-weight:700;color:var(--text);flex:1">${mName}</span>
           ${priorityQs.length?`<span class="cov-pill cov-pill-orange" style="font-size:.7rem">${priorityQs.length} da valutare</span>`:''}
-          <span style="font-size:.7rem;color:var(--text3)">min ${mv.minCount} oss.</span>
+          <span style="font-size:.7rem;color:var(--text3)">${totalAreaObs} oss.</span>
           <span class="cov-chevron-btn" style="font-size:.72rem;font-weight:700;color:var(--accent);background:var(--al);border:1px solid var(--al2);border-radius:6px;padding:2px 8px;margin-left:8px;white-space:nowrap">▶ Apri</span>
         </div>
         <div id="${blockId}" style="padding:6px 12px 10px;display:none">

@@ -741,7 +741,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.7.4</div>
+    <div style="text-align:center;padding:18px 0 4px;font-size:.7rem;color:var(--text3);font-family:var(--fb);letter-spacing:.04em">Versione 1.7.5</div>
   </div>
 </div>
 <div id="screen-lab" class="screen">
@@ -1234,7 +1234,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
     <div class="modal-actions" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:4px">
       <button class="btn btn-ghost" onclick="closeModal('modal-settings')" style="width:100%;justify-content:center">Chiudi</button>
-      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.7.4</div>
+      <div style="text-align:center;font-size:.7rem;color:var(--text3)">Versione 1.7.5</div>
     </div>
   </div>
 </div>
@@ -2748,68 +2748,124 @@ function _covHighlight(el,term){
 function _covClearHighlight(container){
   container.querySelectorAll('[data-orig]').forEach(el=>{el.innerHTML=el.dataset.orig;delete el.dataset.orig;});
 }
+// Snapshot stato visibilità prima della ricerca, per ripristino esatto al reset
+const _covSnapshot={user:{},global:null};
+function _covSaveUserSnapshot(ui,body){
+  if(_covSnapshot.user[ui])return; // già salvato
+  const snap={bodyOpen:body.style.display!=='none',areas:[]};
+  body.querySelectorAll('[id^="cov-'+ui+'-"]').forEach(block=>{
+    const parentArea=block.closest('[style*="border:1.5px solid"]');
+    snap.areas.push({blockOpen:block.style.display!=='none',areaVisible:parentArea?parentArea.style.display!=='none':true});
+  });
+  _covSnapshot.user[ui]=snap;
+}
+function _covRestoreUserSnapshot(ui,card,body){
+  const snap=_covSnapshot.user[ui];
+  if(!snap){return;}
+  body.style.display=snap.bodyOpen?'block':'none';
+  const btn=card?card.querySelector('.cov-user-chevron-btn'):null;
+  if(btn)btn.textContent=snap.bodyOpen?'▼ Comprimi':'▶ Espandi';
+  const blocks=[...body.querySelectorAll('[id^="cov-'+ui+'-"]')];
+  blocks.forEach((block,i)=>{
+    const s=snap.areas[i]||{blockOpen:false,areaVisible:true};
+    block.style.display=s.blockOpen?'block':'none';
+    block.querySelectorAll('.cov-q-row').forEach(r=>r.style.display='');
+    const parentArea=block.closest('[style*="border:1.5px solid"]');
+    if(parentArea)parentArea.style.display=s.areaVisible?'':'none';
+  });
+  _covClearHighlight(body);
+  delete _covSnapshot.user[ui];
+}
+function _covSaveGlobalSnapshot(){
+  if(_covSnapshot.global)return;
+  const snap=[];
+  document.querySelectorAll('.cov-user-card').forEach((card,ui)=>{
+    const body=document.getElementById('cov-body-'+ui);
+    const uSnap={cardVisible:card.style.display!=='none',bodyOpen:body?body.style.display!=='none':false,areas:[]};
+    if(body){
+      body.querySelectorAll('[id^="cov-'+ui+'-"]').forEach(block=>{
+        const parentArea=block.closest('[style*="border:1.5px solid"]');
+        uSnap.areas.push({blockOpen:block.style.display!=='none',areaVisible:parentArea?parentArea.style.display!=='none':true});
+      });
+    }
+    snap.push(uSnap);
+  });
+  _covSnapshot.global=snap;
+}
+function _covRestoreGlobalSnapshot(){
+  const snap=_covSnapshot.global;
+  if(!snap){return;}
+  document.querySelectorAll('.cov-user-card').forEach((card,ui)=>{
+    const s=snap[ui];if(!s)return;
+    card.style.display=s.cardVisible?'':'none';
+    const body=document.getElementById('cov-body-'+ui);
+    if(!body)return;
+    body.style.display=s.bodyOpen?'block':'none';
+    const btn=card.querySelector('.cov-user-chevron-btn');
+    if(btn)btn.textContent=s.bodyOpen?'▼ Comprimi':'▶ Espandi';
+    const blocks=[...body.querySelectorAll('[id^="cov-'+ui+'-"]')];
+    blocks.forEach((block,i)=>{
+      const bs=s.areas[i]||{blockOpen:false,areaVisible:true};
+      block.style.display=bs.blockOpen?'block':'none';
+      block.querySelectorAll('.cov-q-row').forEach(r=>r.style.display='');
+      const parentArea=block.closest('[style*="border:1.5px solid"]');
+      if(parentArea)parentArea.style.display=bs.areaVisible?'':'none';
+    });
+    _covClearHighlight(body);
+    const inp=body.querySelector('input[type="text"]');
+    if(inp)inp.value='';
+  });
+  _covSnapshot.global=null;
+}
 function filterCovUser(ui,q){
   const term=q.trim().toLowerCase();
   const body=document.getElementById('cov-body-'+ui);
   if(!body)return;
-  if(term&&body.style.display==='none'){
+  const card=document.getElementById('cov-user-'+ui);
+  if(!term){
+    _covRestoreUserSnapshot(ui,card,body);
+    return;
+  }
+  // Salva snapshot prima del primo filtro
+  _covSaveUserSnapshot(ui,body);
+  // Espandi la scheda
+  if(body.style.display==='none'){
     body.style.display='block';
-    const card=document.getElementById('cov-user-'+ui);
     if(card){const btn=card.querySelector('.cov-user-chevron-btn');if(btn)btn.textContent='▼ Comprimi';}
   }
-  const areaBlocks=body.querySelectorAll('[id^="cov-'+ui+'-"]');
-  areaBlocks.forEach(block=>{
+  body.querySelectorAll('[id^="cov-'+ui+'-"]').forEach(block=>{
     const areaLabel=block.closest('[style*="border:1.5px solid"]')?.querySelector('.cov-area-label');
     const rows=block.querySelectorAll('.cov-q-row');
     let anyVisible=false;
     rows.forEach(row=>{
       const txt=row.dataset.qtext||'';
-      const match=!term||txt.includes(term);
+      const match=txt.includes(term);
       row.style.display=match?'':'none';
       if(match){anyVisible=true;_covHighlight(row.querySelector('.cov-q-label'),term);}
-      else if(!term)_covHighlight(row.querySelector('.cov-q-label'),'');
     });
-    if(term&&anyVisible){block.style.display='block';}
-    else if(!term){block.style.display='';}
+    block.style.display=anyVisible?'block':'none';
     const parentArea=block.closest('[style*="border:1.5px solid"]');
-    if(parentArea)parentArea.style.display=anyVisible||!term?'':'none';
+    if(parentArea)parentArea.style.display=anyVisible?'':'none';
     _covHighlight(areaLabel,anyVisible?term:'');
   });
-  if(!term)_covClearHighlight(body);
 }
 function filterCovGlobal(q){
   const term=q.trim().toLowerCase();
   const info=document.getElementById('cov-global-search-info');
   if(!term){
-    document.querySelectorAll('.cov-user-card').forEach((card,ui)=>{
-      card.style.display='';
-      const body=document.getElementById('cov-body-'+ui);
-      if(body){
-        body.style.display='none';
-        const btn=card.querySelector('.cov-user-chevron-btn');
-        if(btn)btn.textContent='▶ Espandi';
-        _covClearHighlight(body);
-      }
-      card.querySelectorAll('[id^="cov-'+ui+'-"]').forEach(block=>{
-        block.style.display='none';
-        block.querySelectorAll('.cov-q-row').forEach(r=>r.style.display='');
-        const parentArea=block.closest('[style*="border:1.5px solid"]');
-        if(parentArea)parentArea.style.display='';
-      });
-      const inp=body?body.querySelector('input[type="text"]'):null;
-      if(inp)inp.value='';
-    });
+    _covRestoreGlobalSnapshot();
     if(info){info.textContent='';info.style.display='none';}
     return;
   }
+  // Salva snapshot globale prima del primo filtro
+  _covSaveGlobalSnapshot();
   let totalMatches=0;
   let usersWithMatch=0;
   document.querySelectorAll('.cov-user-card').forEach((card,ui)=>{
     const body=document.getElementById('cov-body-'+ui);
     if(!body){card.style.display='none';return;}
-    const areaBlocks=body.querySelectorAll('[id^="cov-'+ui+'-"]');
     let userHasMatch=false;
-    areaBlocks.forEach(block=>{
+    body.querySelectorAll('[id^="cov-'+ui+'-"]').forEach(block=>{
       const areaLabel=block.closest('[style*="border:1.5px solid"]')?.querySelector('.cov-area-label');
       const rows=block.querySelectorAll('.cov-q-row');
       let areaHasMatch=false;
@@ -4569,6 +4625,8 @@ function fallbackDownload(blob,filename){
 function renderCoverage(){
   const content=document.getElementById('coverage-content');
   if(!content)return;
+  // Reset snapshot ad ogni render
+  _covSnapshot.user={};_covSnapshot.global=null;
 
   if(!profiles.length){
     content.innerHTML=`<div class="empty-state"><span class="empty-icon">👤</span><h3>Nessun profilo trovato</h3><p>Crea almeno un utente in Area Utenti.</p></div>`;
